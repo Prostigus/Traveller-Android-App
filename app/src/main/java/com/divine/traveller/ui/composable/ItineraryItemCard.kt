@@ -49,12 +49,14 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import java.text.SimpleDateFormat
+import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
 
 @Composable
 fun ItineraryItemCard(
     item: ItineraryItemModel,
+    timeZone: ZoneId,
     placesClient: PlacesClient,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
@@ -77,14 +79,14 @@ fun ItineraryItemCard(
                 Place.Field.PHOTO_METADATAS
             )
 
-            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-            placesClient.fetchPlace(request)
-                .addOnSuccessListener { response ->
-                    placeDetails = response.place
-                }
-                .addOnFailureListener { exception ->
-                    // Handle error
-                }
+//            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+//            placesClient.fetchPlace(request)
+//                .addOnSuccessListener { response ->
+//                    placeDetails = response.place
+//                }
+//                .addOnFailureListener { exception ->
+//                    // Handle error
+//                }
         }
     }
 
@@ -142,7 +144,7 @@ fun ItineraryItemCard(
                     )
 
                     Text(
-                        text = formatDateTime(item.startDateTime),
+                        text = formatDateTime(item.startDateTime, timeZone),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -328,10 +330,12 @@ private fun getStatusColor(status: com.divine.traveller.data.entity.ItineraryIte
     }
 }
 
-private fun formatDateTime(date: Date): String {
+private fun formatDateTime(date: Date, zoneId: ZoneId): String {
     val formatter = SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
+    formatter.timeZone = java.util.TimeZone.getTimeZone(zoneId)
     return formatter.format(date)
 }
+
 
 private fun extractPlaceIdFromLink(googlePlaceLink: String): String? {
     // Extract place ID from Google Maps URL

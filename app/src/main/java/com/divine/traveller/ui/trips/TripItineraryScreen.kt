@@ -29,7 +29,6 @@ import com.divine.traveller.ui.composable.ItineraryCalendar
 import com.divine.traveller.ui.composable.ItineraryDayTimeLine
 import com.divine.traveller.util.toZoneId
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,6 +108,7 @@ fun TripItineraryScreen(
                 val itemsForDay = itemsByDay.find { it.first == day }?.second ?: emptyList()
                 if(itemsByDay.any { it.first == day }){
                     ItineraryDayTimeLine(
+                        day = day.atStartOfDay(),
                         itemsForDay = itemsForDay,
                         timeZone = timeZone,
                         viewModel = viewModel,
