@@ -14,7 +14,7 @@ data class HotelEntity(
     val checkOutDate: Date,
     val bookingReference: String? = null,
     val placeId: String?,
-    val status : HotelStatus = HotelStatus.BOOKED,
+    val status: HotelStatus = HotelStatus.BOOKED,
 )
 
 enum class HotelStatus {

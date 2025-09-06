@@ -143,7 +143,8 @@ fun AddItineraryItemBottomSheet(
                     onExpandedChange = { categoryDropdownExpanded = it }
                 ) {
                     OutlinedTextField(
-                        value = selectedCategory.name.lowercase().replaceFirstChar { it.uppercase() },
+                        value = selectedCategory.name.lowercase()
+                            .replaceFirstChar { it.uppercase() },
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Category") },
@@ -165,7 +166,11 @@ fun AddItineraryItemBottomSheet(
                     ) {
                         ItineraryCategory.values().forEach { category ->
                             DropdownMenuItem(
-                                text = { Text(category.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                                text = {
+                                    Text(
+                                        category.name.lowercase()
+                                            .replaceFirstChar { it.uppercase() })
+                                },
                                 onClick = {
                                     selectedCategory = category
                                     categoryDropdownExpanded = false
@@ -186,7 +191,16 @@ fun AddItineraryItemBottomSheet(
                     ) {
                         Icon(Icons.Default.DateRange, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Start: ${String.format(Locale.getDefault(), "%02d:%02d", startTimePickerState.hour, startTimePickerState.minute)}")
+                        Text(
+                            "Start: ${
+                                String.format(
+                                    Locale.getDefault(),
+                                    "%02d:%02d",
+                                    startTimePickerState.hour,
+                                    startTimePickerState.minute
+                                )
+                            }"
+                        )
                     }
 
                     FilledTonalButton(
@@ -195,7 +209,16 @@ fun AddItineraryItemBottomSheet(
                     ) {
                         Icon(Icons.Default.DateRange, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("End: ${String.format(Locale.getDefault(), "%02d:%02d", endTimePickerState.hour, endTimePickerState.minute)}")
+                        Text(
+                            "End: ${
+                                String.format(
+                                    Locale.getDefault(),
+                                    "%02d:%02d",
+                                    endTimePickerState.hour,
+                                    endTimePickerState.minute
+                                )
+                            }"
+                        )
                     }
                 }
 

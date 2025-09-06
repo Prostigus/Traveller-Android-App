@@ -28,8 +28,7 @@ fun ItineraryDayTimeLine(
     timeZone: ZoneId,
     viewModel: ItineraryViewModel,
     lazyListState: LazyListState
-    )
-{
+) {
     var showSheet by remember { mutableStateOf(false) }
     var selectedDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
     var selectedItem by remember { mutableStateOf<ItineraryItemModel?>(null) }
@@ -46,7 +45,8 @@ fun ItineraryDayTimeLine(
                     placesClient = viewModel.placesClient,
                     onClick = {
                         selectedItem = item
-                        selectedDateTime = item.startDateTime.toInstant().atZone(timeZone).toLocalDateTime()
+                        selectedDateTime =
+                            item.startDateTime.toInstant().atZone(timeZone).toLocalDateTime()
                         showSheet = true
                     }
                 )

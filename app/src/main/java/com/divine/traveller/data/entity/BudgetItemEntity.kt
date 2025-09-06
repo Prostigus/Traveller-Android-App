@@ -12,7 +12,7 @@ data class BudgetItemEntity(
     val currency: String = "USD",
     val notes: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
-    val payedBy : String? = null,
+    val payedBy: String? = null,
 )
 
 enum class BudgetItemCategory {

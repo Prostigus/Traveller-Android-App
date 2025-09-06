@@ -2,7 +2,6 @@ package com.divine.traveller.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.time.ZoneId
 
 @Entity(tableName = "trips")
 data class TripEntity(

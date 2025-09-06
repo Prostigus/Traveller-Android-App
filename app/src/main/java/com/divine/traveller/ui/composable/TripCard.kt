@@ -89,7 +89,7 @@ fun TripCard(
                 // Action buttons grid
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if(showActionButtons) {
+                if (showActionButtons) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),

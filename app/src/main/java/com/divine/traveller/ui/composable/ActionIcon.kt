@@ -21,7 +21,10 @@ fun ActionIcon(
     val iconBox = @Composable {
         Box(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), shape = MaterialTheme.shapes.small)
+                .background(
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    shape = MaterialTheme.shapes.small
+                )
                 .clip(MaterialTheme.shapes.small)
                 .padding(8.dp)
         ) {

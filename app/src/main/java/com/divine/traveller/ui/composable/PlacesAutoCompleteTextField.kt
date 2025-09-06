@@ -70,7 +70,12 @@ fun PlacesAutocompleteTextField(
             Log.d("PlacesAutocomplete", "Searching for predictions with query: $value")
 
             try {
-                val placeFields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LOCATION)
+                val placeFields = listOf(
+                    Place.Field.ID,
+                    Place.Field.NAME,
+                    Place.Field.ADDRESS,
+                    Place.Field.LOCATION
+                )
                 val builder = SearchByTextRequest.builder(value, placeFields)
                     .setMaxResultCount(6)
 
@@ -87,12 +92,18 @@ fun PlacesAutocompleteTextField(
                 placesClient.searchByText(searchRequest)
                     .addOnSuccessListener { response ->
                         suggestions = response.places
-                        Log.d("PlacesAutocomplete", "Found ${suggestions.size} suggestions for query: $value")
+                        Log.d(
+                            "PlacesAutocomplete",
+                            "Found ${suggestions.size} suggestions for query: $value"
+                        )
                         expanded = suggestions.isNotEmpty()
                         isLoading = false
                     }
                     .addOnFailureListener { exception ->
-                        Log.d("PlacesAutocomplete", "Error fetching suggestions: ${exception.message}")
+                        Log.d(
+                            "PlacesAutocomplete",
+                            "Error fetching suggestions: ${exception.message}"
+                        )
                         suggestions = emptyList()
                         expanded = false
                         isLoading = false
@@ -158,6 +169,7 @@ fun PlacesAutocompleteTextField(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
+
                         value.isNotEmpty() -> {
                             IconButton(
                                 onClick = {

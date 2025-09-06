@@ -2,7 +2,6 @@ package com.divine.traveller.data.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.divine.traveller.data.di.TimeZoneModule
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.repository.TripRepository

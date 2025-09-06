@@ -11,12 +11,12 @@ import com.divine.traveller.data.dao.FlightDao
 import com.divine.traveller.data.dao.HotelDao
 import com.divine.traveller.data.dao.ItineraryItemDao
 import com.divine.traveller.data.dao.TripDao
-import com.divine.traveller.data.entity.TripEntity
-import com.divine.traveller.data.entity.ItineraryItemEntity
-import com.divine.traveller.data.entity.FlightEntity
-import com.divine.traveller.data.entity.HotelEntity
 import com.divine.traveller.data.entity.BudgetItemEntity
 import com.divine.traveller.data.entity.DocumentEntity
+import com.divine.traveller.data.entity.FlightEntity
+import com.divine.traveller.data.entity.HotelEntity
+import com.divine.traveller.data.entity.ItineraryItemEntity
+import com.divine.traveller.data.entity.TripEntity
 
 @Database(
     entities = [TripEntity::class, ItineraryItemEntity::class, FlightEntity::class, HotelEntity::class, BudgetItemEntity::class, DocumentEntity::class],

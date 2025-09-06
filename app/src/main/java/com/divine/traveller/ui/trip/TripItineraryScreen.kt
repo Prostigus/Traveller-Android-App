@@ -1,4 +1,4 @@
-package com.divine.traveller.ui.trips
+package com.divine.traveller.ui.trip
 
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
@@ -23,8 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
-import com.divine.traveller.model.ItineraryItemModel
-import com.divine.traveller.ui.composable.AddItineraryItemBottomSheet
+import com.divine.traveller.navigation.Routes.TRIP_DETAILS
 import com.divine.traveller.ui.composable.ItineraryCalendar
 import com.divine.traveller.ui.composable.ItineraryDayTimeLine
 import com.divine.traveller.util.toZoneId
@@ -39,7 +38,7 @@ fun TripItineraryScreen(
     viewModel: ItineraryViewModel = hiltViewModel(),
     onTripCreated: () -> Unit = {},
     onNavigateBack: () -> Unit = {},
-    onInsertItem: (ItineraryItemModel) -> Unit = {}
+    onNavigate: (String) -> Unit = {}
 ) {
     var selectedDay by remember { mutableStateOf<LocalDate?>(null) }
     var isCalendarExpanded by remember { mutableStateOf(true) }
@@ -80,7 +79,13 @@ fun TripItineraryScreen(
     Scaffold(
         modifier = modifier,
         topBar = { /* ... */ },
-        bottomBar = { TripScreenNavBar() }
+        bottomBar = {
+            TripScreenNavBar(
+                selectedScreen = TRIP_DETAILS,
+                onNavigate = onNavigate,
+                tripId = tripId
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -106,7 +111,7 @@ fun TripItineraryScreen(
 
             selectedDay?.let { day ->
                 val itemsForDay = itemsByDay.find { it.first == day }?.second ?: emptyList()
-                if(itemsByDay.any { it.first == day }){
+                if (itemsByDay.any { it.first == day }) {
                     ItineraryDayTimeLine(
                         day = day.atStartOfDay(),
                         itemsForDay = itemsForDay,

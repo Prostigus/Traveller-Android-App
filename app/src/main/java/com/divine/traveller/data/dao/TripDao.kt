@@ -36,5 +36,9 @@ interface TripDao {
     suspend fun deleteTrip(tripEntity: TripEntity)
 
     @Query("UPDATE trips SET isCompleted = :isCompleted, updatedAtUtcMillis = :updatedAt WHERE id = :tripId")
-    suspend fun markTripCompleted(tripId: Long, isCompleted: Boolean = true, updatedAt: Date = Date())
+    suspend fun markTripCompleted(
+        tripId: Long,
+        isCompleted: Boolean = true,
+        updatedAt: Date = Date()
+    )
 }

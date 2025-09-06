@@ -1,4 +1,4 @@
-package com.divine.traveller.ui.trips
+package com.divine.traveller.ui.trip
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -86,8 +86,10 @@ fun NewTripScreen(
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
-    val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).apply({
-        timeZone = java.util.TimeZone.getTimeZone("UTC")})
+    val dateFormatter = remember {
+        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).apply({
+            timeZone = java.util.TimeZone.getTimeZone("UTC")
+        })
     }
     var timeZoneEngine by remember { mutableStateOf<TimeZoneEngine?>(null) }
 
@@ -170,8 +172,15 @@ fun NewTripScreen(
                                     destination = destination,
                                     description = description.takeIf { it.isNotBlank() },
                                     budget = null,
-                                    startDateUtcMillis = correctUtcTimeStampForZonedDate(startDate!!, ZoneId.of(destinationZoneIdString)),
-                                    endDateUtcMillis = correctUtcTimeStampForZonedDate(endDate!!, ZoneId.of(destinationZoneIdString), true),
+                                    startDateUtcMillis = correctUtcTimeStampForZonedDate(
+                                        startDate!!,
+                                        ZoneId.of(destinationZoneIdString)
+                                    ),
+                                    endDateUtcMillis = correctUtcTimeStampForZonedDate(
+                                        endDate!!,
+                                        ZoneId.of(destinationZoneIdString),
+                                        true
+                                    ),
                                     destinationZoneIdString = destinationZoneIdString
                                 )
                                 viewModel.addTrip(tripModel)

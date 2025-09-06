@@ -46,7 +46,6 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import java.text.SimpleDateFormat
 import java.time.ZoneId
@@ -345,9 +344,11 @@ private fun extractPlaceIdFromLink(googlePlaceLink: String): String? {
             googlePlaceLink.contains("place_id=") -> {
                 googlePlaceLink.substringAfter("place_id=").substringBefore("&")
             }
+
             googlePlaceLink.contains("cid=") -> {
                 googlePlaceLink.substringAfter("cid=").substringBefore("&")
             }
+
             else -> null
         }
     } catch (e: Exception) {

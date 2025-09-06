@@ -48,8 +48,11 @@ class ItineraryViewModel @Inject constructor(
                     if (trip == null) return@map emptyList()
 
                     val zoneId = toZoneId(trip.destinationZoneIdString)
-                    val start = java.time.Instant.ofEpochMilli(trip.startDateUtcMillis).atZone(zoneId).toLocalDate()
-                    val end = java.time.Instant.ofEpochMilli(trip.endDateUtcMillis).atZone(zoneId).toLocalDate()
+                    val start =
+                        java.time.Instant.ofEpochMilli(trip.startDateUtcMillis).atZone(zoneId)
+                            .toLocalDate()
+                    val end = java.time.Instant.ofEpochMilli(trip.endDateUtcMillis).atZone(zoneId)
+                        .toLocalDate()
                     val allDays = generateSequence(start) { it.plusDays(1) }
                         .takeWhile { !it.isAfter(end) }
                         .toList()

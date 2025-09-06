@@ -68,7 +68,8 @@ fun correctUtcTimeStampForZonedDate(
     zoneId: ZoneId,
     atEndOfDay: Boolean = false
 ): Long {
-    val selectedLocalDate = Instant.ofEpochMilli(originalUtcMillis).atZone(ZoneId.of("UTC")).toLocalDate()
+    val selectedLocalDate =
+        Instant.ofEpochMilli(originalUtcMillis).atZone(ZoneId.of("UTC")).toLocalDate()
     val zonedDateTime = if (atEndOfDay) {
         selectedLocalDate.atTime(23, 59, 59, 999_000_000).atZone(zoneId)
     } else {
@@ -76,6 +77,7 @@ fun correctUtcTimeStampForZonedDate(
     }
     return zonedDateTime.toInstant().toEpochMilli()
 }
+
 @TypeConverter
 fun fromZoneId(zoneId: ZoneId): String = zoneId.id
 
