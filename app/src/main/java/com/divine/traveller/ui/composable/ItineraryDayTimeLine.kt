@@ -1,6 +1,7 @@
 package com.divine.traveller.ui.composable
 
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,7 +20,8 @@ fun ItineraryDayTimeLine(
     itemsForDay: List<ItineraryItemModel>,
     tripId: Long,
     timeZone: ZoneId,
-    viewModel: ItineraryViewModel
+    viewModel: ItineraryViewModel,
+    lazyListState: LazyListState
     )
 {
     var showSheet by remember { mutableStateOf(false) }
@@ -27,7 +29,8 @@ fun ItineraryDayTimeLine(
 
 
     LazyColumn(
-        modifier = modifier
+        modifier = modifier,
+        state = lazyListState
     ) {
         items(itemsForDay) { item ->
             ItineraryItemCard(

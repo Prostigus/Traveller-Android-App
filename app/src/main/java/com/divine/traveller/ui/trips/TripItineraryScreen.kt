@@ -1,15 +1,20 @@
 package com.divine.traveller.ui.trips
 
 import android.util.Log
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +43,24 @@ fun TripItineraryScreen(
     onInsertItem: (ItineraryItemModel) -> Unit = {}
 ) {
     var selectedDay by remember { mutableStateOf<LocalDate?>(null) }
+    var isCalendarExpanded by remember { mutableStateOf(true) }
+    val timelineScrollState = rememberLazyListState()
+
+    // Track if user has scrolled down
+    val hasScrolledDown by remember {
+        derivedStateOf {
+            timelineScrollState.firstVisibleItemIndex > 0 ||
+                    timelineScrollState.firstVisibleItemScrollOffset > 50
+        }
+    }
+
+    LaunchedEffect(hasScrolledDown) {
+        if (hasScrolledDown && isCalendarExpanded) {
+            isCalendarExpanded = false
+        } else if (!hasScrolledDown && !isCalendarExpanded) {
+            isCalendarExpanded = true
+        }
+    }
 
     LaunchedEffect(tripId) {
         Log.d("TripItineraryScreen", "Rendering itinerary for tripId: $tripId")
@@ -47,6 +70,13 @@ fun TripItineraryScreen(
     val itemsByDay by viewModel.itemsByDay.collectAsState()
     val trip by viewModel.trip.collectAsState()
     val timeZone = trip?.let { toZoneId(it.destinationZoneIdString) } ?: ZoneId.systemDefault()
+
+    // Animate calendar height - shrink to 150dp instead of 80dp
+    val calendarHeight by animateDpAsState(
+        targetValue = if (isCalendarExpanded) 420.dp else 300.dp,
+        animationSpec = tween(durationMillis = 300),
+        label = "calendar_height"
+    )
 
     Scaffold(
         modifier = modifier,
@@ -60,14 +90,20 @@ fun TripItineraryScreen(
         ) {
             // Calendar - shown at top, will be compressed when scrolling timeline
 
-                ItineraryCalendar(
-                    itemsPerDay = itemsByDay,
-                    selectedDay = selectedDay,
-                    onClickDay = { day ->
-                        selectedDay = day
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
+            ItineraryCalendar(
+                itemsPerDay = itemsByDay,
+                selectedDay = selectedDay,
+                isExpanded = isCalendarExpanded,
+                onClickDay = { day ->
+                    selectedDay = day
+                },
+                onToggleExpanded = {
+                    isCalendarExpanded = !isCalendarExpanded
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(calendarHeight)
+            )
 
             selectedDay?.let { day ->
                 val itemsForDay = itemsByDay.find { it.first == day }?.second ?: emptyList()
@@ -81,6 +117,7 @@ fun TripItineraryScreen(
 //                            selectedDateTime = day.atTime(hour, minute)
 //                            showSheet = true
 //                        },
+                        lazyListState = timelineScrollState,
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(16.dp)

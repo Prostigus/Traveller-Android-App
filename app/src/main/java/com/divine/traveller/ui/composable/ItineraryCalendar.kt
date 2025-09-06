@@ -35,7 +35,9 @@ fun ItineraryCalendar(
     modifier: Modifier = Modifier,
     itemsPerDay: List<Pair<LocalDate, List<ItineraryItemModel>>>,
     selectedDay: LocalDate? = null,
-    onClickDay: (LocalDate) -> Unit = {}
+    isExpanded: Boolean = true,
+    onClickDay: (LocalDate) -> Unit = {},
+    onToggleExpanded: () -> Unit = {}
 ) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
 
@@ -60,6 +62,7 @@ fun ItineraryCalendar(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .clickable { onToggleExpanded() }
             .shadow(
                 elevation = 8.dp,
                 shape = RoundedCornerShape(16.dp)
@@ -77,7 +80,7 @@ fun ItineraryCalendar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = if (isExpanded) 16.dp else 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -91,7 +94,7 @@ fun ItineraryCalendar(
 
                 Text(
                     text = "${currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${currentMonth.year}",
-                    fontSize = 20.sp,
+                    fontSize = if (isExpanded) 20.sp else 16.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurface
@@ -106,45 +109,88 @@ fun ItineraryCalendar(
                 }
             }
 
-            // Calendar grid
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(7),
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                // Day headers
-                items(listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")) { dayName ->
-                    Text(
-                        text = dayName,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                // Get all days for the current month view
-                val monthDays = getMonthDays(currentMonth)
-                items(monthDays) { date ->
-                    val items = itemsByDate[date] ?: emptyList()
-                    val isCurrentMonth = date?.month == currentMonth.month
-                    val isTripDay = date?.let { tripDates.contains(it) } ?: false
-
-                    if (date != null) {
-                        CalendarDayItem(
-                            date = date,
-                            items = items,
-                            isSelected = date == selectedDay,
-                            isCurrentMonth = isCurrentMonth,
-                            isTripDay = isTripDay,
-                            isToday = date == LocalDate.now(),
-                            onClick = { onClickDay(date) }
+            if (isExpanded) {
+                // Full calendar grid
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(7),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    // Day headers
+                    items(listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")) { dayName ->
+                        Text(
+                            text = dayName,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = MaterialTheme.colorScheme.primary
                         )
-                    } else {
-                        // Empty cell for spacing
-//                        Spacer(modifier = Modifier.size(44.dp))
+                    }
+
+                    val monthDays = getMonthDays(currentMonth)
+                    items(monthDays) { date ->
+                        val items = itemsByDate[date] ?: emptyList()
+                        val isCurrentMonth = date?.month == currentMonth.month
+                        val isTripDay = date?.let { tripDates.contains(it) } ?: false
+
+                        if (date != null) {
+                            CalendarDayItem(
+                                date = date,
+                                items = items,
+                                isSelected = date == selectedDay,
+                                isCurrentMonth = isCurrentMonth,
+                                isTripDay = isTripDay,
+                                isToday = date == LocalDate.now(),
+                                onClick = { onClickDay(date) },
+                                compact = false
+                            )
+                        }
+                    }
+                }
+            } else {
+                // Compact view - show only trip dates in a horizontal row
+// Compact view - show all trip dates with current month structure
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(7),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // Compact day headers
+                    items(listOf("S", "M", "T", "W", "T", "F", "S")) { dayName ->
+                        Text(
+                            text = dayName,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 10.sp,
+                            modifier = Modifier.padding(vertical = 2.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    // Show all month days in compact format
+                    val monthDays = getMonthDays(currentMonth)
+                    items(monthDays) { date ->
+                        val items = itemsByDate[date] ?: emptyList()
+                        val isCurrentMonth = date?.month == currentMonth.month
+                        val isTripDay = date?.let { tripDates.contains(it) } ?: false
+
+                        if (date != null) {
+                            CalendarDayItem(
+                                date = date,
+                                items = items,
+                                isSelected = date == selectedDay,
+                                isCurrentMonth = isCurrentMonth,
+                                isTripDay = isTripDay,
+                                isToday = date == LocalDate.now(),
+                                onClick = { onClickDay(date) },
+                                compact = true
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.size(24.dp))
+                        }
                     }
                 }
             }
@@ -160,11 +206,16 @@ private fun CalendarDayItem(
     isCurrentMonth: Boolean,
     isTripDay: Boolean,
     isToday: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    compact: Boolean = false
 ) {
+    val itemSize = if (compact) 24.dp else 44.dp
+    val fontSize = if (compact) 10.sp else 14.sp
+    val dotSize = if (compact) 2.dp else 4.dp
+
     Box(
         modifier = Modifier
-            .size(44.dp)
+            .size(itemSize)
             .clip(CircleShape)
             .background(
                 when {
@@ -175,7 +226,7 @@ private fun CalendarDayItem(
                 }
             )
             .border(
-                width = if (isToday && !isSelected) 2.dp else 0.dp,
+                width = if (isToday && !isSelected) 1.dp else 0.dp,
                 color = MaterialTheme.colorScheme.secondary,
                 shape = CircleShape
             )
@@ -188,7 +239,7 @@ private fun CalendarDayItem(
         ) {
             Text(
                 text = date.dayOfMonth.toString(),
-                fontSize = 14.sp,
+                fontSize = fontSize,
                 fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
                 color = when {
                     isSelected -> MaterialTheme.colorScheme.onPrimary
@@ -199,17 +250,17 @@ private fun CalendarDayItem(
                 }
             )
 
-            // Show category dots for items
-            if (items.isNotEmpty() && isCurrentMonth) {
-                Spacer(modifier = Modifier.height(2.dp))
+            // Show category dots for items (only if not compact or has items)
+            if (items.isNotEmpty() && isCurrentMonth && (!compact || items.size <= 2)) {
+                Spacer(modifier = Modifier.height(1.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
-                    val categories = items.map { it.category }.distinct().take(3)
+                    val categories = items.map { it.category }.distinct().take(if (compact) 2 else 3)
                     categories.forEach { category ->
                         Box(
                             modifier = Modifier
-                                .size(4.dp)
+                                .size(dotSize)
                                 .clip(CircleShape)
                                 .background(getCategoryColor(category))
                         )
