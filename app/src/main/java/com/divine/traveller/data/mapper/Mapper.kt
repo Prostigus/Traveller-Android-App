@@ -1,38 +1,146 @@
 package com.divine.traveller.data.mapper
 
+import com.divine.traveller.data.entity.BudgetItemEntity
+import com.divine.traveller.data.entity.DocumentEntity
+import com.divine.traveller.data.entity.FlightEntity
+import com.divine.traveller.data.entity.HotelEntity
+import com.divine.traveller.data.entity.ItineraryItemEntity
 import com.divine.traveller.data.entity.TripEntity
-import com.divine.traveller.model.Trip
+import com.divine.traveller.model.BudgetItemModel
+import com.divine.traveller.model.DocumentModel
+import com.divine.traveller.model.FlightModel
+import com.divine.traveller.model.HotelModel
+import com.divine.traveller.model.ItineraryItemModel
+import com.divine.traveller.model.TripModel
 
-fun TripEntity.toDomainModel(): Trip {
-    return Trip(
-        id = id,
-        name = name,
-        description = description,
-        destination = destination,
-        startDate = startDate,
-        endDate = endDate,
-        budget = budget,
-        currency = currency,
-        imageUrl = imageUrl,
-        isCompleted = isCompleted,
-        createdAt = createdAt,
-        updatedAt = updatedAt
-    )
-}
+fun TripEntity.toDomainModel() = TripModel(
+    id = id,
+    name = name,
+    description = description,
+    destination = destination,
+    startDateUtcMillis = startDateUtcMillis,
+    endDateUtcMillis = endDateUtcMillis,
+    budget = budget,
+    currency = currency,
+    imageUrl = imageUrl,
+    isCompleted = isCompleted,
+    createdAtUtcMillis = createdAtUtcMillis,
+    updatedAtUtcMillis = updatedAtUtcMillis,
+    destinationZoneIdString = destinationZoneIdString
+)
 
-fun Trip.toEntity(): TripEntity {
-    return TripEntity(
-        id = id,
-        name = name,
-        description = description,
-        destination = destination,
-        startDate = startDate,
-        endDate = endDate,
-        budget = budget,
-        currency = currency,
-        imageUrl = imageUrl,
-        isCompleted = isCompleted,
-        createdAt = createdAt,
-        updatedAt = updatedAt
-    )
-}
+fun TripModel.toEntity() = TripEntity(
+    id = id,
+    name = name,
+    description = description,
+    destination = destination,
+    startDateUtcMillis = startDateUtcMillis,
+    endDateUtcMillis = endDateUtcMillis,
+    budget = budget,
+    currency = currency,
+    imageUrl = imageUrl,
+    isCompleted = isCompleted,
+    createdAtUtcMillis = createdAtUtcMillis,
+    updatedAtUtcMillis = updatedAtUtcMillis,
+    destinationZoneIdString = destinationZoneIdString
+)
+
+fun BudgetItemEntity.toDomainModel() = BudgetItemModel(
+    id, tripId, category, amount, currency, notes, createdAt, payedBy
+)
+
+fun DocumentEntity.toDomainModel() = DocumentModel(
+    id, tripId, fileName, fileUrl, flightHotelId, type, description, uploadedAt
+)
+
+fun FlightEntity.toDomainModel() = FlightModel(
+    id,
+    tripId,
+    airline,
+    flightNumber,
+    departureAirport,
+    arrivalAirport,
+    departureTime,
+    arrivalTime,
+    status
+)
+
+fun HotelEntity.toDomainModel() = HotelModel(
+    id, tripId, name, address, checkInDate, checkOutDate, bookingReference, placeId, status
+)
+
+fun ItineraryItemEntity.toDomainModel() = ItineraryItemModel(
+    id,
+    tripId,
+    title,
+    description,
+    placeId,
+    viewType,
+    startDateTime,
+    endDateTime,
+    category,
+    status,
+    hotelId,
+    flightId
+)
+
+fun BudgetItemModel.toEntity() = BudgetItemEntity(
+    id = id,
+    tripId = tripId,
+    category = category,
+    amount = amount,
+    currency = currency,
+    notes = notes,
+    createdAt = createdAt,
+    payedBy = payedBy
+)
+
+fun DocumentModel.toEntity() = DocumentEntity(
+    id = id,
+    tripId = tripId,
+    fileName = fileName,
+    fileUrl = fileUrl,
+    flightHotelId = flightHotelId,
+    type = type,
+    description = description,
+    uploadedAt = uploadedAt
+)
+
+fun FlightModel.toEntity() = FlightEntity(
+    id = id,
+    tripId = tripId,
+    airline = airline,
+    flightNumber = flightNumber,
+    departureAirport = departureAirport,
+    arrivalAirport = arrivalAirport,
+    departureTime = departureTime,
+    arrivalTime = arrivalTime,
+    status = status
+)
+
+fun HotelModel.toEntity() = HotelEntity(
+    id = id,
+    tripId = tripId,
+    name = name,
+    address = address,
+    checkInDate = checkInDate,
+    checkOutDate = checkOutDate,
+    bookingReference = bookingReference,
+    placeId = placeId,
+    status = status
+)
+
+fun ItineraryItemModel.toEntity() = ItineraryItemEntity(
+    id = id,
+    tripId = tripId,
+    title = title,
+    description = description,
+    placeId = placeId,
+    viewType = viewType,
+    startDateTime = startDateTime,
+    endDateTime = endDateTime,
+    category = category,
+    status = status,
+    hotelId = hotelId,
+    flightId = flightId
+)

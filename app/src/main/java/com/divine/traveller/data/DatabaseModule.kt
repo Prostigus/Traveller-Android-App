@@ -2,7 +2,6 @@ package com.divine.traveller.data
 
 import android.content.Context
 import androidx.room.Room
-import com.divine.traveller.data.dao.TripDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,7 +24,20 @@ object DatabaseModule {
     }
 
     @Provides
-    fun provideTripDao(database: TravellerDatabase): TripDao {
-        return database.tripDao()
-    }
+    fun provideTripDao(database: TravellerDatabase) = database.tripDao()
+
+    @Provides
+    fun provideItineraryItemDao(database: TravellerDatabase) = database.itineraryItemDao()
+
+    @Provides
+    fun provideFlightDao(database: TravellerDatabase) = database.flightDao()
+
+    @Provides
+    fun provideHotelDao(database: TravellerDatabase) = database.hotelDao()
+
+    @Provides
+    fun provideBudgetItemDao(database: TravellerDatabase) = database.budgetItemDao()
+
+    @Provides
+    fun provideDocumentDao(database: TravellerDatabase) = database.documentDao()
 }

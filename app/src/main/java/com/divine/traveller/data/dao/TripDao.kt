@@ -11,19 +11,19 @@ import java.util.Date
 
 @Dao
 interface TripDao {
-    @Query("SELECT * FROM trips ORDER BY startDate DESC")
+    @Query("SELECT * FROM trips ORDER BY startDateUtcMillis DESC")
     fun getAllTrips(): Flow<List<TripEntity>>
 
     @Query("SELECT * FROM trips WHERE id = :tripId")
     suspend fun getTripById(tripId: Long): TripEntity?
 
-    @Query("SELECT * FROM trips WHERE isCompleted = 0 ORDER BY startDate ASC")
-    fun getUpcomingTrips(): Flow<List<TripEntity>>
+    @Query("SELECT * FROM trips WHERE isCompleted = 0 AND startDateUtcMillis > :today ORDER BY startDateUtcMillis ASC")
+    fun getUpcomingTrips(today: Date = Date()): Flow<List<TripEntity>>
 
-    @Query("SELECT * FROM trips WHERE isCompleted = 1 ORDER BY endDate DESC")
-    fun getCompletedTrips(): Flow<List<TripEntity>>
+    @Query("SELECT * FROM trips WHERE isCompleted = 1 OR endDateUtcMillis < :today ORDER BY endDateUtcMillis DESC")
+    fun getCompletedTrips(today: Date = Date()): Flow<List<TripEntity>>
 
-    @Query("SELECT * FROM trips WHERE startDate <= :today AND endDate >= :today")
+    @Query("SELECT * FROM trips WHERE startDateUtcMillis <= :today AND endDateUtcMillis >= :today")
     fun getCurrentTrips(today: Date = Date()): Flow<List<TripEntity>>
 
     @Insert
@@ -35,6 +35,6 @@ interface TripDao {
     @Delete
     suspend fun deleteTrip(tripEntity: TripEntity)
 
-    @Query("UPDATE trips SET isCompleted = :isCompleted, updatedAt = :updatedAt WHERE id = :tripId")
+    @Query("UPDATE trips SET isCompleted = :isCompleted, updatedAtUtcMillis = :updatedAt WHERE id = :tripId")
     suspend fun markTripCompleted(tripId: Long, isCompleted: Boolean = true, updatedAt: Date = Date())
 }

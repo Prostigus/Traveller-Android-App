@@ -5,11 +5,21 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.divine.traveller.data.dao.BudgetItemDao
+import com.divine.traveller.data.dao.DocumentDao
+import com.divine.traveller.data.dao.FlightDao
+import com.divine.traveller.data.dao.HotelDao
+import com.divine.traveller.data.dao.ItineraryItemDao
 import com.divine.traveller.data.dao.TripDao
 import com.divine.traveller.data.entity.TripEntity
+import com.divine.traveller.data.entity.ItineraryItemEntity
+import com.divine.traveller.data.entity.FlightEntity
+import com.divine.traveller.data.entity.HotelEntity
+import com.divine.traveller.data.entity.BudgetItemEntity
+import com.divine.traveller.data.entity.DocumentEntity
 
 @Database(
-    entities = [TripEntity::class],
+    entities = [TripEntity::class, ItineraryItemEntity::class, FlightEntity::class, HotelEntity::class, BudgetItemEntity::class, DocumentEntity::class],
     version = 1,
     exportSchema = false
 )
@@ -17,6 +27,11 @@ import com.divine.traveller.data.entity.TripEntity
 abstract class TravellerDatabase : RoomDatabase() {
 
     abstract fun tripDao(): TripDao
+    abstract fun itineraryItemDao(): ItineraryItemDao
+    abstract fun flightDao(): FlightDao
+    abstract fun hotelDao(): HotelDao
+    abstract fun budgetItemDao(): BudgetItemDao
+    abstract fun documentDao(): DocumentDao
 
     companion object {
         @Volatile

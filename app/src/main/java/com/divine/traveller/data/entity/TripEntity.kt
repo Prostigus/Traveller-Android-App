@@ -2,7 +2,7 @@ package com.divine.traveller.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.Date
+import java.time.ZoneId
 
 @Entity(tableName = "trips")
 data class TripEntity(
@@ -11,12 +11,13 @@ data class TripEntity(
     val name: String,
     val description: String? = null,
     val destination: String,
-    val startDate: Date,
-    val endDate: Date,
+    val startDateUtcMillis: Long,
+    val endDateUtcMillis: Long,
     val budget: Double? = null,
     val currency: String = "USD",
     val imageUrl: String? = null,
     val isCompleted: Boolean = false,
-    val createdAt: Date = Date(),
-    val updatedAt: Date = Date()
+    val createdAtUtcMillis: Long = System.currentTimeMillis(),
+    val updatedAtUtcMillis: Long = System.currentTimeMillis(),
+    val destinationZoneIdString: String
 )

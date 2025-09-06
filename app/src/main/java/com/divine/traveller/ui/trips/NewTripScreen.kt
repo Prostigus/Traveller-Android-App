@@ -1,5 +1,6 @@
 package com.divine.traveller.ui.trips
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,34 +55,48 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.divine.traveller.data.viewmodel.TripViewModel
-import com.divine.traveller.model.Trip
-import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 import com.divine.traveller.R
+import com.divine.traveller.data.viewmodel.HomeViewModel
+import com.divine.traveller.model.TripModel
+import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
+import com.divine.traveller.util.correctUtcTimeStampForZonedDate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import net.iakovlev.timeshape.TimeZoneEngine
+import java.text.SimpleDateFormat
+import java.time.ZoneId
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewTripScreen(
     modifier: Modifier = Modifier,
-    viewModel: TripViewModel = hiltViewModel(),
+    viewModel: HomeViewModel = hiltViewModel(),
     onTripCreated: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
     var tripName by remember { mutableStateOf("") }
     var destination by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var startDate by remember { mutableStateOf<Date?>(null) }
-    var endDate by remember { mutableStateOf<Date?>(null) }
+    var startDate by remember { mutableStateOf<Long?>(null) }
+    var endDate by remember { mutableStateOf<Long?>(null) }
+    var destinationZoneIdString by remember { mutableStateOf("UTC") }
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
-    val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
+    val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).apply({
+        timeZone = java.util.TimeZone.getTimeZone("UTC")})
+    }
+    var timeZoneEngine by remember { mutableStateOf<TimeZoneEngine?>(null) }
+
+    LaunchedEffect(Unit) {
+        timeZoneEngine = withContext(Dispatchers.Default) {
+            viewModel.getTimeZoneEngine()
+        }
+    }
+
 
     // Get current date at start of day to prevent past date selection
     val today = remember {
@@ -92,29 +109,12 @@ fun NewTripScreen(
     }
 
     val startDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = startDate?.time ?: today
+        initialSelectedDateMillis = startDate ?: today,
     )
 
     val endDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = endDate?.time ?: today
+        initialSelectedDateMillis = endDate ?: today
     )
-
-    // Helper function to convert UTC millis to local date
-    fun millisToLocalDate(millis: Long): Date {
-        val calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-        calendar.timeInMillis = millis
-
-        val localCalendar = Calendar.getInstance()
-        localCalendar.set(
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH),
-            0, 0, 0
-        )
-        localCalendar.set(Calendar.MILLISECOND, 0)
-
-        return localCalendar.time
-    }
 
     Scaffold(
         modifier = modifier,
@@ -165,15 +165,16 @@ fun NewTripScreen(
                     Button(
                         onClick = {
                             if (tripName.isNotBlank() && destination.isNotBlank() && startDate != null && endDate != null) {
-                                val trip = Trip(
+                                val tripModel = TripModel(
                                     name = tripName,
                                     destination = destination,
                                     description = description.takeIf { it.isNotBlank() },
                                     budget = null,
-                                    startDate = startDate!!,
-                                    endDate = endDate!!
+                                    startDateUtcMillis = correctUtcTimeStampForZonedDate(startDate!!, ZoneId.of(destinationZoneIdString)),
+                                    endDateUtcMillis = correctUtcTimeStampForZonedDate(endDate!!, ZoneId.of(destinationZoneIdString), true),
+                                    destinationZoneIdString = destinationZoneIdString
                                 )
-                                viewModel.addTrip(trip)
+                                viewModel.addTrip(tripModel)
                                 onTripCreated()
                             }
                         },
@@ -211,6 +212,7 @@ fun NewTripScreen(
             FormFieldWithIcon(
                 value = tripName,
                 onValueChange = { tripName = it },
+                label = "Trip Name",
                 placeholder = "e.g. Alpine Adventure",
                 icon = Icons.Default.Favorite
             )
@@ -219,7 +221,7 @@ fun NewTripScreen(
             Column {
                 Text(
                     text = "Destination",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -229,11 +231,18 @@ fun NewTripScreen(
                     value = destination,
                     onValueChange = { destination = it },
                     onPlaceSelected = { selectedPlace ->
-                        destination = selectedPlace
+                        destination = selectedPlace.displayName ?: ""
+                        destinationZoneIdString = selectedPlace.location?.let { latLng ->
+                            val id = timeZoneEngine?.query(latLng.latitude, latLng.longitude)
+                                ?.orElse(ZoneId.of("UTC"))?.id
+                            id
+                        } ?: "UTC"
                     },
                     placesClient = viewModel.placesClient,
                     modifier = Modifier.fillMaxWidth(),
-                    label = "City, Country"
+                    label = "City, Country",
+                    placeholder = "Enter a destination...",
+                    includedType = "locality"
                 )
             }
 
@@ -246,7 +255,7 @@ fun NewTripScreen(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Start Date",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -262,7 +271,7 @@ fun NewTripScreen(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "End Date",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -280,13 +289,13 @@ fun NewTripScreen(
                 Row {
                     Text(
                         text = "Description ",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "(Optional)",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -298,18 +307,19 @@ fun NewTripScreen(
                     placeholder = {
                         Text(
                             "Add a description for your trip...",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 4,
                     maxLines = 4,
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                        focusedBorderColor = Color(0xFF6366F1)
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 )
             }
@@ -318,7 +328,7 @@ fun NewTripScreen(
             Column {
                 Text(
                     text = "Cover Photo",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -328,13 +338,13 @@ fun NewTripScreen(
                         .fillMaxWidth()
                         .height(128.dp)
                         .border(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(8.dp)
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(12.dp)
                         )
                         .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(8.dp)
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(12.dp)
                         )
                         .clickable { /* TODO: Handle photo upload */ },
                     contentAlignment = Alignment.Center
@@ -353,19 +363,19 @@ fun NewTripScreen(
                             Row {
                                 Text(
                                     text = "Click to upload",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
                                     text = " or drag and drop",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Text(
                                 text = "SVG, PNG, JPG (MAX. 800x400px)",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -386,8 +396,10 @@ fun NewTripScreen(
                 TextButton(
                     onClick = {
                         startDatePickerState.selectedDateMillis?.let { millis ->
-                            startDate = millisToLocalDate(millis)
+//                            startDate = correctUtcTimeStampForLocalDate(millis, ZoneId.systemDefault())
+                            startDate = millis
                         }
+
                         showStartDatePicker = false
                     }
                 ) {
@@ -400,7 +412,7 @@ fun NewTripScreen(
                 }
             }
         ) {
-            androidx.compose.material3.DatePicker(state = startDatePickerState)
+            DatePicker(state = startDatePickerState)
         }
     }
 
@@ -412,7 +424,8 @@ fun NewTripScreen(
                 TextButton(
                     onClick = {
                         endDatePickerState.selectedDateMillis?.let { millis ->
-                            endDate = millisToLocalDate(millis)
+//                            endDate = correctUtcTimeStampForLocalDate(millis, ZoneId.systemDefault(), true)
+                            endDate = millis
                         }
                         showEndDatePicker = false
                     }
@@ -426,7 +439,7 @@ fun NewTripScreen(
                 }
             }
         ) {
-            androidx.compose.material3.DatePicker(state = endDatePickerState)
+            DatePicker(state = endDatePickerState)
         }
     }
 }
@@ -435,13 +448,14 @@ fun NewTripScreen(
 private fun FormFieldWithIcon(
     value: String,
     onValueChange: (String) -> Unit,
+    label: String,
     placeholder: String,
     icon: ImageVector
 ) {
     Column {
         Text(
-            text = "Trip Name",
-            fontSize = 14.sp,
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -450,27 +464,34 @@ private fun FormFieldWithIcon(
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
+            label = {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
             placeholder = {
                 Text(
                     placeholder,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
             },
             leadingIcon = {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
             },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedContainerColor = MaterialTheme.colorScheme.surface,
-                unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
-                focusedBorderColor = Color(0xFF6366F1)
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
     }
@@ -478,46 +499,50 @@ private fun FormFieldWithIcon(
 
 @Composable
 private fun DatePickerField(
-    selectedDate: Date?,
+    selectedDate: Long?,
     dateFormatter: SimpleDateFormat,
     onClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    val formattedDate = selectedDate?.let { dateFormatter.format(it) } ?: ""
+    if (selectedDate != null) {
+        Log.d("DatePickerField", "selectedDate millis: $selectedDate")
+        Log.d("DatePickerField", "formattedDate: $formattedDate")
+        Log.d("DatePickerField", "formatter timeZone: ${dateFormatter.timeZone.id}")
+    }
+    OutlinedTextField(
+        value = selectedDate?.let { dateFormatter.format(it) } ?: "",
+        onValueChange = { },
+        label = {
             Text(
-                text = selectedDate?.let { dateFormatter.format(it) } ?: "Select Date",
-                color = if (selectedDate != null)
-                    MaterialTheme.colorScheme.onSurface
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 16.sp
+                text = "Date",
+                style = MaterialTheme.typography.bodyMedium
             )
+        },
+        placeholder = {
+            Text(
+                "Select date",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+        },
+        trailingIcon = {
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = "Select date",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
-        }
-    }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        enabled = false,
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            disabledBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledTrailingIconColor = MaterialTheme.colorScheme.primary
+        )
+    )
 }

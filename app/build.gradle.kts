@@ -85,11 +85,19 @@ dependencies {
 
     implementation(libs.coil.compose)
 
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    implementation(libs.timeshape.v2025b28) {
+        exclude(group = "com.github.luben", module = "zstd-jni")
+    }
+
+    //do not use toml, it causes issues with aar packaging
+    implementation("com.github.luben:zstd-jni:1.5.5-11@aar")
+
+
+//    testImplementation(libs.junit)
+//    androidTestImplementation(libs.androidx.junit)
+//    androidTestImplementation(libs.androidx.espresso.core)
+//    androidTestImplementation(platform(libs.androidx.compose.bom))
+//    androidTestImplementation(libs.androidx.ui.test.junit4)
 }
 
 kotlin {
