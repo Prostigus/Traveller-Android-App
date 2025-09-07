@@ -246,8 +246,6 @@ fun NewTripScreen(
 
 
                 PlacesAutocompleteTextField(
-                    value = destination,
-                    onValueChange = { newTripViewModel.setDestination(it) },
                     onPlaceSelected = { selectedPlace ->
                         newTripViewModel.setDestination(selectedPlace.displayName ?: "")
                         newTripViewModel.setDestinationZoneIdString(selectedPlace.location?.let { latLng ->

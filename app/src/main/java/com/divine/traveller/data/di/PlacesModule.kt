@@ -18,7 +18,10 @@ object PlacesModule {
     @Singleton
     fun providePlacesClient(@ApplicationContext context: Context): PlacesClient {
         if (!Places.isInitialized()) {
-            Places.initialize(context, com.divine.traveller.BuildConfig.MAPS_API_KEY)
+            Places.initializeWithNewPlacesApiEnabled(
+                context,
+                com.divine.traveller.BuildConfig.MAPS_API_KEY
+            )
         }
         return Places.createClient(context)
     }

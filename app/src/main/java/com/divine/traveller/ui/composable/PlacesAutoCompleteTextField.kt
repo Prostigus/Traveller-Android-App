@@ -35,80 +35,66 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.FetchPlaceRequest
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.api.net.kotlin.awaitFetchPlace
+import com.google.android.libraries.places.api.net.kotlin.awaitFindAutocompletePredictions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlacesAutocompleteTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
     onPlaceSelected: (Place) -> Unit,
     placesClient: PlacesClient,
     modifier: Modifier = Modifier,
     label: String = "Search location",
     placeholder: String = "Enter a location...",
     includedTypes: List<String> = emptyList(),
-//    locationRestriction: String = "",
 ) {
+    var value by remember { mutableStateOf("") }
     var predictions by remember { mutableStateOf<List<AutocompletePrediction>>(emptyList()) }
     var expanded by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+    var isSelecting by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     // Efficient autocomplete search with debouncing
     LaunchedEffect(value) {
-        if (value.length >= 2) {
+        if (value.length >= 2 && !isSelecting) {
             delay(300) // Debounce
             isLoading = true
             Log.d("PlacesAutocomplete", "Searching for predictions with query: $value")
 
             try {
-                val builder = FindAutocompletePredictionsRequest.builder()
-                    .setQuery(value)
-
-                if (includedTypes.isNotEmpty()) {
-                    builder.setTypesFilter(includedTypes)
+                val foundPredictions = placesClient.awaitFindAutocompletePredictions {
+                    query = value
+                    if (includedTypes.isNotEmpty()) {
+                        typesFilter = includedTypes
+                    }
                 }
-                //TODO: Implement location restriction properly
-//                if(!locationRestriction.isBlank()){
-//                    builder.setLocationRestriction(null)
-//                }
 
-                val request = builder.build()
-
-                placesClient.findAutocompletePredictions(request)
-                    .addOnSuccessListener { response ->
-                        predictions = response.autocompletePredictions
-                        Log.d(
-                            "PlacesAutocomplete",
-                            "Found ${predictions.size} predictions for query: $value"
-                        )
-                        expanded = predictions.isNotEmpty()
-                        isLoading = false
-                    }
-                    .addOnFailureListener { exception ->
-                        Log.d(
-                            "PlacesAutocomplete",
-                            "Error fetching predictions: ${exception.message}"
-                        )
-                        predictions = emptyList()
-                        expanded = false
-                        isLoading = false
-                    }
+                predictions = foundPredictions.autocompletePredictions
+                Log.d(
+                    "PlacesAutocomplete",
+                    "Found ${predictions.size} predictions for query: $value"
+                )
+                expanded = predictions.isNotEmpty()
+                isLoading = false
             } catch (e: Exception) {
                 Log.d("PlacesAutocomplete", "Error fetching predictions: ${e.message}")
                 predictions = emptyList()
                 expanded = false
                 isLoading = false
             }
-        } else {
+        } else if (!isSelecting) {
             predictions = emptyList()
             expanded = false
             isLoading = false
+        }
+
+        // Reset the selecting flag after the effect
+        if (isSelecting) {
+            isSelecting = false
         }
     }
 
@@ -119,7 +105,11 @@ fun PlacesAutocompleteTextField(
         ) {
             OutlinedTextField(
                 value = value,
-                onValueChange = onValueChange,
+                onValueChange = {
+                    value = it
+                    isSelecting = false // User is typing, not selecting
+                },
+                // ... rest of the OutlinedTextField code remains the same
                 label = {
                     Text(
                         text = label,
@@ -164,7 +154,7 @@ fun PlacesAutocompleteTextField(
                         value.isNotEmpty() -> {
                             IconButton(
                                 onClick = {
-                                    onValueChange("")
+                                    value = ""
                                     predictions = emptyList()
                                     expanded = false
                                 },
@@ -222,41 +212,33 @@ fun PlacesAutocompleteTextField(
                             },
                             onClick = {
                                 coroutineScope.launch {
-                                    // Fetch the full place details using the prediction's place ID
-                                    val placeFields = listOf(
-                                        Place.Field.ID,
-                                        Place.Field.DISPLAY_NAME,
-                                        Place.Field.FORMATTED_ADDRESS,
-                                        Place.Field.LOCATION
-                                    )
-                                    val placeRequest = FetchPlaceRequest.newInstance(
-                                        prediction.placeId,
-                                        placeFields
-                                    )
+                                    try {
+                                        isSelecting = true // Set flag before updating value
+                                        val place = placesClient.awaitFetchPlace(
+                                            prediction.placeId,
+                                            placeFields = listOf(
+                                                Place.Field.ID,
+                                                Place.Field.DISPLAY_NAME,
+                                                Place.Field.FORMATTED_ADDRESS,
+                                                Place.Field.LOCATION
+                                            )
+                                        ).place
 
-                                    placesClient.fetchPlace(placeRequest)
-                                        .addOnSuccessListener { response ->
-                                            val place = response.place
-                                            onValueChange(
-                                                place.displayName ?: prediction.getPrimaryText(null)
-                                                    .toString()
-                                            )
-                                            onPlaceSelected(place)
-                                            expanded = false
-                                            predictions = emptyList()
-                                        }
-                                        .addOnFailureListener { exception ->
-                                            Log.e(
-                                                "PlacesAutocomplete",
-                                                "Error fetching place details: ${exception.message}"
-                                            )
-                                            // Fallback: use prediction text
-                                            onValueChange(
-                                                prediction.getPrimaryText(null).toString()
-                                            )
-                                            expanded = false
-                                            predictions = emptyList()
-                                        }
+                                        value = place.displayName ?: prediction.getPrimaryText(null)
+                                            .toString()
+                                        onPlaceSelected(place)
+                                        expanded = false
+                                        predictions = emptyList()
+                                    } catch (exception: Exception) {
+                                        Log.e(
+                                            "PlacesAutocomplete",
+                                            "Error fetching place details: ${exception.message}"
+                                        )
+                                        value = prediction.getPrimaryText(null).toString()
+                                        expanded = false
+                                        predictions = emptyList()
+                                        isSelecting = false
+                                    }
                                 }
                             },
                             leadingIcon = {

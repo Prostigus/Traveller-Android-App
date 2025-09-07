@@ -120,8 +120,6 @@ fun AddItineraryItemBottomSheet(
                 )
 
                 PlacesAutocompleteTextField(
-                    value = destination,
-                    onValueChange = { destination = it },
                     onPlaceSelected = { selectedPlace ->
                         destination = selectedPlace.displayName ?: ""
                         placeId = selectedPlace.id ?: ""
