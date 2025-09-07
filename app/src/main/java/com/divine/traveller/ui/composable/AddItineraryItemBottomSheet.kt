@@ -130,7 +130,6 @@ fun AddItineraryItemBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                     label = "Destination",
                     placeholder = "Search for a place...",
-                    includedType = "locality"
                 )
 
                 // Category Selection

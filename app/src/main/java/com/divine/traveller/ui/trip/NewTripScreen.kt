@@ -62,7 +62,9 @@ import com.divine.traveller.model.TripModel
 import com.divine.traveller.ui.composable.FormFieldWithIcon
 import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
 import com.divine.traveller.util.correctUtcTimeStampForZonedDate
+import com.google.android.libraries.places.api.model.PlaceTypes
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import net.iakovlev.timeshape.TimeZoneEngine
 import java.text.SimpleDateFormat
@@ -86,6 +88,8 @@ fun NewTripScreen(
     val startDate = state.startDate
     val endDate = state.endDate
     val destinationZoneIdString = state.destinationZoneIdString
+
+    val searchTextFlow = MutableStateFlow("")
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
@@ -177,11 +181,11 @@ fun NewTripScreen(
                                     description = description.takeIf { it.isNotBlank() },
                                     budget = null,
                                     startDateUtcMillis = correctUtcTimeStampForZonedDate(
-                                        startDate!!,
+                                        startDate,
                                         ZoneId.of(destinationZoneIdString)
                                     ),
                                     endDateUtcMillis = correctUtcTimeStampForZonedDate(
-                                        endDate!!,
+                                        endDate,
                                         ZoneId.of(destinationZoneIdString),
                                         true
                                     ),
@@ -240,6 +244,7 @@ fun NewTripScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
+
                 PlacesAutocompleteTextField(
                     value = destination,
                     onValueChange = { newTripViewModel.setDestination(it) },
@@ -255,7 +260,7 @@ fun NewTripScreen(
                     modifier = Modifier.fillMaxWidth(),
                     label = "City, Country",
                     placeholder = "Enter a destination...",
-                    includedType = "locality",
+                    includedTypes = listOf(PlaceTypes.REGIONS),
                 )
             }
 

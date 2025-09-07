@@ -27,15 +27,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.android.libraries.places.api.net.SearchByTextRequest
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,12 +51,13 @@ fun PlacesAutocompleteTextField(
     modifier: Modifier = Modifier,
     label: String = "Search location",
     placeholder: String = "Enter a location...",
-    includedType: String = "all",
+    includedTypes: List<String> = emptyList(),
 //    locationRestriction: String = "",
 ) {
-    var suggestions by remember { mutableStateOf<List<Place>>(emptyList()) }
+    var predictions by remember { mutableStateOf<List<AutocompletePrediction>>(emptyList()) }
     var expanded by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     // Efficient autocomplete search with debouncing
     LaunchedEffect(value) {
@@ -62,54 +67,46 @@ fun PlacesAutocompleteTextField(
             Log.d("PlacesAutocomplete", "Searching for predictions with query: $value")
 
             try {
-                val placeFields = listOf(
-                    Place.Field.ID,
-                    Place.Field.DISPLAY_NAME,
-                    Place.Field.FORMATTED_ADDRESS,
-                    Place.Field.LOCATION
-                )
-                val builder = SearchByTextRequest.builder(value, placeFields)
-                    .setMaxResultCount(6)
+                val builder = FindAutocompletePredictionsRequest.builder()
+                    .setQuery(value)
 
-                if (includedType != "all") {
-                    Log.d("PlacesAutocomplete", "Filtering by type: $includedType")
-                    builder
-                        .setIncludedType(includedType)
+                if (includedTypes.isNotEmpty()) {
+                    builder.setTypesFilter(includedTypes)
                 }
                 //TODO: Implement location restriction properly
 //                if(!locationRestriction.isBlank()){
 //                    builder.setLocationRestriction(null)
 //                }
 
-                val searchRequest = builder.build()
+                val request = builder.build()
 
-                placesClient.searchByText(searchRequest)
+                placesClient.findAutocompletePredictions(request)
                     .addOnSuccessListener { response ->
-                        suggestions = response.places
+                        predictions = response.autocompletePredictions
                         Log.d(
                             "PlacesAutocomplete",
-                            "Found ${suggestions.size} suggestions for query: $value"
+                            "Found ${predictions.size} predictions for query: $value"
                         )
-                        expanded = suggestions.isNotEmpty()
+                        expanded = predictions.isNotEmpty()
                         isLoading = false
                     }
                     .addOnFailureListener { exception ->
                         Log.d(
                             "PlacesAutocomplete",
-                            "Error fetching suggestions: ${exception.message}"
+                            "Error fetching predictions: ${exception.message}"
                         )
-                        suggestions = emptyList()
+                        predictions = emptyList()
                         expanded = false
                         isLoading = false
                     }
             } catch (e: Exception) {
-                Log.d("PlacesAutocomplete", "Error fetching suggestions: ${e.message}")
-                suggestions = emptyList()
+                Log.d("PlacesAutocomplete", "Error fetching predictions: ${e.message}")
+                predictions = emptyList()
                 expanded = false
                 isLoading = false
             }
         } else {
-            suggestions = emptyList()
+            predictions = emptyList()
             expanded = false
             isLoading = false
         }
@@ -168,7 +165,7 @@ fun PlacesAutocompleteTextField(
                             IconButton(
                                 onClick = {
                                     onValueChange("")
-                                    suggestions = emptyList()
+                                    predictions = emptyList()
                                     expanded = false
                                 },
                                 modifier = Modifier.size(24.dp)
@@ -186,7 +183,7 @@ fun PlacesAutocompleteTextField(
                 singleLine = true
             )
 
-            if (expanded && suggestions.isNotEmpty()) {
+            if (expanded && predictions.isNotEmpty()) {
                 ExposedDropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
@@ -194,7 +191,7 @@ fun PlacesAutocompleteTextField(
                         .fillMaxWidth()
                         .heightIn(max = 300.dp)
                 ) {
-                    suggestions.forEach { place ->
+                    predictions.forEach { prediction ->
                         DropdownMenuItem(
                             text = {
                                 Column(
@@ -203,7 +200,7 @@ fun PlacesAutocompleteTextField(
                                         .padding(vertical = 4.dp)
                                 ) {
                                     Text(
-                                        text = place.name ?: "Unknown",
+                                        text = prediction.getPrimaryText(null).toString(),
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onSurface,
@@ -211,10 +208,10 @@ fun PlacesAutocompleteTextField(
                                         overflow = TextOverflow.Ellipsis
                                     )
 
-                                    place.address?.let { address ->
+                                    prediction.getSecondaryText(null)?.let { secondaryText ->
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
-                                            text = address,
+                                            text = secondaryText.toString(),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = 1,
@@ -224,11 +221,43 @@ fun PlacesAutocompleteTextField(
                                 }
                             },
                             onClick = {
-                                val selectedPlace = place
-                                onValueChange(selectedPlace.displayName)
-                                onPlaceSelected(selectedPlace)
-                                expanded = false
-                                suggestions = emptyList()
+                                coroutineScope.launch {
+                                    // Fetch the full place details using the prediction's place ID
+                                    val placeFields = listOf(
+                                        Place.Field.ID,
+                                        Place.Field.DISPLAY_NAME,
+                                        Place.Field.FORMATTED_ADDRESS,
+                                        Place.Field.LOCATION
+                                    )
+                                    val placeRequest = FetchPlaceRequest.newInstance(
+                                        prediction.placeId,
+                                        placeFields
+                                    )
+
+                                    placesClient.fetchPlace(placeRequest)
+                                        .addOnSuccessListener { response ->
+                                            val place = response.place
+                                            onValueChange(
+                                                place.displayName ?: prediction.getPrimaryText(null)
+                                                    .toString()
+                                            )
+                                            onPlaceSelected(place)
+                                            expanded = false
+                                            predictions = emptyList()
+                                        }
+                                        .addOnFailureListener { exception ->
+                                            Log.e(
+                                                "PlacesAutocomplete",
+                                                "Error fetching place details: ${exception.message}"
+                                            )
+                                            // Fallback: use prediction text
+                                            onValueChange(
+                                                prediction.getPrimaryText(null).toString()
+                                            )
+                                            expanded = false
+                                            predictions = emptyList()
+                                        }
+                                }
                             },
                             leadingIcon = {
                                 Icon(
