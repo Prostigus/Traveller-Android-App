@@ -79,12 +79,13 @@ fun NewTripScreen(
     onTripCreated: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
-    val tripName by newTripViewModel.tripName.collectAsState()
-    val destination by newTripViewModel.destination.collectAsState()
-    val description by newTripViewModel.description.collectAsState()
-    val startDate by newTripViewModel.startDate.collectAsState()
-    val endDate by newTripViewModel.endDate.collectAsState()
-    val destinationZoneIdString by newTripViewModel.destinationZoneIdString.collectAsState()
+    val state by newTripViewModel.uiState.collectAsState()
+    val tripName = state.tripName
+    val destination = state.destination
+    val description = state.description
+    val startDate = state.startDate
+    val endDate = state.endDate
+    val destinationZoneIdString = state.destinationZoneIdString
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
