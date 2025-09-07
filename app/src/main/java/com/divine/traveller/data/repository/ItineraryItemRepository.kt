@@ -7,7 +7,7 @@ import javax.inject.Singleton
 
 @Singleton
 class ItineraryItemRepository @Inject constructor(
-    private val itineraryItemDao: ItineraryItemDao
+    private val itineraryItemDao: ItineraryItemDao,
 ) {
 
     suspend fun insert(item: ItineraryItemEntity): Long {
@@ -29,4 +29,10 @@ class ItineraryItemRepository @Inject constructor(
     fun getByTripId(tripId: Long) = itineraryItemDao.getByTripId(tripId)
 
     fun getAll() = itineraryItemDao.getAll()
+
+    suspend fun getItineraryItemsForFlight(flightId: Long) =
+        itineraryItemDao.getItineraryItemsForFlight(flightId)
+
+    suspend fun getAllsuspend() = itineraryItemDao.getAllsuspend()
+
 }

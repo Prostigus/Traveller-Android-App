@@ -40,7 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.divine.traveller.data.entity.ItineraryCategory
+import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.model.ItineraryItemModel
+import com.divine.traveller.model.startAsDate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
@@ -143,7 +145,7 @@ fun ItineraryItemCard(
                     )
 
                     Text(
-                        text = formatDateTime(item.startDateTime, timeZone),
+                        text = formatDateTime(item.startAsDate(), timeZone),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -323,9 +325,10 @@ private fun getCategoryColor(category: ItineraryCategory): Color {
 
 private fun getStatusColor(status: com.divine.traveller.data.entity.ItineraryItemStatus): Color {
     return when (status) {
-        com.divine.traveller.data.entity.ItineraryItemStatus.PENDING -> Color(0xFFFF9800) // Orange
-        com.divine.traveller.data.entity.ItineraryItemStatus.COMPLETED -> Color(0xFF4CAF50) // Green
-        com.divine.traveller.data.entity.ItineraryItemStatus.CANCELLED -> Color(0xFFF44336) // Red
+        ItineraryItemStatus.PENDING -> Color(0xFFFF9800) // Orange
+        ItineraryItemStatus.COMPLETED -> Color(0xFF4CAF50) // Green
+        ItineraryItemStatus.CANCELLED -> Color(0xFFF44336) // Red
+        ItineraryItemStatus.NONE -> TODO()
     }
 }
 

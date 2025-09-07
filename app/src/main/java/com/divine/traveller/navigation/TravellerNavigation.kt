@@ -11,6 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.divine.traveller.ui.budget.BudgetScreen
 import com.divine.traveller.ui.flight.FlightScreen
+import com.divine.traveller.ui.flight.NewFlightScreen
 import com.divine.traveller.ui.home.HomeScreen
 import com.divine.traveller.ui.hotel.HotelScreen
 import com.divine.traveller.ui.trip.NewTripScreen
@@ -32,7 +33,7 @@ fun TravellerNavigation(
                     navController.navigate(Routes.NEW_TRIP)
                 },
                 onNavigateToTripDetails = { tripId ->
-                    navController.navigate("trip_details/$tripId")
+                    navController.navigate(Routes.TRIP_DETAILS + "/$tripId")
                 }
             )
         }
@@ -46,6 +47,20 @@ fun TravellerNavigation(
                     navController.popBackStack()
                 }
             )
+        }
+
+        composable(
+            route = Routes.NEW_FLIGHT + "/{tripId}",
+            arguments = listOf(navArgument("tripId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val tripId = backStackEntry.arguments?.getLong("tripId")
+            if (tripId != null) {
+                NewFlightScreen(
+                    tripId = tripId,
+                    onFlightCreated = { navController.popBackStack() },
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
         }
 
         // Reused helper for screens that accept a long tripId and use the same navigate options
@@ -67,7 +82,10 @@ fun TravellerNavigation(
             FlightScreen(
                 tripId = tripId,
                 onNavigate = onNavigate,
-                onNavigateBack = onNavigateBack
+                onNavigateBack = onNavigateBack,
+                onNavigateToNewFlight = {
+                    navController.navigate(Routes.NEW_FLIGHT + "/$tripId")
+                }
             )
         }
 

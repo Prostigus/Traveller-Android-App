@@ -32,18 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchByTextRequest
 import kotlinx.coroutines.delay
-
-data class PlaceResult(
-    val placeId: String,
-    val name: String,
-    val address: String,
-    val latLng: LatLng
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,15 +64,17 @@ fun PlacesAutocompleteTextField(
             try {
                 val placeFields = listOf(
                     Place.Field.ID,
-                    Place.Field.NAME,
-                    Place.Field.ADDRESS,
+                    Place.Field.DISPLAY_NAME,
+                    Place.Field.FORMATTED_ADDRESS,
                     Place.Field.LOCATION
                 )
                 val builder = SearchByTextRequest.builder(value, placeFields)
                     .setMaxResultCount(6)
 
                 if (includedType != "all") {
-                    builder.setIncludedType(includedType)
+                    Log.d("PlacesAutocomplete", "Filtering by type: $includedType")
+                    builder
+                        .setIncludedType(includedType)
                 }
                 //TODO: Implement location restriction properly
 //                if(!locationRestriction.isBlank()){

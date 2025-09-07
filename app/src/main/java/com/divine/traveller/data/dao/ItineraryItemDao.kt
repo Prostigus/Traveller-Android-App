@@ -28,4 +28,10 @@ interface ItineraryItemDao {
 
     @Query("SELECT * FROM itinerary_items")
     fun getAll(): Flow<List<ItineraryItemEntity>>
+
+    @Query("SELECT * FROM itinerary_items WHERE flightId = :flightId")
+    suspend fun getItineraryItemsForFlight(flightId: Long): List<ItineraryItemEntity>
+
+    @Query("SELECT * FROM itinerary_items")
+    suspend fun getAllsuspend(): List<ItineraryItemEntity>
 }

@@ -2,6 +2,10 @@ package com.divine.traveller.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.Date
 
 @Entity(tableName = "trips")
 data class TripEntity(
@@ -20,3 +24,19 @@ data class TripEntity(
     val updatedAtUtcMillis: Long = System.currentTimeMillis(),
     val destinationZoneIdString: String
 )
+
+fun TripEntity.startAsDate(): Date = Date(this.startDateUtcMillis)
+
+fun TripEntity.startAsLocalDate(zone: ZoneId): LocalDate =
+    java.time.Instant.ofEpochMilli(this.startDateUtcMillis).atZone(zone).toLocalDate()
+
+fun TripEntity.startAsLocalDateTime(zone: ZoneId): LocalDateTime =
+    java.time.Instant.ofEpochMilli(this.startDateUtcMillis).atZone(zone).toLocalDateTime()
+
+fun TripEntity.endAsDate(): Date = Date(this.endDateUtcMillis)
+
+fun TripEntity.endAsLocalDate(zone: ZoneId): LocalDate =
+    java.time.Instant.ofEpochMilli(this.endDateUtcMillis).atZone(zone).toLocalDate()
+
+fun TripEntity.endAsLocalDateTime(zone: ZoneId): LocalDateTime =
+    java.time.Instant.ofEpochMilli(this.endDateUtcMillis).atZone(zone).toLocalDateTime()

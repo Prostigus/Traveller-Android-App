@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.model.ItineraryItemModel
+import com.divine.traveller.util.millisToLocalDateTimeInZone
 import java.time.LocalDateTime
 import java.time.ZoneId
 
@@ -46,7 +47,7 @@ fun ItineraryDayTimeLine(
                     onClick = {
                         selectedItem = item
                         selectedDateTime =
-                            item.startDateTime.toInstant().atZone(timeZone).toLocalDateTime()
+                            millisToLocalDateTimeInZone(item.startDateTime, timeZone)
                         showSheet = true
                     }
                 )

@@ -24,20 +24,26 @@ object DatabaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideTripDao(database: TravellerDatabase) = database.tripDao()
 
     @Provides
+    @Singleton
     fun provideItineraryItemDao(database: TravellerDatabase) = database.itineraryItemDao()
 
     @Provides
+    @Singleton
     fun provideFlightDao(database: TravellerDatabase) = database.flightDao()
 
     @Provides
+    @Singleton
     fun provideHotelDao(database: TravellerDatabase) = database.hotelDao()
 
     @Provides
+    @Singleton
     fun provideBudgetItemDao(database: TravellerDatabase) = database.budgetItemDao()
 
     @Provides
+    @Singleton
     fun provideDocumentDao(database: TravellerDatabase) = database.documentDao()
 }

@@ -41,6 +41,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,7 +57,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.R
 import com.divine.traveller.data.viewmodel.HomeViewModel
+import com.divine.traveller.data.viewmodel.NewTripViewModel
 import com.divine.traveller.model.TripModel
+import com.divine.traveller.ui.composable.FormFieldWithIcon
 import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
 import com.divine.traveller.util.correctUtcTimeStampForZonedDate
 import kotlinx.coroutines.Dispatchers
@@ -73,15 +75,16 @@ import java.util.Locale
 fun NewTripScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
+    newTripViewModel: NewTripViewModel = hiltViewModel(),
     onTripCreated: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
-    var tripName by remember { mutableStateOf("") }
-    var destination by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var startDate by remember { mutableStateOf<Long?>(null) }
-    var endDate by remember { mutableStateOf<Long?>(null) }
-    var destinationZoneIdString by remember { mutableStateOf("UTC") }
+    val tripName by newTripViewModel.tripName.collectAsState()
+    val destination by newTripViewModel.destination.collectAsState()
+    val description by newTripViewModel.description.collectAsState()
+    val startDate by newTripViewModel.startDate.collectAsState()
+    val endDate by newTripViewModel.endDate.collectAsState()
+    val destinationZoneIdString by newTripViewModel.destinationZoneIdString.collectAsState()
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
@@ -220,7 +223,7 @@ fun NewTripScreen(
             // Trip Name Field
             FormFieldWithIcon(
                 value = tripName,
-                onValueChange = { tripName = it },
+                onValueChange = { newTripViewModel.setTripName(it) },
                 label = "Trip Name",
                 placeholder = "e.g. Alpine Adventure",
                 icon = Icons.Default.Favorite
@@ -238,20 +241,20 @@ fun NewTripScreen(
 
                 PlacesAutocompleteTextField(
                     value = destination,
-                    onValueChange = { destination = it },
+                    onValueChange = { newTripViewModel.setDestination(it) },
                     onPlaceSelected = { selectedPlace ->
-                        destination = selectedPlace.displayName ?: ""
-                        destinationZoneIdString = selectedPlace.location?.let { latLng ->
+                        newTripViewModel.setDestination(selectedPlace.displayName ?: "")
+                        newTripViewModel.setDestinationZoneIdString(selectedPlace.location?.let { latLng ->
                             val id = timeZoneEngine?.query(latLng.latitude, latLng.longitude)
                                 ?.orElse(ZoneId.of("UTC"))?.id
                             id
-                        } ?: "UTC"
+                        } ?: "UTC")
                     },
                     placesClient = viewModel.placesClient,
                     modifier = Modifier.fillMaxWidth(),
                     label = "City, Country",
                     placeholder = "Enter a destination...",
-                    includedType = "locality"
+                    includedType = "locality",
                 )
             }
 
@@ -312,7 +315,7 @@ fun NewTripScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = description,
-                    onValueChange = { description = it },
+                    onValueChange = { newTripViewModel.setDescription(it) },
                     placeholder = {
                         Text(
                             "Add a description for your trip...",
@@ -406,7 +409,7 @@ fun NewTripScreen(
                     onClick = {
                         startDatePickerState.selectedDateMillis?.let { millis ->
 //                            startDate = correctUtcTimeStampForLocalDate(millis, ZoneId.systemDefault())
-                            startDate = millis
+                            newTripViewModel.setStartDate(millis)
                         }
 
                         showStartDatePicker = false
@@ -434,7 +437,7 @@ fun NewTripScreen(
                     onClick = {
                         endDatePickerState.selectedDateMillis?.let { millis ->
 //                            endDate = correctUtcTimeStampForLocalDate(millis, ZoneId.systemDefault(), true)
-                            endDate = millis
+                            newTripViewModel.setEndDate(millis)
                         }
                         showEndDatePicker = false
                     }
@@ -450,59 +453,6 @@ fun NewTripScreen(
         ) {
             DatePicker(state = endDatePickerState)
         }
-    }
-}
-
-@Composable
-private fun FormFieldWithIcon(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    placeholder: String,
-    icon: ImageVector
-) {
-    Column {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            placeholder = {
-                Text(
-                    placeholder,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                focusedLabelColor = MaterialTheme.colorScheme.primary,
-                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        )
     }
 }
 

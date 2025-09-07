@@ -23,7 +23,6 @@ class HomeViewModel @Inject constructor(
     val placesClient: PlacesClient,
     private val timeZoneEngineDeferred: Deferred<TimeZoneEngine>
 ) : ViewModel() {
-
     suspend fun getTimeZoneEngine(): TimeZoneEngine = timeZoneEngineDeferred.await()
 
     // Expose all trips as a StateFlow

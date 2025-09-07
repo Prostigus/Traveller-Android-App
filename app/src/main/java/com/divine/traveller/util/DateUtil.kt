@@ -3,6 +3,7 @@ package com.divine.traveller.util
 import androidx.room.TypeConverter
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.Calendar
@@ -61,6 +62,10 @@ fun zoneIdFromString(timeZoneId: String): ZoneId {
  */
 fun millisToLocalDateInZone(millis: Long, zoneId: ZoneId): LocalDate {
     return Instant.ofEpochMilli(millis).atZone(zoneId).toLocalDate()
+}
+
+fun millisToLocalDateTimeInZone(millis: Long, zoneId: ZoneId): LocalDateTime {
+    return Instant.ofEpochMilli(millis).atZone(zoneId).toLocalDateTime()
 }
 
 fun correctUtcTimeStampForZonedDate(

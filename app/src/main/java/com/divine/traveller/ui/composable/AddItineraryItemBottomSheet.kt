@@ -40,9 +40,9 @@ import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.model.ItineraryItemModel
+import com.divine.traveller.util.millisToLocalDateTimeInZone
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,12 +81,8 @@ fun AddItineraryItemBottomSheet(
         placeId = selectedItem?.placeId ?: ""
         selectedCategory = selectedItem?.category ?: ItineraryCategory.OTHER
         if (selectedItem != null) {
-            val startLocal = selectedItem.startDateTime.toInstant()
-                .atZone(timeZone)
-                .toLocalDateTime()
-            val endLocal = selectedItem.endDateTime.toInstant()
-                .atZone(timeZone)
-                .toLocalDateTime()
+            val startLocal = millisToLocalDateTimeInZone(selectedItem.startDateTime, timeZone)
+            val endLocal = millisToLocalDateTimeInZone(selectedItem.endDateTime, timeZone)
             startTimePickerState.hour = startLocal.hour
             startTimePickerState.minute = startLocal.minute
             endTimePickerState.hour = endLocal.hour
@@ -252,8 +248,8 @@ fun AddItineraryItemBottomSheet(
                             description = description,
                             placeId = placeId,
                             viewType = "view",
-                            startDateTime = Date.from(startInstant),
-                            endDateTime = Date.from(endInstant),
+                            startDateTime = startInstant.toEpochMilli(),
+                            endDateTime = endInstant.toEpochMilli(),
                             category = selectedCategory,
                             status = ItineraryItemStatus.PENDING
                         )

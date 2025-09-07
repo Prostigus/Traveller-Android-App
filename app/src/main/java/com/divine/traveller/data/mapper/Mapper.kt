@@ -60,8 +60,10 @@ fun FlightEntity.toDomainModel() = FlightModel(
     flightNumber,
     departureAirport,
     arrivalAirport,
-    departureTime,
-    arrivalTime,
+    departureDate,
+    departureZoneId,
+    arrivalDate,
+    arrivalZoneId,
     status
 )
 
@@ -113,8 +115,10 @@ fun FlightModel.toEntity() = FlightEntity(
     flightNumber = flightNumber,
     departureAirport = departureAirport,
     arrivalAirport = arrivalAirport,
-    departureTime = departureTime,
-    arrivalTime = arrivalTime,
+    departureDate = departureDate,
+    departureZoneId = departureZoneId,
+    arrivalDate = arrivalDate,
+    arrivalZoneId = arrivalZoneId,
     status = status
 )
 

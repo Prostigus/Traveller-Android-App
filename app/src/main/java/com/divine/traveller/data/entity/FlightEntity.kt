@@ -2,7 +2,6 @@ package com.divine.traveller.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.Date
 
 @Entity(tableName = "flights")
 data class FlightEntity(
@@ -12,8 +11,10 @@ data class FlightEntity(
     val flightNumber: String,
     val departureAirport: String,
     val arrivalAirport: String,
-    val departureTime: Date,
-    val arrivalTime: Date,
+    val departureDate: Long,
+    val departureZoneId: String,
+    val arrivalDate: Long,
+    val arrivalZoneId: String,
     val status: FlightStatus
 )
 
