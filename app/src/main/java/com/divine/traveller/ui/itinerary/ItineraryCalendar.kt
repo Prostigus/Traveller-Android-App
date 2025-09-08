@@ -1,4 +1,4 @@
-package com.divine.traveller.ui.composable
+package com.divine.traveller.ui.itinerary
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,8 +18,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -42,7 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.divine.traveller.data.entity.ItineraryCategory
-import com.divine.traveller.model.ItineraryItemModel
+import com.divine.traveller.data.model.ItineraryItemModel
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -104,7 +104,7 @@ fun ItineraryCalendar(
             ) {
                 IconButton(onClick = { currentMonth = currentMonth.minusMonths(1) }) {
                     Icon(
-                        imageVector = Icons.Default.KeyboardArrowLeft,
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                         contentDescription = "Previous month",
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -125,7 +125,7 @@ fun ItineraryCalendar(
 
                 IconButton(onClick = { currentMonth = currentMonth.plusMonths(1) }) {
                     Icon(
-                        imageVector = Icons.Default.KeyboardArrowRight,
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = "Next month",
                         tint = MaterialTheme.colorScheme.primary
                     )

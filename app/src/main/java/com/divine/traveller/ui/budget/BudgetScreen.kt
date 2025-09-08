@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.navigation.Routes.BUDGET_DETAILS
-import com.divine.traveller.ui.trip.TripScreenNavBar
+import com.divine.traveller.ui.composable.ItineraryNavBar
 
 @Composable
 fun BudgetScreen(
@@ -22,7 +22,7 @@ fun BudgetScreen(
         modifier = modifier,
         topBar = { /* ... */ },
         bottomBar = {
-            TripScreenNavBar(
+            ItineraryNavBar(
                 selectedScreen = BUDGET_DETAILS,
                 onNavigate = onNavigate,
                 tripId = tripId

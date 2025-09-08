@@ -1,4 +1,4 @@
-package com.divine.traveller.ui.trip
+package com.divine.traveller.ui.itinerary
 
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
@@ -24,19 +24,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.navigation.Routes.TRIP_DETAILS
-import com.divine.traveller.ui.composable.ItineraryCalendar
-import com.divine.traveller.ui.composable.ItineraryDayTimeLine
+import com.divine.traveller.ui.composable.ItineraryNavBar
 import com.divine.traveller.util.toZoneId
 import java.time.LocalDate
 import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TripItineraryScreen(
+fun ItineraryScreen(
     modifier: Modifier = Modifier,
     tripId: Long,
     viewModel: ItineraryViewModel = hiltViewModel(),
-    onTripCreated: () -> Unit = {},
     onNavigateBack: () -> Unit = {},
     onNavigate: (String) -> Unit = {}
 ) {
@@ -80,7 +78,7 @@ fun TripItineraryScreen(
         modifier = modifier,
         topBar = { /* ... */ },
         bottomBar = {
-            TripScreenNavBar(
+            ItineraryNavBar(
                 selectedScreen = TRIP_DETAILS,
                 onNavigate = onNavigate,
                 tripId = tripId
@@ -112,7 +110,7 @@ fun TripItineraryScreen(
             selectedDay?.let { day ->
                 val itemsForDay = itemsByDay.find { it.first == day }?.second ?: emptyList()
                 if (itemsByDay.any { it.first == day }) {
-                    ItineraryDayTimeLine(
+                    ItineraryDayTimeline(
                         day = day.atStartOfDay(),
                         itemsForDay = itemsForDay,
                         timeZone = timeZone,

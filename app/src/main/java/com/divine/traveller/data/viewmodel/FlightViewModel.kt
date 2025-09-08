@@ -8,11 +8,11 @@ import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.data.entity.TripEntity
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
+import com.divine.traveller.data.model.FlightModel
+import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.repository.FlightRepository
 import com.divine.traveller.data.repository.ItineraryItemRepository
 import com.divine.traveller.data.repository.TripRepository
-import com.divine.traveller.model.FlightModel
-import com.divine.traveller.model.ItineraryItemModel
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -1,4 +1,4 @@
-package com.divine.traveller.data
+package com.divine.traveller.data.di
 
 import android.content.Context
 import androidx.room.Room

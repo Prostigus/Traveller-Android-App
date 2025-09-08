@@ -1,4 +1,4 @@
-package com.divine.traveller.ui.composable
+package com.divine.traveller.ui.itinerary
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
@@ -38,8 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.entity.ItineraryItemStatus
+import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
-import com.divine.traveller.model.ItineraryItemModel
+import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
 import com.divine.traveller.util.millisToLocalDateTimeInZone
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -47,7 +50,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddItineraryItemBottomSheet(
+fun ItineraryItemBottomSheet(
     visible: Boolean,
     selectedDateTime: LocalDateTime?,
     timeZone: ZoneId,
@@ -157,7 +160,7 @@ fun AddItineraryItemBottomSheet(
                         expanded = categoryDropdownExpanded,
                         onDismissRequest = { categoryDropdownExpanded = false }
                     ) {
-                        ItineraryCategory.values().forEach { category ->
+                        ItineraryCategory.entries.forEach { category ->
                             DropdownMenuItem(
                                 text = {
                                     Text(
@@ -296,15 +299,15 @@ private fun TimePickerDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    androidx.compose.material3.AlertDialog(
+    AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            androidx.compose.material3.TextButton(onClick = onConfirm) {
+            TextButton(onClick = onConfirm) {
                 Text("OK")
             }
         },
         dismissButton = {
-            androidx.compose.material3.TextButton(onClick = onDismiss) {
+            TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         },

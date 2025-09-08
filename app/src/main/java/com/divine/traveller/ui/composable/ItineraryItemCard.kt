@@ -41,8 +41,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.entity.ItineraryItemStatus
-import com.divine.traveller.model.ItineraryItemModel
-import com.divine.traveller.model.startAsDate
+import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.data.model.startAsDate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
@@ -328,7 +328,7 @@ private fun getStatusColor(status: com.divine.traveller.data.entity.ItineraryIte
         ItineraryItemStatus.PENDING -> Color(0xFFFF9800) // Orange
         ItineraryItemStatus.COMPLETED -> Color(0xFF4CAF50) // Green
         ItineraryItemStatus.CANCELLED -> Color(0xFFF44336) // Red
-        ItineraryItemStatus.NONE -> TODO()
+        ItineraryItemStatus.NONE -> Color(0xFF000000)
     }
 }
 

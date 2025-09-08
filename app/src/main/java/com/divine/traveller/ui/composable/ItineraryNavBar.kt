@@ -1,4 +1,4 @@
-package com.divine.traveller.ui.trip
+package com.divine.traveller.ui.composable
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,7 +19,7 @@ private data class NavItem(
 )
 
 @Composable
-fun TripScreenNavBar(
+fun ItineraryNavBar(
     selectedScreen: String,
     onNavigate: (String) -> Unit,
     tripId: Long,

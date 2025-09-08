@@ -24,9 +24,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.divine.traveller.model.TripModel
-import com.divine.traveller.model.dateRange
-import com.divine.traveller.model.duration
+import com.divine.traveller.data.model.TripModel
+import com.divine.traveller.data.model.dateRange
+import com.divine.traveller.data.model.duration
 
 @Composable
 fun TripCard(

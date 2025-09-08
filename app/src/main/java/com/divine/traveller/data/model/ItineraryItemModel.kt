@@ -1,4 +1,4 @@
-package com.divine.traveller.model
+package com.divine.traveller.data.model
 
 import android.os.Parcelable
 import com.divine.traveller.data.entity.ItineraryCategory

@@ -7,14 +7,13 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.navigation.Routes.HOTEL_DETAILS
-import com.divine.traveller.ui.trip.TripScreenNavBar
+import com.divine.traveller.ui.composable.ItineraryNavBar
 
 @Composable
 fun HotelScreen(
     modifier: Modifier = Modifier,
     tripId: Long,
     viewModel: ItineraryViewModel = hiltViewModel(),
-    onTripCreated: () -> Unit = {},
     onNavigateBack: () -> Unit = {},
     onNavigate: (String) -> Unit = {}
 ) {
@@ -22,7 +21,7 @@ fun HotelScreen(
         modifier = modifier,
         topBar = { /* ... */ },
         bottomBar = {
-            TripScreenNavBar(
+            ItineraryNavBar(
                 selectedScreen = HOTEL_DETAILS,
                 onNavigate = onNavigate,
                 tripId = tripId

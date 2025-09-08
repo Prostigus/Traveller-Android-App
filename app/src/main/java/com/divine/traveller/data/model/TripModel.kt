@@ -1,7 +1,10 @@
-package com.divine.traveller.model
+package com.divine.traveller.data.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Parcelize
 data class TripModel(
@@ -22,12 +25,12 @@ data class TripModel(
 
 val TripModel.dateRange: String
     get() {
-        val formatter = java.time.format.DateTimeFormatter.ofPattern("MMM d")
-        val start = java.time.Instant.ofEpochMilli(startDateUtcMillis)
-            .atZone(java.time.ZoneId.of(destinationZoneIdString))
+        val formatter = DateTimeFormatter.ofPattern("MMM d")
+        val start = Instant.ofEpochMilli(startDateUtcMillis)
+            .atZone(ZoneId.of(destinationZoneIdString))
             .toLocalDate()
-        val end = java.time.Instant.ofEpochMilli(endDateUtcMillis)
-            .atZone(java.time.ZoneId.of(destinationZoneIdString))
+        val end = Instant.ofEpochMilli(endDateUtcMillis)
+            .atZone(ZoneId.of(destinationZoneIdString))
             .toLocalDate()
         return "${start.format(formatter)} - ${end.format(formatter)}"
     }

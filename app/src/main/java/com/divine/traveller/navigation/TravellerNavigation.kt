@@ -14,8 +14,8 @@ import com.divine.traveller.ui.flight.FlightScreen
 import com.divine.traveller.ui.flight.NewFlightScreen
 import com.divine.traveller.ui.home.HomeScreen
 import com.divine.traveller.ui.hotel.HotelScreen
+import com.divine.traveller.ui.itinerary.ItineraryScreen
 import com.divine.traveller.ui.trip.NewTripScreen
-import com.divine.traveller.ui.trip.TripItineraryScreen
 
 @Composable
 fun TravellerNavigation(
@@ -63,12 +63,11 @@ fun TravellerNavigation(
             }
         }
 
-        // Reused helper for screens that accept a long tripId and use the same navigate options
         detailScreen(
             navController = navController,
             routeBase = Routes.TRIP_DETAILS
         ) { tripId, onNavigate, onNavigateBack ->
-            TripItineraryScreen(
+            ItineraryScreen(
                 tripId = tripId,
                 onNavigate = onNavigate,
                 onNavigateBack = onNavigateBack

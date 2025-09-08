@@ -1,4 +1,4 @@
-package com.divine.traveller.ui.composable
+package com.divine.traveller.ui.itinerary
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -14,14 +14,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
-import com.divine.traveller.model.ItineraryItemModel
+import com.divine.traveller.ui.composable.ItineraryItemCard
 import com.divine.traveller.util.millisToLocalDateTimeInZone
 import java.time.LocalDateTime
 import java.time.ZoneId
 
 @Composable
-fun ItineraryDayTimeLine(
+fun ItineraryDayTimeline(
     modifier: Modifier = Modifier,
     day: LocalDateTime,
     itemsForDay: List<ItineraryItemModel>,
@@ -67,7 +68,7 @@ fun ItineraryDayTimeLine(
     }
 
 
-    AddItineraryItemBottomSheet(
+    ItineraryItemBottomSheet(
         visible = showSheet,
         selectedDateTime = selectedDateTime,
         timeZone = timeZone,

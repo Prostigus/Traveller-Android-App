@@ -1,4 +1,4 @@
-package com.divine.traveller.data
+package com.divine.traveller.data.di
 
 import android.content.Context
 import androidx.room.Database
@@ -17,6 +17,7 @@ import com.divine.traveller.data.entity.FlightEntity
 import com.divine.traveller.data.entity.HotelEntity
 import com.divine.traveller.data.entity.ItineraryItemEntity
 import com.divine.traveller.data.entity.TripEntity
+import com.divine.traveller.util.DateConverter
 
 @Database(
     entities = [TripEntity::class, ItineraryItemEntity::class, FlightEntity::class, HotelEntity::class, BudgetItemEntity::class, DocumentEntity::class],

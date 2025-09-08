@@ -6,12 +6,12 @@ import com.divine.traveller.data.entity.FlightEntity
 import com.divine.traveller.data.entity.HotelEntity
 import com.divine.traveller.data.entity.ItineraryItemEntity
 import com.divine.traveller.data.entity.TripEntity
-import com.divine.traveller.model.BudgetItemModel
-import com.divine.traveller.model.DocumentModel
-import com.divine.traveller.model.FlightModel
-import com.divine.traveller.model.HotelModel
-import com.divine.traveller.model.ItineraryItemModel
-import com.divine.traveller.model.TripModel
+import com.divine.traveller.data.model.BudgetItemModel
+import com.divine.traveller.data.model.DocumentModel
+import com.divine.traveller.data.model.FlightModel
+import com.divine.traveller.data.model.HotelModel
+import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.data.model.TripModel
 
 fun TripEntity.toDomainModel() = TripModel(
     id = id,

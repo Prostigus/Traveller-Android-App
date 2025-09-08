@@ -56,21 +56,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.R
+import com.divine.traveller.data.model.TripModel
 import com.divine.traveller.data.viewmodel.HomeViewModel
 import com.divine.traveller.data.viewmodel.NewTripViewModel
-import com.divine.traveller.model.TripModel
 import com.divine.traveller.ui.composable.FormFieldWithIcon
 import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
 import com.divine.traveller.util.correctUtcTimeStampForZonedDate
 import com.google.android.libraries.places.api.model.PlaceTypes
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import net.iakovlev.timeshape.TimeZoneEngine
 import java.text.SimpleDateFormat
 import java.time.ZoneId
 import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,14 +89,12 @@ fun NewTripScreen(
     val endDate = state.endDate
     val destinationZoneIdString = state.destinationZoneIdString
 
-    val searchTextFlow = MutableStateFlow("")
-
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
     val dateFormatter = remember {
         SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).apply({
-            timeZone = java.util.TimeZone.getTimeZone("UTC")
+            timeZone = TimeZone.getTimeZone("UTC")
         })
     }
     var timeZoneEngine by remember { mutableStateOf<TimeZoneEngine?>(null) }

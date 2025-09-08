@@ -1,4 +1,4 @@
-package com.divine.traveller.data
+package com.divine.traveller.util
 
 import androidx.room.TypeConverter
 import java.util.Date

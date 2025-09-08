@@ -1,6 +1,8 @@
-package com.divine.traveller.model
+package com.divine.traveller.data.model
 
 import com.divine.traveller.data.entity.FlightStatus
+import java.time.Instant
+import java.time.ZoneId
 import java.util.Date
 
 data class FlightModel(
@@ -20,19 +22,19 @@ data class FlightModel(
 fun FlightModel.departureAsDate(): Date = Date(this.departureDate)
 
 fun FlightModel.departureAsLocalDate(zoneId: String) =
-    java.time.Instant.ofEpochMilli(this.departureDate).atZone(java.time.ZoneId.of(zoneId))
+    Instant.ofEpochMilli(this.departureDate).atZone(ZoneId.of(zoneId))
         .toLocalDate()
 
 fun FlightModel.departureAsLocalDateTime(zoneId: String) =
-    java.time.Instant.ofEpochMilli(this.departureDate).atZone(java.time.ZoneId.of(zoneId))
+    Instant.ofEpochMilli(this.departureDate).atZone(ZoneId.of(zoneId))
         .toLocalDateTime()
 
 fun FlightModel.arrivalAsDate(): Date = Date(this.arrivalDate)
 
 fun FlightModel.arrivalAsLocalDate(zoneId: String) =
-    java.time.Instant.ofEpochMilli(this.arrivalDate).atZone(java.time.ZoneId.of(zoneId))
+    Instant.ofEpochMilli(this.arrivalDate).atZone(ZoneId.of(zoneId))
         .toLocalDate()
 
 fun FlightModel.arrivalAsLocalDateTime(zoneId: String) =
-    java.time.Instant.ofEpochMilli(this.arrivalDate).atZone(java.time.ZoneId.of(zoneId))
+    Instant.ofEpochMilli(this.arrivalDate).atZone(ZoneId.of(zoneId))
         .toLocalDateTime()

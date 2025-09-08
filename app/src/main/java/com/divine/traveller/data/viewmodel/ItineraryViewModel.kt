@@ -7,10 +7,10 @@ import com.divine.traveller.data.entity.endAsLocalDate
 import com.divine.traveller.data.entity.startAsLocalDate
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
+import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.data.model.startAsLocalDate
 import com.divine.traveller.data.repository.ItineraryItemRepository
 import com.divine.traveller.data.repository.TripRepository
-import com.divine.traveller.model.ItineraryItemModel
-import com.divine.traveller.model.startAsLocalDate
 import com.divine.traveller.util.toZoneId
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel

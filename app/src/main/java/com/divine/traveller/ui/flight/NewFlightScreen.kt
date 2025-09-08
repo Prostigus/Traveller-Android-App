@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.data.entity.FlightStatus
+import com.divine.traveller.data.model.FlightModel
 import com.divine.traveller.data.viewmodel.FlightViewModel
-import com.divine.traveller.model.FlightModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,4 +1,4 @@
-package com.divine.traveller.model
+package com.divine.traveller.data.model
 
 import com.divine.traveller.data.entity.HotelStatus
 import java.util.Date
