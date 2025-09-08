@@ -1,8 +1,8 @@
 package com.divine.traveller.data.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.divine.traveller.data.entity.FlightStatus
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.data.entity.TripEntity
@@ -13,6 +13,7 @@ import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.repository.FlightRepository
 import com.divine.traveller.data.repository.ItineraryItemRepository
 import com.divine.traveller.data.repository.TripRepository
+import com.divine.traveller.data.statemodel.NewFlightState
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,12 +61,27 @@ class FlightViewModel @Inject constructor(
         }
     }
 
+    fun createNewFlight(tripId: Long, state: NewFlightState) {
+        //TODO: Do the calculations for the dates based on the timezone
+        val newFlight = FlightModel(
+            id = 0L,
+            tripId = tripId,
+            airline = state.airline,
+            flightNumber = state.flightNumber,
+            departureAirport = state.departurePlace?.displayName!!,
+            arrivalAirport = state.arrivalPlace?.displayName!!,
+            departureDate = state.departureDate!!,
+            departureZoneId = "UTC",
+            arrivalDate = state.arrivalDate!!,
+            arrivalZoneId = "UTC",
+            status = FlightStatus.SCHEDULED
+        )
+        insert(newFlight)
+    }
+
     fun insert(flight: FlightModel, onComplete: (Long) -> Unit = {}) = viewModelScope.launch {
         val id = repository.insert(flight.toEntity())
-        val all = itineraryItemRepository.getAllsuspend()
-        Log.d("DBG", "DB instance repo=${itineraryItemRepository.hashCode()} allItems=$all")
         val itemsForFlight = itineraryItemRepository.getItineraryItemsForFlight(id)
-        Log.d("DBG", "itemsForFlight for $id = $itemsForFlight")
         val newItineraryItem = ItineraryItemModel(
             id = if (itemsForFlight.isNotEmpty()) itemsForFlight[0].id else 0,
             title = "Flight from ${flight.departureAirport} to ${flight.arrivalAirport}",
@@ -83,10 +99,6 @@ class FlightViewModel @Inject constructor(
         }
         onComplete(id)
     }
-
-//    fun update(flight: FlightModel, onComplete: (Long) -> Unit = {}) = viewModelScope.launch {
-//        repository.update(flight.toEntity())
-//    }
 
     fun delete(flight: FlightModel, onComplete: () -> Unit = {}) = viewModelScope.launch {
         repository.delete(flight.toEntity())

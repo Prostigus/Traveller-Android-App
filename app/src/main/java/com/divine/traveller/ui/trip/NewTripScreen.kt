@@ -1,6 +1,5 @@
 package com.divine.traveller.ui.trip
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -57,8 +56,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.R
 import com.divine.traveller.data.model.TripModel
+import com.divine.traveller.data.statemodel.NewTripStateModel
 import com.divine.traveller.data.viewmodel.HomeViewModel
-import com.divine.traveller.data.viewmodel.NewTripViewModel
 import com.divine.traveller.ui.composable.FormFieldWithIcon
 import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
 import com.divine.traveller.util.correctUtcTimeStampForZonedDate
@@ -77,11 +76,11 @@ import java.util.TimeZone
 fun NewTripScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    newTripViewModel: NewTripViewModel = hiltViewModel(),
+    newTripStateModel: NewTripStateModel = hiltViewModel(),
     onTripCreated: () -> Unit = {},
     onNavigateBack: () -> Unit = {}
 ) {
-    val state by newTripViewModel.uiState.collectAsState()
+    val state by newTripStateModel.uiState.collectAsState()
     val tripName = state.tripName
     val destination = state.destination
     val description = state.description
@@ -226,7 +225,7 @@ fun NewTripScreen(
             // Trip Name Field
             FormFieldWithIcon(
                 value = tripName,
-                onValueChange = { newTripViewModel.setTripName(it) },
+                onValueChange = { newTripStateModel.setTripName(it) },
                 label = "Trip Name",
                 placeholder = "e.g. Alpine Adventure",
                 icon = Icons.Default.Favorite
@@ -245,8 +244,8 @@ fun NewTripScreen(
 
                 PlacesAutocompleteTextField(
                     onPlaceSelected = { selectedPlace ->
-                        newTripViewModel.setDestination(selectedPlace.displayName ?: "")
-                        newTripViewModel.setDestinationZoneIdString(selectedPlace.location?.let { latLng ->
+                        newTripStateModel.setDestination(selectedPlace.displayName ?: "")
+                        newTripStateModel.setDestinationZoneIdString(selectedPlace.location?.let { latLng ->
                             val id = timeZoneEngine?.query(latLng.latitude, latLng.longitude)
                                 ?.orElse(ZoneId.of("UTC"))?.id
                             id
@@ -317,7 +316,7 @@ fun NewTripScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = description,
-                    onValueChange = { newTripViewModel.setDescription(it) },
+                    onValueChange = { newTripStateModel.setDescription(it) },
                     placeholder = {
                         Text(
                             "Add a description for your trip...",
@@ -410,8 +409,7 @@ fun NewTripScreen(
                 TextButton(
                     onClick = {
                         startDatePickerState.selectedDateMillis?.let { millis ->
-//                            startDate = correctUtcTimeStampForLocalDate(millis, ZoneId.systemDefault())
-                            newTripViewModel.setStartDate(millis)
+                            newTripStateModel.setStartDate(millis)
                         }
 
                         showStartDatePicker = false
@@ -439,7 +437,7 @@ fun NewTripScreen(
                     onClick = {
                         endDatePickerState.selectedDateMillis?.let { millis ->
 //                            endDate = correctUtcTimeStampForLocalDate(millis, ZoneId.systemDefault(), true)
-                            newTripViewModel.setEndDate(millis)
+                            newTripStateModel.setEndDate(millis)
                         }
                         showEndDatePicker = false
                     }
@@ -464,12 +462,6 @@ private fun DatePickerField(
     dateFormatter: SimpleDateFormat,
     onClick: () -> Unit
 ) {
-    val formattedDate = selectedDate?.let { dateFormatter.format(it) } ?: ""
-    if (selectedDate != null) {
-        Log.d("DatePickerField", "selectedDate millis: $selectedDate")
-        Log.d("DatePickerField", "formattedDate: $formattedDate")
-        Log.d("DatePickerField", "formatter timeZone: ${dateFormatter.timeZone.id}")
-    }
     OutlinedTextField(
         value = selectedDate?.let { dateFormatter.format(it) } ?: "",
         onValueChange = { },

@@ -22,7 +22,8 @@ fun FormFieldWithIcon(
     onValueChange: (String) -> Unit,
     label: String,
     placeholder: String,
-    icon: ImageVector
+    icon: ImageVector? = null,
+    drawableRes: Int? = null
 ) {
     Column {
         Text(
@@ -50,12 +51,21 @@ fun FormFieldWithIcon(
                 )
             },
             leadingIcon = {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
+                when {
+                    icon != null -> Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+
+                    drawableRes != null -> Icon(
+                        painter = androidx.compose.ui.res.painterResource(id = drawableRes),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),

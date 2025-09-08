@@ -1,4 +1,4 @@
-package com.divine.traveller.data.viewmodel
+package com.divine.traveller.data.statemodel
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
@@ -13,7 +13,7 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @HiltViewModel
-class NewTripViewModel @Inject constructor(private val state: SavedStateHandle) : ViewModel() {
+class NewTripStateModel @Inject constructor(private val state: SavedStateHandle) : ViewModel() {
 
     companion object {
         private const val KEY_STATE = "newTripState"

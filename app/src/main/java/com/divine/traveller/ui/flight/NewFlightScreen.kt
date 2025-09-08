@@ -1,7 +1,13 @@
 package com.divine.traveller.ui.flight
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,14 +18,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.divine.traveller.data.entity.FlightStatus
-import com.divine.traveller.data.model.FlightModel
+import com.divine.traveller.data.statemodel.NewFlightStateModel
 import com.divine.traveller.data.viewmodel.FlightViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,8 +36,12 @@ fun NewFlightScreen(
     tripId: Long,
     onFlightCreated: () -> Unit = {},
     onNavigateBack: () -> Unit = {},
+    newFlightStateModel: NewFlightStateModel = hiltViewModel(),
     viewModel: FlightViewModel = hiltViewModel()
 ) {
+
+    val state by newFlightStateModel.uiState.collectAsState()
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -60,37 +71,43 @@ fun NewFlightScreen(
                 actions = {
                     Button(
                         onClick = {
-                            val newFlight = FlightModel(
-                                id = 0L,
-                                tripId = tripId,
-                                airline = "Sample Airline",
-                                flightNumber = "FL123",
-                                departureAirport = "JFK",
-                                arrivalAirport = "LAX",
-                                departureDate = System.currentTimeMillis(),
-                                departureZoneId = "America/New_York",
-                                arrivalDate = System.currentTimeMillis() + 5 * 60 * 60 * 1000, // +5 hours
-                                arrivalZoneId = "America/Los_Angeles",
-                                status = FlightStatus.SCHEDULED
-                            )
-                            viewModel.insert(newFlight)
+                            if (state.departureDate != null && state.arrivalDate != null && state.departurePlace != null && state.arrivalPlace != null) {
+                                viewModel.createNewFlight(tripId, state)
+                            }
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(4.dp)
+                            .height(56.dp),
                     ) {
-                        Text("Add Flight")
-//                        Icon(
-//                            imageVector = Icons.Default.Add,
-//                            contentDescription = "Add new flight",
-//                            tint = MaterialTheme.colorScheme.onSurface,
-//                            modifier = Modifier.size(24.dp)
-//                        )
+                        Text(
+                            "Add Flight",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 },
             )
         }
     ) { paddingValues ->
-        Text("Flight Screen for tripId: $tripId", modifier = modifier)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            NewFlightForm(
+                state = state,
+                onAirlineChange = newFlightStateModel::setAirline,
+                onFlightNumberChange = newFlightStateModel::setFlightNumber,
+                onDeparturePlaceChange = newFlightStateModel::setDeparturePlace,
+                onArrivalPlaceChange = newFlightStateModel::setArrivalPlace,
+                onDepartureDateChange = newFlightStateModel::setDepartureDate,
+                onArrivalDateChange = newFlightStateModel::setArrivalDate,
+                placesClient = viewModel.placesClient
+            )
+        }
     }
 }
+
