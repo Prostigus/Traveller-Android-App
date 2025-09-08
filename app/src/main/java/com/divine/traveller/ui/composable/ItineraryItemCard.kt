@@ -32,13 +32,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.divine.traveller.R
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.data.model.ItineraryItemModel
@@ -120,7 +121,7 @@ fun ItineraryItemCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = getCategoryIcon(item.category),
+                        painter = painterResource(getCategoryIcon(item.category)),
                         contentDescription = item.category.displayName,
                         tint = getCategoryColor(item.category),
                         modifier = Modifier.size(24.dp)
@@ -141,7 +142,8 @@ fun ItineraryItemCard(
                     )
 
                     Text(
-                        text = formatZonedDateTime(item.startDateTime),
+//                        text = formatZonedDateTime(item.startDateTime),
+                        text = item.orderIndex.toString(),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -291,20 +293,14 @@ private fun GoogleMapView(
     )
 }
 
-private fun getCategoryIcon(category: ItineraryCategory): ImageVector {
+private fun getCategoryIcon(category: ItineraryCategory): Int {
     return when (category) {
-//        ItineraryCategory.FLIGHT -> Icons.Default.Flight
-//        ItineraryCategory.HOTEL -> Icons.Default.Hotel
-//        ItineraryCategory.ACTIVITY -> Icons.Default.LocalActivity
-//        ItineraryCategory.TRANSPORT -> Icons.Default.DirectionsBus
-//        ItineraryCategory.MEAL -> Icons.Default.Restaurant
-//        ItineraryCategory.OTHER -> Icons.Default.Event
-        ItineraryCategory.FLIGHT -> Icons.Default.Star
-        ItineraryCategory.HOTEL -> Icons.Default.Star
-        ItineraryCategory.ACTIVITY -> Icons.Default.Star
-        ItineraryCategory.TRANSPORT -> Icons.Default.Star
-        ItineraryCategory.MEAL -> Icons.Default.Star
-        ItineraryCategory.OTHER -> Icons.Default.Star
+        ItineraryCategory.FLIGHT -> R.drawable.outline_flight
+        ItineraryCategory.HOTEL -> R.drawable.outline_hotel
+        ItineraryCategory.ACTIVITY -> R.drawable.baseline_location_pin
+        ItineraryCategory.TRANSPORT -> R.drawable.outline_train
+        ItineraryCategory.MEAL -> R.drawable.outline_food
+        ItineraryCategory.OTHER -> R.drawable.outline_push_pin
     }
 }
 

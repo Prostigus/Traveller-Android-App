@@ -3,13 +3,21 @@ package com.divine.traveller.ui.itinerary
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +30,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.data.model.tripDatesAsLocalDates
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.navigation.Routes.TRIP_DETAILS
 import com.divine.traveller.ui.composable.ItineraryNavBar
@@ -38,9 +48,13 @@ fun ItineraryScreen(
     onNavigateBack: () -> Unit = {},
     onNavigate: (String) -> Unit = {}
 ) {
-    var selectedDay by remember { mutableStateOf<LocalDate?>(null) }
+    val selectedDay = viewModel.selectedDay.collectAsState(null)
     var isCalendarExpanded by remember { mutableStateOf(true) }
     val timelineScrollState = rememberLazyListState()
+
+    var showSheet by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var selectedItem by remember { mutableStateOf<ItineraryItemModel?>(null) }
 
     // Track if user has scrolled down
     val hasScrolledDown by remember {
@@ -63,7 +77,7 @@ fun ItineraryScreen(
         viewModel.loadItems(tripId)
     }
 
-    val itemsByDay by viewModel.itemsByDay.collectAsState()
+    val itemsForDay by viewModel.itemsForDay.collectAsState()
     val trip by viewModel.trip.collectAsState()
     val timeZone = trip?.let { toZoneId(it.destinationZoneIdString) } ?: ZoneId.systemDefault()
 
@@ -83,6 +97,28 @@ fun ItineraryScreen(
                 onNavigate = onNavigate,
                 tripId = tripId
             )
+        },
+        floatingActionButton = {
+            IconButton(
+                onClick = {
+                    showSheet = true
+                    selectedDate = selectedDay.value
+                    selectedItem = null
+                },
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    )
+                    .padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add new itinerary item",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     ) { paddingValues ->
         Column(
@@ -93,11 +129,12 @@ fun ItineraryScreen(
             // Calendar - shown at top, will be compressed when scrolling timeline
 
             ItineraryCalendar(
-                itemsPerDay = itemsByDay,
-                selectedDay = selectedDay,
+                itemsPerDay = itemsForDay,
+                selectedDay = selectedDay.value,
+                tripDates = trip?.tripDatesAsLocalDates ?: emptySet(),
                 isExpanded = isCalendarExpanded,
                 onClickDay = { day ->
-                    selectedDay = day
+                    viewModel.selectDay(day)
                 },
                 onToggleExpanded = {
                     isCalendarExpanded = !isCalendarExpanded
@@ -107,18 +144,13 @@ fun ItineraryScreen(
                     .height(calendarHeight)
             )
 
-            selectedDay?.let { day ->
-                val itemsForDay = itemsByDay.find { it.first == day }?.second ?: emptyList()
-                if (itemsByDay.any { it.first == day }) {
+            selectedDay.let { day ->
+                if (itemsForDay.isNotEmpty()) {
                     ItineraryDayTimeline(
-                        day = day.atStartOfDay().atZone(timeZone),
+                        day = day.value ?: LocalDate.now(),
                         itemsForDay = itemsForDay,
                         viewModel = viewModel,
                         tripId = tripId,
-//                        onAddItem = { hour, minute ->
-//                            selectedDateTime = day.atTime(hour, minute)
-//                            showSheet = true
-//                        },
                         lazyListState = timelineScrollState,
                         modifier = Modifier
                             .fillMaxSize()
@@ -126,6 +158,19 @@ fun ItineraryScreen(
                     )
                 }
             }
+
+            ItineraryItemBottomSheet(
+                visible = showSheet,
+                selectedDate = selectedDate,
+                tripId = tripId,
+                viewModel = viewModel,
+                selectedItem = selectedItem,
+                onDismiss = {
+                    showSheet = false
+                    selectedDate = null
+                    selectedItem = null
+                },
+            )
         }
     }
 }

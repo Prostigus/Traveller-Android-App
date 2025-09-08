@@ -2,6 +2,7 @@ package com.divine.traveller.data.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -42,4 +43,16 @@ val TripModel.duration: Long
             endDateTime,
             java.time.temporal.ChronoUnit.DAYS
         ) + 1 // +1 to include both start and end days
+    }
+
+val TripModel.tripDatesAsLocalDates: Set<LocalDate>
+    get() {
+        val dates = mutableSetOf<LocalDate>()
+        var current = startDateTime.toLocalDate()
+        val end = endDateTime.toLocalDate()
+        while (!current.isAfter(end)) {
+            dates.add(current)
+            current = current.plusDays(1)
+        }
+        return dates
     }

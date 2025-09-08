@@ -5,9 +5,11 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.divine.traveller.data.entity.ItineraryItemEntity
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 @Dao
 interface ItineraryItemDao {
@@ -19,6 +21,23 @@ interface ItineraryItemDao {
 
     @Delete
     suspend fun delete(item: ItineraryItemEntity)
+
+    @Transaction
+    suspend fun deleteAndReorder(item: ItineraryItemEntity) {
+        // remove item first
+        delete(item)
+
+        // if item had no day grouping, nothing to compact here
+        val day = item.dayDate ?: return
+
+        // fetch remaining items for that day and reindex with uniform gaps
+        val remaining = getItemsForDayOrderedSuspend(item.tripId, day)
+        var current = INITIAL_ORDER
+        for (it in remaining) {
+            updateOrderIndex(it.id, current)
+            current += ORDER_GAP
+        }
+    }
 
     @Query("SELECT * FROM itinerary_items WHERE id = :id")
     suspend fun getById(id: Long): ItineraryItemEntity?
@@ -34,4 +53,38 @@ interface ItineraryItemDao {
 
     @Query("SELECT * FROM itinerary_items")
     suspend fun getAllsuspend(): List<ItineraryItemEntity>
+
+    @Query("SELECT * FROM itinerary_items WHERE tripId = :tripId AND dayDate = :dayDate ORDER BY orderIndex ASC")
+    fun getItemsForDayOrdered(tripId: Long, dayDate: LocalDate): Flow<List<ItineraryItemEntity>>
+
+    @Query("SELECT * FROM itinerary_items WHERE tripId = :tripId AND dayDate = :dayDate ORDER BY orderIndex ASC")
+    suspend fun getItemsForDayOrderedSuspend(
+        tripId: Long,
+        dayDate: LocalDate
+    ): List<ItineraryItemEntity>
+
+    @Query("UPDATE itinerary_items SET orderIndex = :orderIndex WHERE id = :id")
+    suspend fun updateOrderIndex(id: Long, orderIndex: Long)
+
+    companion object {
+        private const val ORDER_GAP = 1000L
+        private const val INITIAL_ORDER = ORDER_GAP
+    }
+
+    @Transaction
+    suspend fun reorderItemsForDay(tripId: Long, dayDate: LocalDate, orderedIds: List<Long>) {
+        // fetch current items for the day
+        val currentItems = getItemsForDayOrderedSuspend(tripId, dayDate)
+        val validIds = currentItems.map { it.id }.toSet()
+
+        // keep only ids that exist for that day, in the requested order
+        val filtered = orderedIds.filter { it in validIds }
+
+        // assign uniform gaps (INITIAL_ORDER, INITIAL_ORDER + ORDER_GAP, ...)
+        var current = INITIAL_ORDER
+        for (id in filtered) {
+            updateOrderIndex(id, current)
+            current += ORDER_GAP
+        }
+    }
 }

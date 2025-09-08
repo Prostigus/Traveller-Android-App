@@ -2,6 +2,7 @@ package com.divine.traveller.data.repository
 
 import com.divine.traveller.data.dao.ItineraryItemDao
 import com.divine.traveller.data.entity.ItineraryItemEntity
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,5 +35,8 @@ class ItineraryItemRepository @Inject constructor(
         itineraryItemDao.getItineraryItemsForFlight(flightId)
 
     suspend fun getAllsuspend() = itineraryItemDao.getAllsuspend()
+
+    fun getItemsForDayOrdered(tripId: Long, dayDate: LocalDate) =
+        itineraryItemDao.getItemsForDayOrdered(tripId, dayDate)
 
 }

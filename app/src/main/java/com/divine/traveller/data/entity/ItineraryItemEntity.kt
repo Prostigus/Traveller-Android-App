@@ -3,6 +3,7 @@ package com.divine.traveller.data.entity
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import java.time.LocalDate
 import java.time.ZonedDateTime
 
 @Entity(
@@ -19,6 +20,12 @@ import java.time.ZonedDateTime
             parentColumns = ["id"],
             childColumns = ["flightId"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = TripEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["tripId"],
+            onDelete = ForeignKey.NO_ACTION
         )
     ]
 )
@@ -29,12 +36,14 @@ data class ItineraryItemEntity(
     val description: String? = null,
     val placeId: String?,
     val viewType: String? = null,
-    val startDateTime: ZonedDateTime,
-    val endDateTime: ZonedDateTime,
+    val startDateTime: ZonedDateTime? = null,
+    val endDateTime: ZonedDateTime? = null,
     val category: ItineraryCategory = ItineraryCategory.OTHER,
     val status: ItineraryItemStatus = ItineraryItemStatus.PENDING,
     val hotelId: Long? = null,
-    val flightId: Long? = null
+    val flightId: Long? = null,
+    val dayDate: LocalDate? = null,
+    val orderIndex: Long = 0L
 )
 
 enum class ItineraryItemStatus {

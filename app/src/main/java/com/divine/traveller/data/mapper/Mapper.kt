@@ -81,7 +81,26 @@ fun ItineraryItemEntity.toDomainModel() = ItineraryItemModel(
     category,
     status,
     hotelId,
-    flightId
+    flightId,
+    dayDate,
+    orderIndex
+)
+
+fun ItineraryItemModel.toEntity() = ItineraryItemEntity(
+    id = id,
+    tripId = tripId,
+    title = title,
+    description = description,
+    placeId = placeId,
+    viewType = viewType,
+    startDateTime = startDateTime,
+    endDateTime = endDateTime,
+    category = category,
+    status = status,
+    hotelId = hotelId,
+    flightId = flightId,
+    dayDate = dayDate,
+    orderIndex = orderIndex
 )
 
 fun BudgetItemModel.toEntity() = BudgetItemEntity(
@@ -128,19 +147,4 @@ fun HotelModel.toEntity() = HotelEntity(
     bookingReference = bookingReference,
     placeId = placeId,
     status = status
-)
-
-fun ItineraryItemModel.toEntity() = ItineraryItemEntity(
-    id = id,
-    tripId = tripId,
-    title = title,
-    description = description,
-    placeId = placeId,
-    viewType = viewType,
-    startDateTime = startDateTime,
-    endDateTime = endDateTime,
-    category = category,
-    status = status,
-    hotelId = hotelId,
-    flightId = flightId
 )

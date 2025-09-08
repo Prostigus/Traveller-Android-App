@@ -2,10 +2,10 @@ package com.divine.traveller.data.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.divine.traveller.data.entity.TripEntity
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.data.model.TripModel
 import com.divine.traveller.data.repository.ItineraryItemRepository
 import com.divine.traveller.data.repository.TripRepository
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -30,36 +30,34 @@ class ItineraryViewModel @Inject constructor(
     val placesClient: PlacesClient
 ) : ViewModel() {
 
-    private val _trip = MutableStateFlow<TripEntity?>(null)
-    val trip: StateFlow<TripEntity?> = _trip.asStateFlow()
+    private val _trip = MutableStateFlow<TripModel?>(null)
+    val trip: StateFlow<TripModel?> = _trip.asStateFlow()
+
+    private val _selectedDay = MutableStateFlow<LocalDate?>(null)
+    val selectedDay: StateFlow<LocalDate?> = _selectedDay.asStateFlow()
+
+    fun selectDay(day: LocalDate) {
+        _selectedDay.value = day
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val itemsByDay: StateFlow<List<Pair<LocalDate, List<ItineraryItemModel>>>> = _trip
+    val itemsForDay: StateFlow<List<ItineraryItemModel>> = _trip
         .filterNotNull()
         .flatMapLatest { trip ->
-            repository.getByTripId(trip.id)
-                .map { entities ->
-                    val items = entities.map { it.toDomainModel() }
-
-                    val start = trip.startDateTime.toLocalDate()
-                    val end = trip.endDateTime.toLocalDate()
-                    val allDays = generateSequence(start) { it.plusDays(1) }
-                        .takeWhile { !it.isAfter(end) }
-                        .toList()
-
-                    val itemsGrouped = items.groupBy {
-                        it.startDateTime.toLocalDate()
-                    }
-                    allDays.map { day ->
-                        day to (itemsGrouped[day]?.sortedBy { it.startDateTime } ?: emptyList())
-                    }
-                }
+            _selectedDay.filterNotNull().flatMapLatest { day ->
+                repository.getItemsForDayOrdered(trip.id, day)
+            }
         }
+        .map { entities -> entities.map { it.toDomainModel() } }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun loadItems(tripId: Long) {
         viewModelScope.launch {
-            _trip.value = tripRepository.getTripByIdCached(tripId)
+            val tripEntity = tripRepository.getTripByIdCached(tripId)
+            _trip.value = tripEntity?.toDomainModel()
+            tripEntity?.let {
+                _selectedDay.value = it.startDateTime.toLocalDate()
+            }
         }
     }
 

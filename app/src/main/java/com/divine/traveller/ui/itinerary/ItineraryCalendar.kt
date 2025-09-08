@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -51,23 +50,15 @@ import java.util.Locale
 @Composable
 fun ItineraryCalendar(
     modifier: Modifier = Modifier,
-    itemsPerDay: List<Pair<LocalDate, List<ItineraryItemModel>>>,
+    itemsPerDay: List<ItineraryItemModel>,
     selectedDay: LocalDate? = null,
+    tripDates: Set<LocalDate> = emptySet(),
     isExpanded: Boolean = true,
     onClickDay: (LocalDate) -> Unit = {},
     onToggleExpanded: () -> Unit = {}
 ) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
 
-    // Get items grouped by date for easy lookup
-    val itemsByDate = remember(itemsPerDay) {
-        itemsPerDay.associate { it.first to it.second }
-    }
-
-    // Get all trip dates for highlighting
-    val tripDates = remember(itemsPerDay) {
-        itemsPerDay.map { it.first }.toSet()
-    }
 
     // Auto-select today if it's in the trip dates and no day is selected
     LaunchedEffect(itemsPerDay, selectedDay) {
@@ -154,7 +145,7 @@ fun ItineraryCalendar(
 
                     val monthDays = getMonthDays(currentMonth)
                     items(monthDays) { date ->
-                        val items = itemsByDate[date] ?: emptyList()
+                        val items = itemsPerDay
                         val isCurrentMonth = date?.month == currentMonth.month
                         val isTripDay = date?.let { tripDates.contains(it) } ?: false
 
@@ -196,7 +187,7 @@ fun ItineraryCalendar(
                     // Show all month days in compact format
                     val monthDays = getMonthDays(currentMonth)
                     items(monthDays) { date ->
-                        val items = itemsByDate[date] ?: emptyList()
+                        val items = itemsPerDay
                         val isCurrentMonth = date?.month == currentMonth.month
                         val isTripDay = date?.let { tripDates.contains(it) } ?: false
 
@@ -274,23 +265,23 @@ private fun CalendarDayItem(
             )
 
             // Show category dots for items (only if not compact or has items)
-            if (items.isNotEmpty() && isCurrentMonth && (!compact || items.size <= 2)) {
-                Spacer(modifier = Modifier.height(1.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(1.dp)
-                ) {
-                    val categories =
-                        items.map { it.category }.distinct().take(if (compact) 2 else 3)
-                    categories.forEach { category ->
-                        Box(
-                            modifier = Modifier
-                                .size(dotSize)
-                                .clip(CircleShape)
-                                .background(getCategoryColor(category))
-                        )
-                    }
-                }
-            }
+//            if (items.isNotEmpty() && isCurrentMonth && (!compact || items.size <= 2)) {
+//                Spacer(modifier = Modifier.height(1.dp))
+//                Row(
+//                    horizontalArrangement = Arrangement.spacedBy(1.dp)
+//                ) {
+//                    val categories =
+//                        items.map { it.category }.distinct().take(if (compact) 2 else 3)
+//                    categories.forEach { category ->
+//                        Box(
+//                            modifier = Modifier
+//                                .size(dotSize)
+//                                .clip(CircleShape)
+//                                .background(getCategoryColor(category))
+//                        )
+//                    }
+//                }
+//            }
         }
     }
 }

@@ -2,33 +2,21 @@ package com.divine.traveller.ui.itinerary
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,14 +31,13 @@ import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
-import java.time.ZonedDateTime
-import java.util.Locale
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItineraryItemBottomSheet(
     visible: Boolean,
-    selectedDateTime: ZonedDateTime?,
+    selectedDate: LocalDate?,
     tripId: Long,
     viewModel: ItineraryViewModel,
     selectedItem: ItineraryItemModel? = null,
@@ -62,40 +49,40 @@ fun ItineraryItemBottomSheet(
     var placeId by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf(ItineraryCategory.OTHER) }
     var categoryDropdownExpanded by remember { mutableStateOf(false) }
-    var showStartTimePicker by remember { mutableStateOf(false) }
-    var showEndTimePicker by remember { mutableStateOf(false) }
+//    var showStartTimePicker by remember { mutableStateOf(false) }
+//    var showEndTimePicker by remember { mutableStateOf(false) }
 
-    val startTimePickerState = rememberTimePickerState(
-        initialHour = selectedDateTime?.hour ?: 9,
-        initialMinute = selectedDateTime?.minute ?: 0
-    )
-    val endTimePickerState = rememberTimePickerState(
-        initialHour = selectedDateTime?.plusHours(1)?.hour ?: 10,
-        initialMinute = selectedDateTime?.minute ?: 0
-    )
+//    val startTimePickerState = rememberTimePickerState(
+//        initialHour = selectedDateTime?.hour ?: 9,
+//        initialMinute = selectedDateTime?.minute ?: 0
+//    )
+//    val endTimePickerState = rememberTimePickerState(
+//        initialHour = selectedDateTime?.plusHours(1)?.hour ?: 10,
+//        initialMinute = selectedDateTime?.minute ?: 0
+//    )
 
     LaunchedEffect(selectedItem) {
         title = selectedItem?.title ?: ""
         description = selectedItem?.description ?: ""
         destination = selectedItem?.placeId ?: ""
         placeId = selectedItem?.placeId ?: ""
-        selectedCategory = selectedItem?.category ?: ItineraryCategory.OTHER
-        if (selectedItem != null) {
-            val startLocal = selectedItem.startDateTime
-            val endLocal = selectedItem.endDateTime
-            startTimePickerState.hour = startLocal.hour
-            startTimePickerState.minute = startLocal.minute
-            endTimePickerState.hour = endLocal.hour
-            endTimePickerState.minute = endLocal.minute
-        } else if (selectedDateTime != null) {
-            startTimePickerState.hour = selectedDateTime.hour
-            startTimePickerState.minute = selectedDateTime.minute
-            endTimePickerState.hour = selectedDateTime.plusHours(1).hour
-            endTimePickerState.minute = selectedDateTime.minute
-        }
+        selectedCategory = selectedItem?.category ?: ItineraryCategory.ACTIVITY
+//        if (selectedItem != null) {
+//            val startLocal = selectedItem.startDateTime
+//            val endLocal = selectedItem.endDateTime
+//            startTimePickerState.hour = startLocal.hour
+//            startTimePickerState.minute = startLocal.minute
+//            endTimePickerState.hour = endLocal.hour
+//            endTimePickerState.minute = endLocal.minute
+//        } else if (selectedDateTime != null) {
+//            startTimePickerState.hour = selectedDateTime.hour
+//            startTimePickerState.minute = selectedDateTime.minute
+//            endTimePickerState.hour = selectedDateTime.plusHours(1).hour
+//            endTimePickerState.minute = selectedDateTime.minute
+//        }
     }
 
-    if (visible && selectedDateTime != null) {
+    if (visible && selectedDate != null) {
         ModalBottomSheet(
             onDismissRequest = onDismiss
         ) {
@@ -111,13 +98,13 @@ fun ItineraryItemBottomSheet(
                     fontWeight = FontWeight.Bold
                 )
 
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("Title") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
+//                OutlinedTextField(
+//                    value = title,
+//                    onValueChange = { title = it },
+//                    label = { Text("Title") },
+//                    modifier = Modifier.fillMaxWidth(),
+//                    singleLine = true
+//                )
 
                 PlacesAutocompleteTextField(
                     onPlaceSelected = { selectedPlace ->
@@ -131,109 +118,109 @@ fun ItineraryItemBottomSheet(
                 )
 
                 // Category Selection
-                ExposedDropdownMenuBox(
-                    expanded = categoryDropdownExpanded,
-                    onExpandedChange = { categoryDropdownExpanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = selectedCategory.name.lowercase()
-                            .replaceFirstChar { it.uppercase() },
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Category") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Star, contentDescription = null)
-                        },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryDropdownExpanded)
-                        },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = categoryDropdownExpanded,
-                        onDismissRequest = { categoryDropdownExpanded = false }
-                    ) {
-                        ItineraryCategory.entries.forEach { category ->
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        category.name.lowercase()
-                                            .replaceFirstChar { it.uppercase() })
-                                },
-                                onClick = {
-                                    selectedCategory = category
-                                    categoryDropdownExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
+//                ExposedDropdownMenuBox(
+//                    expanded = categoryDropdownExpanded,
+//                    onExpandedChange = { categoryDropdownExpanded = it }
+//                ) {
+//                    OutlinedTextField(
+//                        value = selectedCategory.name.lowercase()
+//                            .replaceFirstChar { it.uppercase() },
+//                        onValueChange = {},
+//                        readOnly = true,
+//                        label = { Text("Category") },
+//                        leadingIcon = {
+//                            Icon(Icons.Default.Star, contentDescription = null)
+//                        },
+//                        trailingIcon = {
+//                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryDropdownExpanded)
+//                        },
+//                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+//                        modifier = Modifier
+//                            .menuAnchor()
+//                            .fillMaxWidth()
+//                    )
+//
+//                    ExposedDropdownMenu(
+//                        expanded = categoryDropdownExpanded,
+//                        onDismissRequest = { categoryDropdownExpanded = false }
+//                    ) {
+//                        ItineraryCategory.entries.forEach { category ->
+//                            DropdownMenuItem(
+//                                text = {
+//                                    Text(
+//                                        category.name.lowercase()
+//                                            .replaceFirstChar { it.uppercase() })
+//                                },
+//                                onClick = {
+//                                    selectedCategory = category
+//                                    categoryDropdownExpanded = false
+//                                }
+//                            )
+//                        }
+//                    }
+//                }
 
                 // Time Selection
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    FilledTonalButton(
-                        onClick = { showStartTimePicker = true },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.DateRange, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "Start: ${
-                                String.format(
-                                    Locale.getDefault(),
-                                    "%02d:%02d",
-                                    startTimePickerState.hour,
-                                    startTimePickerState.minute
-                                )
-                            }"
-                        )
-                    }
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+//                ) {
+//                    FilledTonalButton(
+//                        onClick = { showStartTimePicker = true },
+//                        modifier = Modifier.weight(1f)
+//                    ) {
+//                        Icon(Icons.Default.DateRange, contentDescription = null)
+//                        Spacer(modifier = Modifier.width(8.dp))
+//                        Text(
+//                            "Start: ${
+//                                String.format(
+//                                    Locale.getDefault(),
+//                                    "%02d:%02d",
+//                                    startTimePickerState.hour,
+//                                    startTimePickerState.minute
+//                                )
+//                            }"
+//                        )
+//                    }
+//
+//                    FilledTonalButton(
+//                        onClick = { showEndTimePicker = true },
+//                        modifier = Modifier.weight(1f)
+//                    ) {
+//                        Icon(Icons.Default.DateRange, contentDescription = null)
+//                        Spacer(modifier = Modifier.width(8.dp))
+//                        Text(
+//                            "End: ${
+//                                String.format(
+//                                    Locale.getDefault(),
+//                                    "%02d:%02d",
+//                                    endTimePickerState.hour,
+//                                    endTimePickerState.minute
+//                                )
+//                            }"
+//                        )
+//                    }
+//                }
 
-                    FilledTonalButton(
-                        onClick = { showEndTimePicker = true },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.DateRange, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "End: ${
-                                String.format(
-                                    Locale.getDefault(),
-                                    "%02d:%02d",
-                                    endTimePickerState.hour,
-                                    endTimePickerState.minute
-                                )
-                            }"
-                        )
-                    }
-                }
-
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 2,
-                    maxLines = 4
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+//                OutlinedTextField(
+//                    value = description,
+//                    onValueChange = { description = it },
+//                    label = { Text("Description") },
+//                    modifier = Modifier.fillMaxWidth(),
+//                    minLines = 2,
+//                    maxLines = 4
+//                )
+//
+//                Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
                     onClick = {
-                        val startDateTime = selectedDateTime
-                            .withHour(startTimePickerState.hour)
-                            .withMinute(startTimePickerState.minute)
-                        val endDateTime = selectedDateTime
-                            .withHour(endTimePickerState.hour)
-                            .withMinute(endTimePickerState.minute)
+//                        val startDateTime = selectedDateTime
+//                            .withHour(startTimePickerState.hour)
+//                            .withMinute(startTimePickerState.minute)
+//                        val endDateTime = selectedDateTime
+//                            .withHour(endTimePickerState.hour)
+//                            .withMinute(endTimePickerState.minute)
 
                         val newItem = ItineraryItemModel(
                             id = selectedItem?.id ?: 0,
@@ -242,10 +229,12 @@ fun ItineraryItemBottomSheet(
                             description = description,
                             placeId = placeId,
                             viewType = "view",
-                            startDateTime = startDateTime,
-                            endDateTime = endDateTime,
-                            category = selectedCategory,
-                            status = ItineraryItemStatus.PENDING
+//                            startDateTime = startDateTime,
+//                            endDateTime = endDateTime,
+                            category = ItineraryCategory.ACTIVITY,
+                            status = ItineraryItemStatus.PENDING,
+                            dayDate = selectedDate,
+                            orderIndex = 0L
                         )
                         viewModel.insert(newItem)
 
@@ -254,7 +243,7 @@ fun ItineraryItemBottomSheet(
                         description = ""
                         destination = ""
                         placeId = ""
-                        selectedCategory = ItineraryCategory.OTHER
+                        selectedCategory = ItineraryCategory.ACTIVITY
                         onDismiss()
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -269,21 +258,21 @@ fun ItineraryItemBottomSheet(
     }
 
     // Time Picker Dialogs
-    if (showStartTimePicker) {
-        TimePickerDialog(
-            timePickerState = startTimePickerState,
-            onDismiss = { showStartTimePicker = false },
-            onConfirm = { showStartTimePicker = false }
-        )
-    }
-
-    if (showEndTimePicker) {
-        TimePickerDialog(
-            timePickerState = endTimePickerState,
-            onDismiss = { showEndTimePicker = false },
-            onConfirm = { showEndTimePicker = false }
-        )
-    }
+//    if (showStartTimePicker) {
+//        TimePickerDialog(
+//            timePickerState = startTimePickerState,
+//            onDismiss = { showStartTimePicker = false },
+//            onConfirm = { showStartTimePicker = false }
+//        )
+//    }
+//
+//    if (showEndTimePicker) {
+//        TimePickerDialog(
+//            timePickerState = endTimePickerState,
+//            onDismiss = { showEndTimePicker = false },
+//            onConfirm = { showEndTimePicker = false }
+//        )
+//    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
