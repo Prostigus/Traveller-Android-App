@@ -18,13 +18,14 @@ import com.divine.traveller.data.entity.HotelEntity
 import com.divine.traveller.data.entity.ItineraryItemEntity
 import com.divine.traveller.data.entity.TripEntity
 import com.divine.traveller.util.DateConverter
+import com.divine.traveller.util.ZonedDateTimeConverter
 
 @Database(
     entities = [TripEntity::class, ItineraryItemEntity::class, FlightEntity::class, HotelEntity::class, BudgetItemEntity::class, DocumentEntity::class],
     version = 1,
     exportSchema = false
 )
-@TypeConverters(DateConverter::class)
+@TypeConverters(DateConverter::class, ZonedDateTimeConverter::class)
 abstract class TravellerDatabase : RoomDatabase() {
 
     abstract fun tripDao(): TripDao

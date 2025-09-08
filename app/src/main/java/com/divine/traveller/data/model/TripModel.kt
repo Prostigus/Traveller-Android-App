@@ -2,8 +2,7 @@ package com.divine.traveller.data.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
-import java.time.Instant
-import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Parcelize
@@ -12,8 +11,8 @@ data class TripModel(
     val name: String,
     val description: String? = null,
     val destination: String,
-    val startDateUtcMillis: Long,
-    val endDateUtcMillis: Long,
+    val startDateTime: ZonedDateTime,
+    val endDateTime: ZonedDateTime,
     val budget: Double? = null,
     val currency: String = "USD",
     val imageUrl: String? = null,
@@ -26,17 +25,21 @@ data class TripModel(
 val TripModel.dateRange: String
     get() {
         val formatter = DateTimeFormatter.ofPattern("MMM d")
-        val start = Instant.ofEpochMilli(startDateUtcMillis)
-            .atZone(ZoneId.of(destinationZoneIdString))
-            .toLocalDate()
-        val end = Instant.ofEpochMilli(endDateUtcMillis)
-            .atZone(ZoneId.of(destinationZoneIdString))
-            .toLocalDate()
+        val start = startDateTime.toLocalDate()
+        val end = endDateTime.toLocalDate()
         return "${start.format(formatter)} - ${end.format(formatter)}"
     }
 
+//val TripModel.duration: Long
+//    get() {
+//        val diffInMillis = endDateTime.toInstant().toEpochMilli() - startDateTime.toInstant().toEpochMilli()
+//        return (diffInMillis / (1000 * 60 * 60 * 24)) + 1 // +1 to include both start and end days
+//    }
+
 val TripModel.duration: Long
     get() {
-        val diffInMillis = endDateUtcMillis - startDateUtcMillis
-        return (diffInMillis / (1000 * 60 * 60 * 24)) + 1 // +1 to include both start and end days
+        return startDateTime.until(
+            endDateTime,
+            java.time.temporal.ChronoUnit.DAYS
+        ) + 1 // +1 to include both start and end days
     }

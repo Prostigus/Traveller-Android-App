@@ -2,7 +2,7 @@ package com.divine.traveller.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.Date
+import java.time.ZonedDateTime
 
 @Entity(tableName = "hotels")
 data class HotelEntity(
@@ -10,8 +10,8 @@ data class HotelEntity(
     val tripId: Long,
     val name: String,
     val address: String,
-    val checkInDate: Date,
-    val checkOutDate: Date,
+    val checkInDate: ZonedDateTime,
+    val checkOutDate: ZonedDateTime,
     val bookingReference: String? = null,
     val placeId: String?,
     val status: HotelStatus = HotelStatus.BOOKED,

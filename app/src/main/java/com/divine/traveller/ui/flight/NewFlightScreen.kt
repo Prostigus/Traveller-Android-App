@@ -71,7 +71,7 @@ fun NewFlightScreen(
                 actions = {
                     Button(
                         onClick = {
-                            if (state.departureDate != null && state.arrivalDate != null && state.departurePlace != null && state.arrivalPlace != null) {
+                            if (state.departureDateTime != null && state.arrivalDateTime != null && state.departurePlace != null && state.arrivalPlace != null) {
                                 viewModel.createNewFlight(tripId, state)
                             }
                         },

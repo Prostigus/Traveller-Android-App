@@ -17,38 +17,35 @@ import androidx.compose.ui.unit.dp
 import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.ui.composable.ItineraryItemCard
-import com.divine.traveller.util.millisToLocalDateTimeInZone
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZonedDateTime
 
 @Composable
 fun ItineraryDayTimeline(
     modifier: Modifier = Modifier,
-    day: LocalDateTime,
+    day: ZonedDateTime,
     itemsForDay: List<ItineraryItemModel>,
     tripId: Long,
-    timeZone: ZoneId,
     viewModel: ItineraryViewModel,
     lazyListState: LazyListState
 ) {
     var showSheet by remember { mutableStateOf(false) }
-    var selectedDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
+    var selectedDateTime by remember { mutableStateOf<ZonedDateTime?>(null) }
     var selectedItem by remember { mutableStateOf<ItineraryItemModel?>(null) }
 
 
     Column(modifier = modifier) {
+        Text("${day.toLocalDate()}", modifier = Modifier.padding(16.dp))
         LazyColumn(
             state = lazyListState
         ) {
             items(itemsForDay) { item ->
                 ItineraryItemCard(
                     item = item,
-                    timeZone = timeZone,
                     placesClient = viewModel.placesClient,
                     onClick = {
                         selectedItem = item
                         selectedDateTime =
-                            millisToLocalDateTimeInZone(item.startDateTime, timeZone)
+                            item.startDateTime
                         showSheet = true
                     }
                 )
@@ -71,7 +68,6 @@ fun ItineraryDayTimeline(
     ItineraryItemBottomSheet(
         visible = showSheet,
         selectedDateTime = selectedDateTime,
-        timeZone = timeZone,
         tripId = tripId,
         viewModel = viewModel,
         selectedItem = selectedItem,

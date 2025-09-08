@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.parcelize.Parcelize
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,8 +26,8 @@ class NewFlightStateModel @Inject constructor(private val state: SavedStateHandl
     fun setFlightNumber(v: String) = update { it.copy(flightNumber = v) }
     fun setDeparturePlace(v: Place) = update { it.copy(departurePlace = v) }
     fun setArrivalPlace(v: Place) = update { it.copy(arrivalPlace = v) }
-    fun setDepartureDate(v: Long?) = update { it.copy(departureDate = v) }
-    fun setArrivalDate(v: Long?) = update { it.copy(arrivalDate = v) }
+    fun setDepartureDate(v: ZonedDateTime?) = update { it.copy(departureDateTime = v) }
+    fun setArrivalDate(v: ZonedDateTime?) = update { it.copy(arrivalDateTime = v) }
     fun setStatus(v: FlightStatus) = update { it.copy(status = v) }
 
     private fun update(transform: (NewFlightState) -> NewFlightState) {
@@ -42,7 +43,7 @@ data class NewFlightState(
     val flightNumber: String = "",
     val departurePlace: Place? = null,
     val arrivalPlace: Place? = null,
-    val departureDate: Long? = null,
-    val arrivalDate: Long? = null,
+    val departureDateTime: ZonedDateTime? = null,
+    val arrivalDateTime: ZonedDateTime? = null,
     val status: FlightStatus = FlightStatus.SCHEDULED
 ) : Parcelable

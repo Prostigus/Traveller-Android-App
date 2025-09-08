@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import java.time.ZonedDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,8 +26,8 @@ class NewTripStateModel @Inject constructor(private val state: SavedStateHandle)
     fun setTripName(v: String) = update { it.copy(tripName = v) }
     fun setDestination(v: String) = update { it.copy(destination = v) }
     fun setDescription(v: String) = update { it.copy(description = v) }
-    fun setStartDate(v: Long?) = update { it.copy(startDate = v) }
-    fun setEndDate(v: Long?) = update { it.copy(endDate = v) }
+    fun setStartDate(v: ZonedDateTime?) = update { it.copy(startDateTime = v) }
+    fun setEndDate(v: ZonedDateTime?) = update { it.copy(endDateTime = v) }
     fun setDestinationZoneIdString(v: String) = update { it.copy(destinationZoneIdString = v) }
 
     private fun update(transform: (NewTripState) -> NewTripState) {
@@ -43,7 +44,7 @@ data class NewTripState(
     val tripName: String = "",
     val destination: String = "",
     val description: String = "",
-    val startDate: Long? = null,
-    val endDate: Long? = null,
-    val destinationZoneIdString: String = "UTC"
+    val startDateTime: ZonedDateTime? = null,
+    val endDateTime: ZonedDateTime? = null,
+    val destinationZoneIdString: String = "UTC",
 ) : Parcelable

@@ -7,24 +7,25 @@ import androidx.room.Query
 import androidx.room.Update
 import com.divine.traveller.data.entity.TripEntity
 import kotlinx.coroutines.flow.Flow
+import java.time.ZonedDateTime
 import java.util.Date
 
 @Dao
 interface TripDao {
-    @Query("SELECT * FROM trips ORDER BY startDateUtcMillis DESC")
+    @Query("SELECT * FROM trips ORDER BY startDateTime DESC")
     fun getAllTrips(): Flow<List<TripEntity>>
 
     @Query("SELECT * FROM trips WHERE id = :tripId")
     suspend fun getTripById(tripId: Long): TripEntity?
 
-    @Query("SELECT * FROM trips WHERE isCompleted = 0 AND startDateUtcMillis > :today ORDER BY startDateUtcMillis ASC")
-    fun getUpcomingTrips(today: Date = Date()): Flow<List<TripEntity>>
+    @Query("SELECT * FROM trips WHERE isCompleted = 0 AND startDateTime > :today ORDER BY startDateTime ASC")
+    fun getUpcomingTrips(today: ZonedDateTime = ZonedDateTime.now()): Flow<List<TripEntity>>
 
-    @Query("SELECT * FROM trips WHERE isCompleted = 1 OR endDateUtcMillis < :today ORDER BY endDateUtcMillis DESC")
-    fun getCompletedTrips(today: Date = Date()): Flow<List<TripEntity>>
+    @Query("SELECT * FROM trips WHERE isCompleted = 1 OR endDateTime < :today ORDER BY endDateTime DESC")
+    fun getCompletedTrips(today: ZonedDateTime = ZonedDateTime.now()): Flow<List<TripEntity>>
 
-    @Query("SELECT * FROM trips WHERE startDateUtcMillis <= :today AND endDateUtcMillis >= :today")
-    fun getCurrentTrips(today: Date = Date()): Flow<List<TripEntity>>
+    @Query("SELECT * FROM trips WHERE startDateTime <= :today AND endDateTime >= :today")
+    fun getCurrentTrips(today: ZonedDateTime = ZonedDateTime.now()): Flow<List<TripEntity>>
 
     @Insert
     suspend fun insertTrip(tripEntity: TripEntity): Long

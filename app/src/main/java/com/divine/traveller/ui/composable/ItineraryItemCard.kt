@@ -42,22 +42,18 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.data.model.ItineraryItemModel
-import com.divine.traveller.data.model.startAsDate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.PlacesClient
-import java.text.SimpleDateFormat
-import java.time.ZoneId
-import java.util.Date
+import java.time.ZonedDateTime
 import java.util.Locale
 
 @Composable
 fun ItineraryItemCard(
     item: ItineraryItemModel,
-    timeZone: ZoneId,
     placesClient: PlacesClient,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
@@ -145,7 +141,7 @@ fun ItineraryItemCard(
                     )
 
                     Text(
-                        text = formatDateTime(item.startAsDate(), timeZone),
+                        text = formatZonedDateTime(item.startDateTime),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -332,10 +328,10 @@ private fun getStatusColor(status: com.divine.traveller.data.entity.ItineraryIte
     }
 }
 
-private fun formatDateTime(date: Date, zoneId: ZoneId): String {
-    val formatter = SimpleDateFormat("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
-    formatter.timeZone = java.util.TimeZone.getTimeZone(zoneId)
-    return formatter.format(date)
+private fun formatZonedDateTime(date: ZonedDateTime): String {
+    val formatter =
+        java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
+    return date.format(formatter)
 }
 
 

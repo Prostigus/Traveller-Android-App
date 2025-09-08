@@ -3,6 +3,7 @@ package com.divine.traveller.data.entity
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import java.time.ZonedDateTime
 
 @Entity(
     tableName = "itinerary_items",
@@ -28,8 +29,8 @@ data class ItineraryItemEntity(
     val description: String? = null,
     val placeId: String?,
     val viewType: String? = null,
-    val startDateTime: Long,
-    val endDateTime: Long,
+    val startDateTime: ZonedDateTime,
+    val endDateTime: ZonedDateTime,
     val category: ItineraryCategory = ItineraryCategory.OTHER,
     val status: ItineraryItemStatus = ItineraryItemStatus.PENDING,
     val hotelId: Long? = null,

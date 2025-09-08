@@ -18,8 +18,8 @@ fun TripEntity.toDomainModel() = TripModel(
     name = name,
     description = description,
     destination = destination,
-    startDateUtcMillis = startDateUtcMillis,
-    endDateUtcMillis = endDateUtcMillis,
+    startDateTime = startDateTime,
+    endDateTime = endDateTime,
     budget = budget,
     currency = currency,
     imageUrl = imageUrl,
@@ -34,8 +34,8 @@ fun TripModel.toEntity() = TripEntity(
     name = name,
     description = description,
     destination = destination,
-    startDateUtcMillis = startDateUtcMillis,
-    endDateUtcMillis = endDateUtcMillis,
+    startDateTime = startDateTime,
+    endDateTime = endDateTime,
     budget = budget,
     currency = currency,
     imageUrl = imageUrl,
@@ -60,10 +60,8 @@ fun FlightEntity.toDomainModel() = FlightModel(
     flightNumber,
     departureAirport,
     arrivalAirport,
-    departureDate,
-    departureZoneId,
-    arrivalDate,
-    arrivalZoneId,
+    departureDateTime,
+    arrivalDateTime,
     status
 )
 
@@ -115,10 +113,8 @@ fun FlightModel.toEntity() = FlightEntity(
     flightNumber = flightNumber,
     departureAirport = departureAirport,
     arrivalAirport = arrivalAirport,
-    departureDate = departureDate,
-    departureZoneId = departureZoneId,
-    arrivalDate = arrivalDate,
-    arrivalZoneId = arrivalZoneId,
+    departureDateTime = departureDateTime,
+    arrivalDateTime = arrivalDateTime,
     status = status
 )
 

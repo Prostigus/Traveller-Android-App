@@ -70,10 +70,8 @@ class FlightViewModel @Inject constructor(
             flightNumber = state.flightNumber,
             departureAirport = state.departurePlace?.displayName!!,
             arrivalAirport = state.arrivalPlace?.displayName!!,
-            departureDate = state.departureDate!!,
-            departureZoneId = "UTC",
-            arrivalDate = state.arrivalDate!!,
-            arrivalZoneId = "UTC",
+            departureDateTime = state.departureDateTime!!,
+            arrivalDateTime = state.arrivalDateTime!!,
             status = FlightStatus.SCHEDULED
         )
         insert(newFlight)
@@ -88,8 +86,8 @@ class FlightViewModel @Inject constructor(
             tripId = flight.tripId,
             category = ItineraryCategory.FLIGHT,
             status = ItineraryItemStatus.NONE,
-            startDateTime = flight.departureDate,
-            endDateTime = flight.arrivalDate,
+            startDateTime = flight.departureDateTime,
+            endDateTime = flight.arrivalDateTime,
             flightId = id
         )
         if (itemsForFlight.isNotEmpty()) {

@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.R
-import com.divine.traveller.data.model.TripModel
 import com.divine.traveller.data.statemodel.NewTripStateModel
 import com.divine.traveller.data.viewmodel.HomeViewModel
 import com.divine.traveller.ui.composable.FormFieldWithIcon
@@ -65,11 +64,11 @@ import com.google.android.libraries.places.api.model.PlaceTypes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.iakovlev.timeshape.TimeZoneEngine
-import java.text.SimpleDateFormat
 import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
-import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,17 +83,15 @@ fun NewTripScreen(
     val tripName = state.tripName
     val destination = state.destination
     val description = state.description
-    val startDate = state.startDate
-    val endDate = state.endDate
+    val startDateTime = state.startDateTime
+    val endDateTime = state.endDateTime
     val destinationZoneIdString = state.destinationZoneIdString
 
     var showStartDatePicker by remember { mutableStateOf(false) }
     var showEndDatePicker by remember { mutableStateOf(false) }
 
     val dateFormatter = remember {
-        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).apply({
-            timeZone = TimeZone.getTimeZone("UTC")
-        })
+        DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.getDefault())
     }
     var timeZoneEngine by remember { mutableStateOf<TimeZoneEngine?>(null) }
 
@@ -116,11 +113,11 @@ fun NewTripScreen(
     }
 
     val startDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = startDate ?: today,
+        initialSelectedDateMillis = startDateTime?.toEpochSecond() ?: today,
     )
 
     val endDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = endDate ?: today
+        initialSelectedDateMillis = endDateTime?.toEpochSecond() ?: today
     )
 
     Scaffold(
@@ -171,31 +168,15 @@ fun NewTripScreen(
                 ) {
                     Button(
                         onClick = {
-                            if (tripName.isNotBlank() && destination.isNotBlank() && startDate != null && endDate != null) {
-                                val tripModel = TripModel(
-                                    name = tripName,
-                                    destination = destination,
-                                    description = description.takeIf { it.isNotBlank() },
-                                    budget = null,
-                                    startDateUtcMillis = correctUtcTimeStampForZonedDate(
-                                        startDate,
-                                        ZoneId.of(destinationZoneIdString)
-                                    ),
-                                    endDateUtcMillis = correctUtcTimeStampForZonedDate(
-                                        endDate,
-                                        ZoneId.of(destinationZoneIdString),
-                                        true
-                                    ),
-                                    destinationZoneIdString = destinationZoneIdString
-                                )
-                                viewModel.addTrip(tripModel)
+                            if (tripName.isNotBlank() && destination.isNotBlank() && startDateTime != null && endDateTime != null) {
+                                viewModel.createNewTrip(state)
                                 onTripCreated()
                             }
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
-                        enabled = tripName.isNotBlank() && destination.isNotBlank() && startDate != null && endDate != null,
+                        enabled = tripName.isNotBlank() && destination.isNotBlank() && startDateTime != null && endDateTime != null,
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF6366F1),
@@ -274,7 +255,7 @@ fun NewTripScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     DatePickerField(
-                        selectedDate = startDate,
+                        selectedDate = startDateTime,
                         dateFormatter = dateFormatter,
                         onClick = { showStartDatePicker = true }
                     )
@@ -290,7 +271,7 @@ fun NewTripScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     DatePickerField(
-                        selectedDate = endDate,
+                        selectedDate = endDateTime,
                         dateFormatter = dateFormatter,
                         onClick = { showEndDatePicker = true }
                     )
@@ -409,7 +390,12 @@ fun NewTripScreen(
                 TextButton(
                     onClick = {
                         startDatePickerState.selectedDateMillis?.let { millis ->
-                            newTripStateModel.setStartDate(millis)
+                            newTripStateModel.setStartDate(
+                                correctUtcTimeStampForZonedDate(
+                                    millis,
+                                    ZoneId.systemDefault()
+                                )
+                            )
                         }
 
                         showStartDatePicker = false
@@ -436,8 +422,12 @@ fun NewTripScreen(
                 TextButton(
                     onClick = {
                         endDatePickerState.selectedDateMillis?.let { millis ->
-//                            endDate = correctUtcTimeStampForLocalDate(millis, ZoneId.systemDefault(), true)
-                            newTripStateModel.setEndDate(millis)
+                            newTripStateModel.setEndDate(
+                                correctUtcTimeStampForZonedDate(
+                                    millis,
+                                    ZoneId.of(destinationZoneIdString)
+                                )
+                            )
                         }
                         showEndDatePicker = false
                     }
@@ -458,8 +448,8 @@ fun NewTripScreen(
 
 @Composable
 private fun DatePickerField(
-    selectedDate: Long?,
-    dateFormatter: SimpleDateFormat,
+    selectedDate: ZonedDateTime?,
+    dateFormatter: DateTimeFormatter,
     onClick: () -> Unit
 ) {
     OutlinedTextField(

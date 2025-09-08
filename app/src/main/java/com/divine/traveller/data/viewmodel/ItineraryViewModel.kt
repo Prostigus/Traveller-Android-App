@@ -3,15 +3,11 @@ package com.divine.traveller.data.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.divine.traveller.data.entity.TripEntity
-import com.divine.traveller.data.entity.endAsLocalDate
-import com.divine.traveller.data.entity.startAsLocalDate
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.ItineraryItemModel
-import com.divine.traveller.data.model.startAsLocalDate
 import com.divine.traveller.data.repository.ItineraryItemRepository
 import com.divine.traveller.data.repository.TripRepository
-import com.divine.traveller.util.toZoneId
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,15 +41,14 @@ class ItineraryViewModel @Inject constructor(
                 .map { entities ->
                     val items = entities.map { it.toDomainModel() }
 
-                    val zoneId = toZoneId(trip.destinationZoneIdString)
-                    val start = trip.startAsLocalDate(zoneId)
-                    val end = trip.endAsLocalDate(zoneId)
+                    val start = trip.startDateTime.toLocalDate()
+                    val end = trip.endDateTime.toLocalDate()
                     val allDays = generateSequence(start) { it.plusDays(1) }
                         .takeWhile { !it.isAfter(end) }
                         .toList()
 
                     val itemsGrouped = items.groupBy {
-                        it.startAsLocalDate(zoneId)
+                        it.startDateTime.toLocalDate()
                     }
                     allDays.map { day ->
                         day to (itemsGrouped[day]?.sortedBy { it.startDateTime } ?: emptyList())

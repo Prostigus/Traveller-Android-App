@@ -111,9 +111,8 @@ fun ItineraryScreen(
                 val itemsForDay = itemsByDay.find { it.first == day }?.second ?: emptyList()
                 if (itemsByDay.any { it.first == day }) {
                     ItineraryDayTimeline(
-                        day = day.atStartOfDay(),
+                        day = day.atStartOfDay().atZone(timeZone),
                         itemsForDay = itemsForDay,
-                        timeZone = timeZone,
                         viewModel = viewModel,
                         tripId = tripId,
 //                        onAddItem = { hour, minute ->

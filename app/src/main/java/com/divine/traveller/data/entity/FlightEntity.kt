@@ -2,6 +2,7 @@ package com.divine.traveller.data.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.ZonedDateTime
 
 @Entity(tableName = "flights")
 data class FlightEntity(
@@ -11,10 +12,8 @@ data class FlightEntity(
     val flightNumber: String,
     val departureAirport: String,
     val arrivalAirport: String,
-    val departureDate: Long,
-    val departureZoneId: String,
-    val arrivalDate: Long,
-    val arrivalZoneId: String,
+    val departureDateTime: ZonedDateTime,
+    val arrivalDateTime: ZonedDateTime,
     val status: FlightStatus
 )
 

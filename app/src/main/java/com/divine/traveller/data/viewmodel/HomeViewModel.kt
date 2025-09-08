@@ -6,6 +6,7 @@ import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.TripModel
 import com.divine.traveller.data.repository.TripRepository
+import com.divine.traveller.data.statemodel.NewTripState
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import net.iakovlev.timeshape.TimeZoneEngine
+import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
@@ -71,5 +73,21 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             repository.markTripCompleted(tripId)
         }
+    }
+
+    fun createNewTrip(state: NewTripState) {
+//        val startDateTime = state.startDateTime?.toLocalDate()?.atStartOfDay(ZoneId.of(state.destinationZoneIdString))
+        val endDateTime = state.endDateTime?.toLocalDate()?.atTime(23, 59, 59, 999_000_000)
+            ?.atZone(ZoneId.of(state.destinationZoneIdString))
+        val tripModel = TripModel(
+            name = state.tripName,
+            destination = state.destination,
+            description = state.description.takeIf { it.isNotBlank() },
+            budget = null,
+            startDateTime = state.startDateTime!!,
+            endDateTime = endDateTime!!,
+            destinationZoneIdString = state.destinationZoneIdString
+        )
+        addTrip(tripModel)
     }
 }

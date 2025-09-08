@@ -43,17 +43,14 @@ import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
-import com.divine.traveller.util.millisToLocalDateTimeInZone
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ItineraryItemBottomSheet(
     visible: Boolean,
-    selectedDateTime: LocalDateTime?,
-    timeZone: ZoneId,
+    selectedDateTime: ZonedDateTime?,
     tripId: Long,
     viewModel: ItineraryViewModel,
     selectedItem: ItineraryItemModel? = null,
@@ -84,8 +81,8 @@ fun ItineraryItemBottomSheet(
         placeId = selectedItem?.placeId ?: ""
         selectedCategory = selectedItem?.category ?: ItineraryCategory.OTHER
         if (selectedItem != null) {
-            val startLocal = millisToLocalDateTimeInZone(selectedItem.startDateTime, timeZone)
-            val endLocal = millisToLocalDateTimeInZone(selectedItem.endDateTime, timeZone)
+            val startLocal = selectedItem.startDateTime
+            val endLocal = selectedItem.endDateTime
             startTimePickerState.hour = startLocal.hour
             startTimePickerState.minute = startLocal.minute
             endTimePickerState.hour = endLocal.hour
@@ -238,9 +235,6 @@ fun ItineraryItemBottomSheet(
                             .withHour(endTimePickerState.hour)
                             .withMinute(endTimePickerState.minute)
 
-                        val startInstant = startDateTime.atZone(timeZone).toInstant()
-                        val endInstant = endDateTime.atZone(timeZone).toInstant()
-
                         val newItem = ItineraryItemModel(
                             id = selectedItem?.id ?: 0,
                             tripId = tripId,
@@ -248,8 +242,8 @@ fun ItineraryItemBottomSheet(
                             description = description,
                             placeId = placeId,
                             viewType = "view",
-                            startDateTime = startInstant.toEpochMilli(),
-                            endDateTime = endInstant.toEpochMilli(),
+                            startDateTime = startDateTime,
+                            endDateTime = endDateTime,
                             category = selectedCategory,
                             status = ItineraryItemStatus.PENDING
                         )

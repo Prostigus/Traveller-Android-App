@@ -18,6 +18,7 @@ import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.net.PlacesClient
+import java.time.ZonedDateTime
 
 @Composable
 fun NewFlightForm(
@@ -27,8 +28,8 @@ fun NewFlightForm(
     onFlightNumberChange: (String) -> Unit,
     onDeparturePlaceChange: (Place) -> Unit,
     onArrivalPlaceChange: (Place) -> Unit,
-    onDepartureDateChange: (Long?) -> Unit,
-    onArrivalDateChange: (Long?) -> Unit,
+    onDepartureDateChange: (ZonedDateTime?) -> Unit,
+    onArrivalDateChange: (ZonedDateTime?) -> Unit,
     placesClient: PlacesClient
 ) {
     Spacer(modifier = Modifier.height(8.dp))
