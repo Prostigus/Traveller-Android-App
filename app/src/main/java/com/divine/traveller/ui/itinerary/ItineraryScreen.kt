@@ -56,7 +56,10 @@ fun ItineraryScreen(
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var selectedItem by remember { mutableStateOf<ItineraryItemModel?>(null) }
 
-    // Track if user has scrolled down
+    val maxCalendarHeight = 420.dp
+    val minCalendarHeight = 300.dp
+
+//     Track if user has scrolled down
     val hasScrolledDown by remember {
         derivedStateOf {
             timelineScrollState.firstVisibleItemIndex > 0 ||
@@ -154,7 +157,6 @@ fun ItineraryScreen(
                         lazyListState = timelineScrollState,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(16.dp)
                     )
                 }
             }

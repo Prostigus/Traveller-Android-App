@@ -92,6 +92,8 @@ dependencies {
     //do not use toml, it causes issues with aar packaging
     implementation("com.github.luben:zstd-jni:1.5.5-11@aar")
 
+    implementation(libs.reorderable)
+
 
 //    testImplementation(libs.junit)
 //    androidTestImplementation(libs.androidx.junit)

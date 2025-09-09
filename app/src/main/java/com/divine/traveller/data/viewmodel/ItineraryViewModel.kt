@@ -1,5 +1,6 @@
 package com.divine.traveller.data.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.divine.traveller.data.mapper.toDomainModel
@@ -90,6 +91,7 @@ class ItineraryViewModel @Inject constructor(
 
     fun reorderItemsForDay(tripId: Long, dayDate: LocalDate, orderedIds: List<Long>) {
         viewModelScope.launch {
+            Log.d("ItineraryViewModel", "Reordering items for $dayDate: $orderedIds")
             repository.reorderItemsForDay(tripId, dayDate, orderedIds)
         }
     }

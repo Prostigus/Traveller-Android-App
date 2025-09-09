@@ -1,5 +1,6 @@
 package com.divine.traveller.data.dao
 
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -94,15 +95,19 @@ interface ItineraryItemDao {
     suspend fun reorderItemsForDay(tripId: Long, dayDate: LocalDate, orderedIds: List<Long>) {
         // fetch current items for the day
         val currentItems = getItemsForDayOrderedSuspend(tripId, dayDate)
+        Log.d("ItineraryItemDao", "Current items for $dayDate: $currentItems")
         val validIds = currentItems.map { it.id }.toSet()
+        Log.d("ItineraryItemDao", "Valid ids for $dayDate: $validIds")
 
         // keep only ids that exist for that day, in the requested order
         val filtered = orderedIds.filter { it in validIds }
+        Log.d("ItineraryItemDao", "Filtered ordered ids for $dayDate: $filtered")
 
         // assign uniform gaps (INITIAL_ORDER, INITIAL_ORDER + ORDER_GAP, ...)
         var current = INITIAL_ORDER
         for (id in filtered) {
             updateOrderIndex(id, current)
+            Log.d("ItineraryItemDao", "Set orderIndex of item $id to $current")
             current += ORDER_GAP
         }
     }
