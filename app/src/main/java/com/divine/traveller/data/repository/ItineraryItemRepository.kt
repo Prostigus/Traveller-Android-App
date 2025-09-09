@@ -34,9 +34,22 @@ class ItineraryItemRepository @Inject constructor(
     suspend fun getItineraryItemsForFlight(flightId: Long) =
         itineraryItemDao.getItineraryItemsForFlight(flightId)
 
-    suspend fun getAllsuspend() = itineraryItemDao.getAllsuspend()
-
     fun getItemsForDayOrdered(tripId: Long, dayDate: LocalDate) =
         itineraryItemDao.getItemsForDayOrdered(tripId, dayDate)
+
+    suspend fun getMaxOrderIndexForDay(tripId: Long, dayDate: LocalDate): Long? {
+        return itineraryItemDao.getMaxOrderIndexForDay(tripId, dayDate)
+    }
+
+    suspend fun insertWithNextOrder(
+        item: ItineraryItemEntity,
+        day: LocalDate? = item.dayDate
+    ): Long {
+        return itineraryItemDao.insertWithNextOrder(item, day)
+    }
+
+    suspend fun reorderItemsForDay(tripId: Long, dayDate: LocalDate, orderedIds: List<Long>) {
+        return itineraryItemDao.reorderItemsForDay(tripId, dayDate, orderedIds)
+    }
 
 }

@@ -93,7 +93,10 @@ class FlightViewModel @Inject constructor(
         if (itemsForFlight.isNotEmpty()) {
             itineraryItemRepository.update(newItineraryItem.toEntity())
         } else {
-            itineraryItemRepository.insert(newItineraryItem.toEntity())
+            itineraryItemRepository.insertWithNextOrder(
+                newItineraryItem.toEntity(),
+                flight.departureDateTime.toLocalDate()
+            )
         }
         onComplete(id)
     }

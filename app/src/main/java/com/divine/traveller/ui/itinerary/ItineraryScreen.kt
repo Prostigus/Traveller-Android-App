@@ -159,7 +159,7 @@ fun ItineraryScreen(
                 }
             }
 
-            ItineraryItemBottomSheet(
+            NewItineraryItemBottomSheet(
                 visible = showSheet,
                 selectedDate = selectedDate,
                 tripId = tripId,

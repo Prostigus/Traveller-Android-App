@@ -61,13 +61,6 @@ class ItineraryViewModel @Inject constructor(
         }
     }
 
-    fun insert(item: ItineraryItemModel, onComplete: (Long) -> Unit = {}) {
-        viewModelScope.launch {
-            val id = repository.insert(item.toEntity())
-            onComplete(id)
-        }
-    }
-
     fun update(item: ItineraryItemModel) {
         viewModelScope.launch {
             repository.update(item.toEntity())
@@ -83,4 +76,22 @@ class ItineraryViewModel @Inject constructor(
     suspend fun getById(id: Long): ItineraryItemModel? {
         return repository.getById(id)?.toDomainModel()
     }
+
+    fun insertWithNextOrder(
+        item: ItineraryItemModel,
+        day: LocalDate? = item.dayDate,
+        onComplete: (Long) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            val id = repository.insertWithNextOrder(item.toEntity(), day)
+            onComplete(id)
+        }
+    }
+
+    fun reorderItemsForDay(tripId: Long, dayDate: LocalDate, orderedIds: List<Long>) {
+        viewModelScope.launch {
+            repository.reorderItemsForDay(tripId, dayDate, orderedIds)
+        }
+    }
+
 }

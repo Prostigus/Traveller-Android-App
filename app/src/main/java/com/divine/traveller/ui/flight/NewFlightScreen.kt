@@ -1,5 +1,6 @@
 package com.divine.traveller.ui.flight
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,7 +72,9 @@ fun NewFlightScreen(
                 actions = {
                     Button(
                         onClick = {
+                            Log.d("NewFlightScreen", "Current State: $state")
                             if (state.departureDateTime != null && state.arrivalDateTime != null && state.departurePlace != null && state.arrivalPlace != null) {
+                                Log.d("NewFlightScreen", "Creating flight with state: $state")
                                 viewModel.createNewFlight(tripId, state)
                             }
                         },

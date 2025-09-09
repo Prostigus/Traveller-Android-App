@@ -25,7 +25,6 @@ fun ItineraryDayTimeline(
     lazyListState: LazyListState
 ) {
 
-
     Column(modifier = modifier) {
         Text("$day", modifier = Modifier.padding(16.dp))
         LazyColumn(
@@ -56,4 +55,10 @@ fun ItineraryDayTimeline(
     }
 
 
+}
+
+private fun categoryPriority(category: ItineraryCategory): Int = when (category) {
+    ItineraryCategory.FLIGHT -> 0
+    ItineraryCategory.HOTEL -> 1
+    else -> 2
 }

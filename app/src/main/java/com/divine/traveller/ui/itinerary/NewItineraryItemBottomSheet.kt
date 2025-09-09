@@ -35,7 +35,7 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ItineraryItemBottomSheet(
+fun NewItineraryItemBottomSheet(
     visible: Boolean,
     selectedDate: LocalDate?,
     tripId: Long,
@@ -108,7 +108,7 @@ fun ItineraryItemBottomSheet(
 
                 PlacesAutocompleteTextField(
                     onPlaceSelected = { selectedPlace ->
-                        destination = selectedPlace.displayName ?: ""
+                        title = selectedPlace.displayName ?: ""
                         placeId = selectedPlace.id ?: ""
                     },
                     placesClient = viewModel.placesClient,
@@ -234,9 +234,8 @@ fun ItineraryItemBottomSheet(
                             category = ItineraryCategory.ACTIVITY,
                             status = ItineraryItemStatus.PENDING,
                             dayDate = selectedDate,
-                            orderIndex = 0L
                         )
-                        viewModel.insert(newItem)
+                        viewModel.insertWithNextOrder(newItem)
 
                         // Reset form
                         title = ""

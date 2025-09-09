@@ -43,7 +43,7 @@ fun NewFlightForm(
     )
 
     FormFieldWithIcon(
-        value = state.airline,
+        value = state.flightNumber,
         onValueChange = { onFlightNumberChange(it) },
         label = "Flight Number",
         placeholder = "e.g.  AC837",
@@ -62,6 +62,8 @@ fun NewFlightForm(
         PlacesAutocompleteTextField(
             onPlaceSelected = { selectedPlace ->
                 onDeparturePlaceChange(selectedPlace)
+//                onDepartureDateChange(ZonedDateTime.now())
+//                onArrivalDateChange(ZonedDateTime.now().plusDays(15))
             },
             placesClient = placesClient,
             modifier = Modifier.fillMaxWidth(),
@@ -82,7 +84,7 @@ fun NewFlightForm(
 
         PlacesAutocompleteTextField(
             onPlaceSelected = { selectedPlace ->
-                onDeparturePlaceChange(selectedPlace)
+                onArrivalPlaceChange(selectedPlace)
             },
             placesClient = placesClient,
             modifier = Modifier.fillMaxWidth(),

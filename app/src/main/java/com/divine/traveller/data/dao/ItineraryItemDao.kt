@@ -66,6 +66,25 @@ interface ItineraryItemDao {
     @Query("UPDATE itinerary_items SET orderIndex = :orderIndex WHERE id = :id")
     suspend fun updateOrderIndex(id: Long, orderIndex: Long)
 
+    @Query("SELECT MAX(orderIndex) FROM itinerary_items WHERE tripId = :tripId AND dayDate = :dayDate")
+    suspend fun getMaxOrderIndexForDay(tripId: Long, dayDate: LocalDate): Long?
+
+    /**
+     * Insert item with the next orderIndex for its trip/day.
+     * If item.dayDate is null, fallback to a plain insert (caller can set orderIndex manually).
+     */
+    @Transaction
+    suspend fun insertWithNextOrder(
+        item: ItineraryItemEntity,
+        day: LocalDate? = item.dayDate
+    ): Long {
+        val day = day ?: return insert(item)
+        val maxOrder = getMaxOrderIndexForDay(item.tripId, day)
+        val nextOrder = if (maxOrder == null) INITIAL_ORDER else maxOrder + ORDER_GAP
+        val itemWithOrder = item.copy(orderIndex = nextOrder)
+        return insert(itemWithOrder)
+    }
+
     companion object {
         private const val ORDER_GAP = 1000L
         private const val INITIAL_ORDER = ORDER_GAP
