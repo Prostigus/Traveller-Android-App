@@ -28,6 +28,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.data.model.ItineraryItemModel
@@ -49,30 +54,55 @@ fun ItineraryScreen(
     onNavigate: (String) -> Unit = {}
 ) {
     val selectedDay = viewModel.selectedDay.collectAsState(null)
-    var isCalendarExpanded by remember { mutableStateOf(true) }
     val timelineScrollState = rememberLazyListState()
 
     var showSheet by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var selectedItem by remember { mutableStateOf<ItineraryItemModel?>(null) }
 
-    val maxCalendarHeight = 420.dp
-    val minCalendarHeight = 300.dp
+    val density = LocalDensity.current
+    val expandedCalendarDp = 420.dp
+    val collapsedCalendarDp = 160.dp // small but accessible header
+    val expandedPx = with(density) { expandedCalendarDp.toPx() }
+    val collapsedPx = with(density) { collapsedCalendarDp.toPx() }
+    val maxOffset = (expandedPx - collapsedPx).coerceAtLeast(0f)
+    var calendarOffset by remember { mutableStateOf(0f) }
 
-//     Track if user has scrolled down
-    val hasScrolledDown by remember {
-        derivedStateOf {
-            timelineScrollState.firstVisibleItemIndex > 0 ||
-                    timelineScrollState.firstVisibleItemScrollOffset > 50
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // available.y is negative when scrolling up (content moves up)
+                if (available.y < 0f && calendarOffset < maxOffset) {
+                    val delta = -available.y
+                    val newOffset = (calendarOffset + delta).coerceAtMost(maxOffset)
+                    val consumed = newOffset - calendarOffset
+                    calendarOffset = newOffset
+                    // consumed is positive -> we consumed upward scroll, so return negative y
+                    return Offset(0f, -consumed)
+                } else if (available.y > 0f && calendarOffset > 0f) {
+                    // scrolling down: expand calendar if there's collapsed offset
+                    val delta = available.y
+                    val newOffset = (calendarOffset - delta).coerceAtLeast(0f)
+                    val consumed = calendarOffset - newOffset
+                    calendarOffset = newOffset
+                    // consumed is positive -> we consumed downward scroll, so return positive y
+                    return Offset(0f, consumed)
+                }
+                return Offset.Zero
+            }
         }
     }
 
-    LaunchedEffect(hasScrolledDown) {
-        if (hasScrolledDown && isCalendarExpanded) {
-            isCalendarExpanded = false
-        } else if (!hasScrolledDown && !isCalendarExpanded) {
-            isCalendarExpanded = true
-        }
+    val calendarHeight by animateDpAsState(
+        targetValue = with(density) {
+            (expandedPx - calendarOffset).coerceIn(collapsedPx, expandedPx).toDp()
+        },
+        animationSpec = tween(durationMillis = 200),
+        label = "calendar_height"
+    )
+
+    val isCalendarExpandedComputed by remember {
+        derivedStateOf { calendarOffset < (maxOffset * 0.95f) } // mostly expanded if little offset
     }
 
     LaunchedEffect(tripId) {
@@ -83,13 +113,6 @@ fun ItineraryScreen(
     val itemsForDay by viewModel.itemsForDay.collectAsState()
     val trip by viewModel.trip.collectAsState()
     val timeZone = trip?.let { toZoneId(it.destinationZoneIdString) } ?: ZoneId.systemDefault()
-
-    // Animate calendar height - shrink to 150dp instead of 80dp
-    val calendarHeight by animateDpAsState(
-        targetValue = if (isCalendarExpanded) 420.dp else 300.dp,
-        animationSpec = tween(durationMillis = 300),
-        label = "calendar_height"
-    )
 
     Scaffold(
         modifier = modifier,
@@ -128,6 +151,7 @@ fun ItineraryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .nestedScroll(nestedScrollConnection)
         ) {
             // Calendar - shown at top, will be compressed when scrolling timeline
 
@@ -135,12 +159,16 @@ fun ItineraryScreen(
                 itemsPerDay = itemsForDay,
                 selectedDay = selectedDay.value,
                 tripDates = trip?.tripDatesAsLocalDates ?: emptySet(),
-                isExpanded = isCalendarExpanded,
+                isExpanded = isCalendarExpandedComputed,
                 onClickDay = { day ->
                     viewModel.selectDay(day)
                 },
                 onToggleExpanded = {
-                    isCalendarExpanded = !isCalendarExpanded
+                    calendarOffset = if (calendarOffset > maxOffset / 2f) {
+                        0f // expand
+                    } else {
+                        maxOffset // collapse
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

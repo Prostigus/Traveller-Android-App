@@ -7,13 +7,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -164,47 +165,29 @@ fun ItineraryCalendar(
                     }
                 }
             } else {
-                // Compact view - show only trip dates in a horizontal row
-// Compact view - show all trip dates with current month structure
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(7),
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                val monthDays = getMonthDays(currentMonth)
+                val tripDaysInMonth = monthDays
+                    .filterNotNull()
+                    .filter { it in tripDates }
+                    .sorted()
+
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Compact day headers
-                    items(listOf("S", "M", "T", "W", "T", "F", "S")) { dayName ->
-                        Text(
-                            text = dayName,
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 10.sp,
-                            modifier = Modifier.padding(vertical = 2.dp),
-                            color = MaterialTheme.colorScheme.primary
+                    items(tripDaysInMonth) { date ->
+                        CalendarDayItem(
+                            date = date,
+                            items = itemsPerDay,
+                            isSelected = date == selectedDay,
+                            isCurrentMonth = date.month == currentMonth.month,
+                            isTripDay = tripDates.contains(date),
+                            isToday = date == LocalDate.now(),
+                            onClick = { onClickDay(date) },
+                            compact = true
                         )
-                    }
-
-                    // Show all month days in compact format
-                    val monthDays = getMonthDays(currentMonth)
-                    items(monthDays) { date ->
-                        val items = itemsPerDay
-                        val isCurrentMonth = date?.month == currentMonth.month
-                        val isTripDay = date?.let { tripDates.contains(it) } ?: false
-
-                        if (date != null) {
-                            CalendarDayItem(
-                                date = date,
-                                items = items,
-                                isSelected = date == selectedDay,
-                                isCurrentMonth = isCurrentMonth,
-                                isTripDay = isTripDay,
-                                isToday = date == LocalDate.now(),
-                                onClick = { onClickDay(date) },
-                                compact = true
-                            )
-                        } else {
-                            Spacer(modifier = Modifier.size(24.dp))
-                        }
                     }
                 }
             }
