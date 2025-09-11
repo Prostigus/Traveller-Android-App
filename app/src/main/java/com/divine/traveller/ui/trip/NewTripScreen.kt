@@ -101,7 +101,6 @@ fun NewTripScreen(
         }
     }
 
-
     // Get current date at start of day to prevent past date selection
     val today = remember {
         Calendar.getInstance().apply {

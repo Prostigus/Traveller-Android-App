@@ -33,12 +33,10 @@ class FlightViewModel @Inject constructor(
     private val repository: FlightRepository,
     private val tripRepository: TripRepository,
     private val itineraryItemRepository: ItineraryItemRepository,
-    val placesClient: PlacesClient
+    val placesClient: PlacesClient,
 ) : ViewModel() {
-
     private val _trip = MutableStateFlow<TripEntity?>(null)
     val trip: StateFlow<TripEntity?> = _trip.asStateFlow()
-
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val flightItems: StateFlow<List<FlightModel>> = _trip
@@ -62,7 +60,6 @@ class FlightViewModel @Inject constructor(
     }
 
     fun createNewFlight(tripId: Long, state: NewFlightState) {
-        //TODO: Do the calculations for the dates based on the timezone
         val newFlight = FlightModel(
             id = 0L,
             tripId = tripId,
@@ -88,6 +85,7 @@ class FlightViewModel @Inject constructor(
             status = ItineraryItemStatus.NONE,
             startDateTime = flight.departureDateTime,
             endDateTime = flight.arrivalDateTime,
+            dayDate = flight.departureDateTime.toLocalDate(),
             flightId = id
         )
         if (itemsForFlight.isNotEmpty()) {

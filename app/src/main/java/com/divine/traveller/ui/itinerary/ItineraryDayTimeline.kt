@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
+import com.divine.traveller.ui.composable.ItineraryFlightItemCard
 import com.divine.traveller.ui.composable.ItineraryItemCard
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -39,6 +40,8 @@ fun ItineraryDayTimeline(
         }
     }
 
+    val previousDragging = remember { mutableStateOf(false) }
+
     Column(modifier = modifier) {
         // use the reorderable state's internal list state so drag events are handled
         LazyColumn(
@@ -48,17 +51,23 @@ fun ItineraryDayTimeline(
                 ReorderableItem(reorderableLazyListState, key = item.id) { isDragging ->
 
                     LaunchedEffect(isDragging) {
-                        if (!isDragging) {
+                        if (previousDragging.value && !isDragging) {
                             viewModel.reorderItemsForDay(tripId, day, list.map { it.id })
                         }
+                        previousDragging.value = isDragging
                     }
 
                     if (item.category == ItineraryCategory.FLIGHT) {
-
+                        ItineraryFlightItemCard(
+                            item = item,
+                            modifier = Modifier
+                                .longPressDraggableHandle()
+                        )
                     }
                     if (item.category == ItineraryCategory.HOTEL) {
 
-                    } else {
+                    }
+                    if (item.category != ItineraryCategory.FLIGHT && item.category != ItineraryCategory.HOTEL) {
                         ItineraryItemCard(
                             item = item,
                             placesClient = viewModel.placesClient,
@@ -70,10 +79,4 @@ fun ItineraryDayTimeline(
             }
         }
     }
-}
-
-private fun categoryPriority(category: ItineraryCategory): Int = when (category) {
-    ItineraryCategory.FLIGHT -> 0
-    ItineraryCategory.HOTEL -> 1
-    else -> 2
 }

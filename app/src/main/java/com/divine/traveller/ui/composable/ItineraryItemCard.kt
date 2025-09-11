@@ -39,10 +39,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.divine.traveller.R
-import com.divine.traveller.data.entity.ItineraryCategory
-import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.util.getCategoryColor
+import com.divine.traveller.util.getCategoryIcon
+import com.divine.traveller.util.getStatusColor
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
@@ -291,37 +291,6 @@ private fun GoogleMapView(
             }
         }
     )
-}
-
-private fun getCategoryIcon(category: ItineraryCategory): Int {
-    return when (category) {
-        ItineraryCategory.FLIGHT -> R.drawable.outline_flight
-        ItineraryCategory.HOTEL -> R.drawable.outline_hotel
-        ItineraryCategory.ACTIVITY -> R.drawable.baseline_location_pin
-        ItineraryCategory.TRANSPORT -> R.drawable.outline_train
-        ItineraryCategory.MEAL -> R.drawable.outline_food
-        ItineraryCategory.OTHER -> R.drawable.outline_push_pin
-    }
-}
-
-private fun getCategoryColor(category: ItineraryCategory): Color {
-    return when (category) {
-        ItineraryCategory.FLIGHT -> Color(0xFF2196F3) // Blue
-        ItineraryCategory.HOTEL -> Color(0xFF4CAF50) // Green
-        ItineraryCategory.ACTIVITY -> Color(0xFFFF9800) // Orange
-        ItineraryCategory.TRANSPORT -> Color(0xFF9C27B0) // Purple
-        ItineraryCategory.MEAL -> Color(0xFFFF5722) // Red
-        ItineraryCategory.OTHER -> Color(0xFF607D8B) // Blue Grey
-    }
-}
-
-private fun getStatusColor(status: com.divine.traveller.data.entity.ItineraryItemStatus): Color {
-    return when (status) {
-        ItineraryItemStatus.PENDING -> Color(0xFFFF9800) // Orange
-        ItineraryItemStatus.COMPLETED -> Color(0xFF4CAF50) // Green
-        ItineraryItemStatus.CANCELLED -> Color(0xFFF44336) // Red
-        ItineraryItemStatus.NONE -> Color(0xFF000000)
-    }
 }
 
 private fun formatZonedDateTime(date: ZonedDateTime): String {

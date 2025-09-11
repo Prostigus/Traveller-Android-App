@@ -1,10 +1,12 @@
 package com.divine.traveller.ui.flight
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,12 +16,16 @@ import androidx.compose.ui.unit.dp
 import com.divine.traveller.R
 import com.divine.traveller.data.statemodel.NewFlightState
 import com.divine.traveller.ui.composable.FormFieldWithIcon
+import com.divine.traveller.ui.composable.LabeledDateTimeBox
 import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.net.PlacesClient
+import java.time.LocalDateTime
 import java.time.ZonedDateTime
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun NewFlightForm(
     state: NewFlightState,
@@ -30,7 +36,9 @@ fun NewFlightForm(
     onArrivalPlaceChange: (Place) -> Unit,
     onDepartureDateChange: (ZonedDateTime?) -> Unit,
     onArrivalDateChange: (ZonedDateTime?) -> Unit,
-    placesClient: PlacesClient
+    onDepartureLocalDateChange: (LocalDateTime) -> Unit,
+    onArrivalLocalDateChange: (LocalDateTime) -> Unit,
+    placesClient: PlacesClient,
 ) {
     Spacer(modifier = Modifier.height(8.dp))
 
@@ -62,12 +70,10 @@ fun NewFlightForm(
         PlacesAutocompleteTextField(
             onPlaceSelected = { selectedPlace ->
                 onDeparturePlaceChange(selectedPlace)
-//                onDepartureDateChange(ZonedDateTime.now())
-//                onArrivalDateChange(ZonedDateTime.now().plusDays(15))
             },
             placesClient = placesClient,
             modifier = Modifier.fillMaxWidth(),
-            label = "DepartureAirport",
+            label = "Departure Airport",
             placeholder = "YVR",
             includedTypes = listOf(PlaceTypes.AIRPORT),
         )
@@ -88,9 +94,29 @@ fun NewFlightForm(
             },
             placesClient = placesClient,
             modifier = Modifier.fillMaxWidth(),
-            label = "ArrivalAirport",
-            placeholder = "TYO",
+            label = "Arrival Airport",
+            placeholder = "HND",
             includedTypes = listOf(PlaceTypes.AIRPORT),
+        )
+    }
+
+    Row(modifier = Modifier.fillMaxWidth()) {
+        LabeledDateTimeBox(
+            label = "Departure Date/Time",
+            onDateTimeChanged = { localDateTime ->
+                onDepartureLocalDateChange(localDateTime)
+            },
+            dateTime = state.departureLocalDate,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        LabeledDateTimeBox(
+            label = "Arrival Date/Time",
+            onDateTimeChanged = { localDateTime ->
+                onArrivalLocalDateChange(localDateTime)
+            },
+            dateTime = state.arrivalLocalDate,
+            modifier = Modifier.weight(1f)
         )
     }
 

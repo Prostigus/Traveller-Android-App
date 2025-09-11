@@ -27,7 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,11 +61,11 @@ fun ItineraryCalendar(
 
 
     // Auto-select today if it's in the trip dates and no day is selected
-    LaunchedEffect(itemsPerDay, selectedDay) {
-        if (selectedDay == null && tripDates.contains(LocalDate.now())) {
-            onClickDay(LocalDate.now())
-        }
-    }
+//    LaunchedEffect(itemsPerDay, selectedDay) {
+//        if (selectedDay == null && tripDates.contains(LocalDate.now())) {
+//            onClickDay(LocalDate.now())
+//        }
+//    }
 
     Card(
         modifier = modifier

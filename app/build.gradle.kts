@@ -94,6 +94,10 @@ dependencies {
 
     implementation(libs.reorderable)
 
+    implementation(libs.datetime.wheel.picker)
+
+    implementation(libs.kotlinx.datetime)
+
 
 //    testImplementation(libs.junit)
 //    androidTestImplementation(libs.androidx.junit)

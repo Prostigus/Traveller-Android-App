@@ -1,8 +1,13 @@
 package com.divine.traveller.data.viewmodel
 
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.divine.traveller.data.di.DataStoreModule.SELECTED_DAY_KEY
+import com.divine.traveller.data.di.DataStoreModule.SELECTED_DAY_TIMESTAMP_KEY
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.ItineraryItemModel
@@ -17,6 +22,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -28,7 +34,8 @@ import javax.inject.Inject
 class ItineraryViewModel @Inject constructor(
     private val repository: ItineraryItemRepository,
     private val tripRepository: TripRepository,
-    val placesClient: PlacesClient
+    val placesClient: PlacesClient,
+    private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
 
     private val _trip = MutableStateFlow<TripModel?>(null)
@@ -36,10 +43,6 @@ class ItineraryViewModel @Inject constructor(
 
     private val _selectedDay = MutableStateFlow<LocalDate?>(null)
     val selectedDay: StateFlow<LocalDate?> = _selectedDay.asStateFlow()
-
-    fun selectDay(day: LocalDate) {
-        _selectedDay.value = day
-    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val itemsForDay: StateFlow<List<ItineraryItemModel>> = _trip
@@ -52,12 +55,32 @@ class ItineraryViewModel @Inject constructor(
         .map { entities -> entities.map { it.toDomainModel() } }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    fun selectDay(day: LocalDate) {
+        _selectedDay.value = day
+        viewModelScope.launch {
+            dataStore.edit { prefs ->
+                prefs[SELECTED_DAY_KEY] = day.toString()
+                prefs[SELECTED_DAY_TIMESTAMP_KEY] = System.currentTimeMillis().toString()
+            }
+        }
+    }
+
     fun loadItems(tripId: Long) {
         viewModelScope.launch {
             val tripEntity = tripRepository.getTripByIdCached(tripId)
             _trip.value = tripEntity?.toDomainModel()
             tripEntity?.let {
-                _selectedDay.value = it.startDateTime.toLocalDate()
+                val tripStartDate = it.startDateTime.toLocalDate()
+                val today = LocalDate.now()
+                val prefs = dataStore.data.first()
+                val savedDay = prefs[SELECTED_DAY_KEY]?.let { LocalDate.parse(it) }
+                val savedTimestamp = prefs[SELECTED_DAY_TIMESTAMP_KEY]?.toLongOrNull()
+                val now = System.currentTimeMillis()
+                val isValid =
+                    savedTimestamp != null && (now - savedTimestamp) < 1 * 60 * 60 * 1000 // 24 hours
+                val defaultDay = maxOf(tripStartDate, today)
+                _selectedDay.value =
+                    if (savedDay != null && savedDay >= tripStartDate && isValid) savedDay else defaultDay
             }
         }
     }

@@ -3,15 +3,21 @@ package com.divine.traveller.ui.flight
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -43,6 +49,7 @@ fun NewFlightScreen(
 
     val state by newFlightStateModel.uiState.collectAsState()
 
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -57,9 +64,21 @@ fun NewFlightScreen(
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
                             fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            fontWeight = FontWeight.Bold
                         )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    },
+                    actions = {
+                        // Empty space to center title
+                        Spacer(modifier = Modifier.width(48.dp))
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface
@@ -73,9 +92,10 @@ fun NewFlightScreen(
                     Button(
                         onClick = {
                             Log.d("NewFlightScreen", "Current State: $state")
-                            if (state.departureDateTime != null && state.arrivalDateTime != null && state.departurePlace != null && state.arrivalPlace != null) {
+                            if (state.departureLocalDate != null && state.arrivalLocalDate != null && state.departurePlace != null && state.arrivalPlace != null) {
                                 Log.d("NewFlightScreen", "Creating flight with state: $state")
                                 viewModel.createNewFlight(tripId, state)
+                                onFlightCreated()
                             }
                         },
                         modifier = Modifier
@@ -108,7 +128,9 @@ fun NewFlightScreen(
                 onArrivalPlaceChange = newFlightStateModel::setArrivalPlace,
                 onDepartureDateChange = newFlightStateModel::setDepartureDate,
                 onArrivalDateChange = newFlightStateModel::setArrivalDate,
-                placesClient = viewModel.placesClient
+                onDepartureLocalDateChange = newFlightStateModel::setDepartureLocalDate,
+                onArrivalLocalDateChange = newFlightStateModel::setArrivalLocalDate,
+                placesClient = viewModel.placesClient,
             )
         }
     }

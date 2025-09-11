@@ -1,13 +1,17 @@
 package com.divine.traveller.util
 
 import androidx.room.TypeConverter
+import com.google.android.gms.maps.model.LatLng
+import net.iakovlev.timeshape.TimeZoneEngine
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.TimeZone
 
 /**
@@ -88,3 +92,19 @@ fun fromZoneId(zoneId: ZoneId): String = zoneId.id
 
 @TypeConverter
 fun toZoneId(zoneIdString: String): ZoneId = ZoneId.of(zoneIdString)
+
+fun getZonedDateTimeForLocalDateTimeUsingTimeZoneEngine(
+    localDateTime: LocalDateTime,
+    latLng: LatLng,
+    timeZoneEngine: TimeZoneEngine
+): ZonedDateTime {
+    val zoneId = timeZoneEngine.query(latLng.latitude, latLng.longitude)
+        ?.orElse(ZoneId.of("UTC"))
+
+    return localDateTime.atZone(zoneId)
+}
+
+fun formatZonedDateTime(zdt: ZonedDateTime): String {
+    val formatter = DateTimeFormatter.ofPattern("HH:mm, MMM d, yyyy", Locale.ENGLISH)
+    return zdt.format(formatter)
+}
