@@ -50,6 +50,12 @@ fun PlacesAutocompleteTextField(
     label: String = "Search location",
     placeholder: String = "Enter a location...",
     includedTypes: List<String> = emptyList(),
+    placeFields: List<Place.Field> = listOf(
+        Place.Field.ID,
+        Place.Field.DISPLAY_NAME,
+        Place.Field.FORMATTED_ADDRESS,
+        Place.Field.LOCATION,
+    ),
 ) {
     var value by remember { mutableStateOf("") }
     var predictions by remember { mutableStateOf<List<AutocompletePrediction>>(emptyList()) }
@@ -109,7 +115,6 @@ fun PlacesAutocompleteTextField(
                     value = it
                     isSelecting = false // User is typing, not selecting
                 },
-                // ... rest of the OutlinedTextField code remains the same
                 label = {
                     Text(
                         text = label,
@@ -216,12 +221,7 @@ fun PlacesAutocompleteTextField(
                                         isSelecting = true // Set flag before updating value
                                         val place = placesClient.awaitFetchPlace(
                                             prediction.placeId,
-                                            placeFields = listOf(
-                                                Place.Field.ID,
-                                                Place.Field.DISPLAY_NAME,
-                                                Place.Field.FORMATTED_ADDRESS,
-                                                Place.Field.LOCATION
-                                            )
+                                            placeFields = placeFields
                                         ).place
 
                                         value = place.displayName ?: prediction.getPrimaryText(null)

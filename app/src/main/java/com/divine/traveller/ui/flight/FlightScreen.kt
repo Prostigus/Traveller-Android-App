@@ -1,6 +1,8 @@
 package com.divine.traveller.ui.flight
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,6 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -24,8 +29,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.divine.traveller.data.viewmodel.ItineraryViewModel
+import com.divine.traveller.data.viewmodel.FlightViewModel
 import com.divine.traveller.navigation.Routes.FLIGHT_DETAILS
+import com.divine.traveller.ui.composable.FlightItemCard
 import com.divine.traveller.ui.composable.ItineraryNavBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,11 +39,17 @@ import com.divine.traveller.ui.composable.ItineraryNavBar
 fun FlightScreen(
     modifier: Modifier = Modifier,
     tripId: Long,
-    viewModel: ItineraryViewModel = hiltViewModel(),
+    viewModel: FlightViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
     onNavigate: (String) -> Unit = {},
     onNavigateToNewFlight: () -> Unit = {}
 ) {
+    val flightItems by viewModel.flightItems.collectAsState()
+
+    LaunchedEffect(tripId) {
+        viewModel.loadItems(tripId)
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -88,6 +100,33 @@ fun FlightScreen(
             )
         }
     ) { paddingValues ->
-        Text("Flight Screen for tripId: $tripId", modifier = modifier)
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            if (flightItems.isEmpty()) {
+                Text(
+                    text = "No flights added yet. Tap the + button to add a new flight.",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textAlign = TextAlign.Center,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            } else {
+                flightItems.forEach { flight ->
+                    FlightItemCard(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        flight = flight,
+                        onClick =
+                            {
+                                //TODO: Navigate to flight details screen}
+                            }
+                    )
+                }
+            }
+        }
     }
 }

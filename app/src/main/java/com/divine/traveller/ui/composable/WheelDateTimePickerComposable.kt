@@ -95,7 +95,7 @@ fun WheelDateTimePickerComposable(
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.align(Alignment.BottomEnd)
         ) {
-            Text("OK")
+            Text("Confirm")
         }
     }
 }

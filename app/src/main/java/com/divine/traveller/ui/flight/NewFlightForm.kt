@@ -1,5 +1,6 @@
 package com.divine.traveller.ui.flight
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +23,6 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.net.PlacesClient
 import java.time.LocalDateTime
-import java.time.ZonedDateTime
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -34,8 +34,6 @@ fun NewFlightForm(
     onFlightNumberChange: (String) -> Unit,
     onDeparturePlaceChange: (Place) -> Unit,
     onArrivalPlaceChange: (Place) -> Unit,
-    onDepartureDateChange: (ZonedDateTime?) -> Unit,
-    onArrivalDateChange: (ZonedDateTime?) -> Unit,
     onDepartureLocalDateChange: (LocalDateTime) -> Unit,
     onArrivalLocalDateChange: (LocalDateTime) -> Unit,
     placesClient: PlacesClient,
@@ -70,6 +68,7 @@ fun NewFlightForm(
         PlacesAutocompleteTextField(
             onPlaceSelected = { selectedPlace ->
                 onDeparturePlaceChange(selectedPlace)
+                Log.d("NewFlightForm", "Selected departure place: $selectedPlace")
             },
             placesClient = placesClient,
             modifier = Modifier.fillMaxWidth(),

@@ -11,7 +11,9 @@ data class FlightEntity(
     val airline: String,
     val flightNumber: String,
     val departureAirport: String,
+    val departureIATA: String,
     val arrivalAirport: String,
+    val arrivalIATA: String,
     val departureDateTime: ZonedDateTime,
     val arrivalDateTime: ZonedDateTime,
     val status: FlightStatus

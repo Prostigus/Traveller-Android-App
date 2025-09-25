@@ -1,6 +1,5 @@
 package com.divine.traveller.ui.itinerary
 
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -106,7 +105,6 @@ fun ItineraryScreen(
     }
 
     LaunchedEffect(tripId) {
-        Log.d("TripItineraryScreen", "Rendering itinerary for tripId: $tripId")
         viewModel.loadItems(tripId)
     }
 

@@ -127,7 +127,7 @@ fun FlightItemCard(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Flight from ${flight.departureAirport} to ${flight.arrivalAirport}",
+                        text = if (flight.departureIATA.isNotEmpty() && flight.arrivalIATA.isNotEmpty()) "Flight from ${flight.departureIATA} to ${flight.arrivalIATA}" else "Flight from ${flight.departureAirport} to ${flight.arrivalAirport}",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurface,

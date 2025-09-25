@@ -1,5 +1,6 @@
 package com.divine.traveller.data.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.divine.traveller.data.entity.FlightStatus
@@ -14,6 +15,7 @@ import com.divine.traveller.data.repository.FlightRepository
 import com.divine.traveller.data.repository.ItineraryItemRepository
 import com.divine.traveller.data.repository.TripRepository
 import com.divine.traveller.data.statemodel.NewFlightState
+import com.divine.traveller.util.AirportCodeParser
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,9 +36,12 @@ class FlightViewModel @Inject constructor(
     private val tripRepository: TripRepository,
     private val itineraryItemRepository: ItineraryItemRepository,
     val placesClient: PlacesClient,
+    private val airportCodeParser: AirportCodeParser,
 ) : ViewModel() {
     private val _trip = MutableStateFlow<TripEntity?>(null)
     val trip: StateFlow<TripEntity?> = _trip.asStateFlow()
+
+    var newFlightCreated = MutableStateFlow(false)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val flightItems: StateFlow<List<FlightModel>> = _trip
@@ -60,18 +65,46 @@ class FlightViewModel @Inject constructor(
     }
 
     fun createNewFlight(tripId: Long, state: NewFlightState) {
-        val newFlight = FlightModel(
-            id = 0L,
-            tripId = tripId,
-            airline = state.airline,
-            flightNumber = state.flightNumber,
-            departureAirport = state.departurePlace?.displayName!!,
-            arrivalAirport = state.arrivalPlace?.displayName!!,
-            departureDateTime = state.departureDateTime!!,
-            arrivalDateTime = state.arrivalDateTime!!,
-            status = FlightStatus.SCHEDULED
-        )
-        insert(newFlight)
+        viewModelScope.launch {
+            try {
+                Log.d("FlightViewModel", "Creating new flight with state: $state")
+                val departureIATA = state.departurePlace?.location?.let { latLng ->
+                    airportCodeParser.getIataCode(
+                        lat = latLng.latitude,
+                        lng = latLng.longitude
+                    ) ?: ""
+                } ?: ""
+                val arrivalIATA = state.arrivalPlace?.location?.let { latLng ->
+                    airportCodeParser.getIataCode(
+                        lat = latLng.latitude,
+                        lng = latLng.longitude
+                    ) ?: ""
+                } ?: ""
+
+                Log.d(
+                    "FlightViewModel",
+                    "Fetched IATA codes - Departure: $departureIATA, Arrival: $arrivalIATA"
+                )
+                val newFlight = FlightModel(
+                    id = 0L,
+                    tripId = tripId,
+                    airline = state.airline,
+                    flightNumber = state.flightNumber,
+                    departureAirport = state.departurePlace?.displayName!!,
+                    arrivalAirport = state.arrivalPlace?.displayName!!,
+                    departureDateTime = state.departureDateTime!!,
+                    arrivalDateTime = state.arrivalDateTime!!,
+                    departureIATA = departureIATA,
+                    arrivalIATA = arrivalIATA,
+                    status = FlightStatus.SCHEDULED
+                )
+                insert(newFlight) {
+                    newFlightCreated.value = true
+                }
+            } catch (e: Exception) {
+                Log.e("FlightViewModel", "Error in createNewFlight", e)
+            }
+        }
     }
 
     fun insert(flight: FlightModel, onComplete: (Long) -> Unit = {}) = viewModelScope.launch {
@@ -79,7 +112,7 @@ class FlightViewModel @Inject constructor(
         val itemsForFlight = itineraryItemRepository.getItineraryItemsForFlight(id)
         val newItineraryItem = ItineraryItemModel(
             id = if (itemsForFlight.isNotEmpty()) itemsForFlight[0].id else 0,
-            title = "Flight from ${flight.departureAirport} to ${flight.arrivalAirport}",
+            title = if (flight.departureIATA.isNotEmpty() && flight.arrivalIATA.isNotEmpty()) "Flight from ${flight.departureIATA} to ${flight.arrivalIATA}" else "Flight from ${flight.departureAirport} to ${flight.arrivalAirport}",
             tripId = flight.tripId,
             category = ItineraryCategory.FLIGHT,
             status = ItineraryItemStatus.NONE,

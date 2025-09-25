@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -49,6 +50,14 @@ fun NewFlightScreen(
 
     val state by newFlightStateModel.uiState.collectAsState()
 
+    val newFlightCreated by viewModel.newFlightCreated.collectAsState()
+
+    LaunchedEffect(newFlightCreated) {
+        if (newFlightCreated) {
+            onFlightCreated()
+            viewModel.newFlightCreated.value = false // reset for next time
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -94,8 +103,8 @@ fun NewFlightScreen(
                             Log.d("NewFlightScreen", "Current State: $state")
                             if (state.departureLocalDate != null && state.arrivalLocalDate != null && state.departurePlace != null && state.arrivalPlace != null) {
                                 Log.d("NewFlightScreen", "Creating flight with state: $state")
+
                                 viewModel.createNewFlight(tripId, state)
-                                onFlightCreated()
                             }
                         },
                         modifier = Modifier
@@ -126,8 +135,6 @@ fun NewFlightScreen(
                 onFlightNumberChange = newFlightStateModel::setFlightNumber,
                 onDeparturePlaceChange = newFlightStateModel::setDeparturePlace,
                 onArrivalPlaceChange = newFlightStateModel::setArrivalPlace,
-                onDepartureDateChange = newFlightStateModel::setDepartureDate,
-                onArrivalDateChange = newFlightStateModel::setArrivalDate,
                 onDepartureLocalDateChange = newFlightStateModel::setDepartureLocalDate,
                 onArrivalLocalDateChange = newFlightStateModel::setArrivalLocalDate,
                 placesClient = viewModel.placesClient,
