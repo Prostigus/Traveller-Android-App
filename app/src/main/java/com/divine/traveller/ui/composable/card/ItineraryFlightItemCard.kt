@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,14 +40,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.divine.traveller.R
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.model.FlightModel
 import com.divine.traveller.data.viewmodel.FlightViewModel
+import com.divine.traveller.ui.composable.DetailsActionRow
 import com.divine.traveller.ui.composable.InfoRow
 import com.divine.traveller.util.formatZonedDateTime
 import com.divine.traveller.util.getCategoryColor
 import com.divine.traveller.util.getCategoryIcon
 import kotlinx.coroutines.launch
+import java.time.ZonedDateTime
 
 @Composable
 fun ItineraryFlightItemCard(
@@ -55,20 +61,6 @@ fun ItineraryFlightItemCard(
 ) {
 
     var showDetails by remember { mutableStateOf(false) }
-
-//    if (nullableFlight.value == null) {
-//        Box(
-//            modifier = modifier
-//                .fillMaxWidth()
-//                .padding(16.dp),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            CircularProgressIndicator()
-//        }
-//        return
-//    }
-
-//    val flight = nullableFlight.value!!
     FlightItemCard(
         modifier = modifier,
         flight = flight,
@@ -183,7 +175,6 @@ fun FlightDetailsModalSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
 
     // show when composed
     LaunchedEffect(Unit) {
@@ -195,77 +186,193 @@ fun FlightDetailsModalSheet(
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface
     ) {
-//            Column(
-//                modifier = Modifier
-//                    .padding(16.dp)
-//                    .verticalScroll(scrollState)
-//            ) {
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.Top
-//                ) {
-//                    Column(modifier = Modifier.weight(1f)) {
-//                        Text(
-//                            text = if (flight.departureIATA.isNotEmpty() && flight.arrivalIATA.isNotEmpty())
-//                                "Flight from ${flight.departureIATA} to ${flight.arrivalIATA}"
-//                            else
-//                                "Flight from ${flight.departureAirport} to ${flight.arrivalAirport}",
-//                            fontWeight = FontWeight.Bold,
-//                            fontSize = 18.sp,
-//                            color = MaterialTheme.colorScheme.onSurface
-//                        )
-//                        Text(
-//                            text = "${flight.airline} • ${flight.flightNumber}",
-//                            fontSize = 14.sp,
-//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-//                        )
-//                    }
-//
-//                    Row {
-//                        IconButton(onClick = {
-//                            scope.launch {
-//                                sheetState.hide()
-//                                onEdit()
-//                            }
-//                        }) {
-//                            Icon(
-//                                imageVector = Icons.Filled.Edit,
-//                                contentDescription = "Edit",
-//                                tint = MaterialTheme.colorScheme.primary
-//                            )
-//                        }
-//                        IconButton(onClick = onAttach) {
-//                            Icon(
-//                                painter = painterResource(R.drawable.outline_attach_file),
-//                                contentDescription = "Attach",
-//                                tint = MaterialTheme.colorScheme.primary
-//                            )
-//                        }
-//                        IconButton(onClick = onBudget) {
-//                            Icon(
-//                                painter = painterResource(R.drawable.outline_attach_money),
-//                                contentDescription = "Budget",
-//                                tint = MaterialTheme.colorScheme.primary
-//                            )
-//                        }
-//                    }
-//                }
-//
-//                Column(
-//                    modifier = Modifier
-//                        .padding(top = 12.dp)
-//                        .fillMaxWidth(),
-//                    verticalArrangement = Arrangement.spacedBy(8.dp)
-//                ) {
-//                    InfoRow("Airline", flight.airline)
-//                    InfoRow("Flight Number", flight.flightNumber)
-//                    InfoRow("Departure", formatZonedDateTime(flight.departureDateTime))
-//                    InfoRow("Arrival", formatZonedDateTime(flight.arrivalDateTime))
-//                    InfoRow("Departure Airport", flight.departureAirport)
-//                    InfoRow("Arrival Airport", flight.arrivalAirport)
-//                }
-//            }
+        Column(
+            modifier = Modifier
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Flight to ${flight.arrivalAirport?.municipality}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
+                Text(
+                    text = "${flight.airline} • ${flight.flightNumber}",
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
+            FlightRouteRow(
+                departureIata = flight.departureAirport?.iataCode,
+                departureMunicipality = flight.departureAirport?.municipality,
+                arrivalIata = flight.arrivalAirport?.iataCode,
+                arrivalMunicipality = flight.arrivalAirport?.municipality
+            )
+            DateRow(flight.departureDateTime, flight.arrivalDateTime)
+            DetailsActionRow(
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+                onEdit = onEdit,
+                onAttach = onAttach,
+                onBudget = onBudget
+            )
+        }
+    }
+}
+
+@Composable
+private fun FlightRouteRow(
+    modifier: Modifier = Modifier,
+    departureIata: String?,
+    departureMunicipality: String?,
+    arrivalIata: String?,
+    arrivalMunicipality: String?
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Left (departure) column - weight to push center into middle
+        AirportColumn(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp),
+            iata = departureIata,
+            municipality = departureMunicipality,
+            alignment = Alignment.Start
+        )
+
+        // Center cell: don't take weight so it stays exactly centered between the two weighted columns
+        Box(
+            modifier = Modifier.wrapContentWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(2.dp)
+                        .width(24.dp)
+                        .clip(RoundedCornerShape(1.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Icon(
+                    painter = painterResource(R.drawable.outline_flight),
+                    contentDescription = "to",
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                    modifier = Modifier.size(28.dp)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .height(2.dp)
+                        .width(24.dp)
+                        .clip(RoundedCornerShape(1.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                )
+            }
+        }
+
+
+        AirportColumn(
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp),
+            iata = arrivalIata,
+            municipality = arrivalMunicipality,
+            alignment = Alignment.End
+        )
+    }
+}
+
+@Composable
+private fun AirportColumn(
+    modifier: Modifier = Modifier,
+    iata: String?,
+    municipality: String?,
+    alignment: Alignment.Horizontal
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = when (alignment) {
+            Alignment.Start -> Alignment.Start
+            Alignment.End -> Alignment.End
+            else -> Alignment.CenterHorizontally
+        }
+    ) {
+        iata?.let {
+            Text(
+                text = it,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        municipality?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DateRow(
+    departureDateTime: ZonedDateTime,
+    arrivalDateTime: ZonedDateTime
+) {
+    val dateFormatter =
+        java.time.format.DateTimeFormatter.ofPattern("MMM d", java.util.Locale.getDefault())
+    val timeFormatter =
+        java.time.format.DateTimeFormatter.ofPattern("hh:mm a", java.util.Locale.getDefault())
+
+    val items = listOf(
+        "Date" to departureDateTime.format(dateFormatter),
+        "Departure" to departureDateTime.format(timeFormatter),
+        "Arrival" to arrivalDateTime.format(timeFormatter)
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items.forEach { (label, value) ->
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = label,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = value,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
     }
 }

@@ -36,7 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.data.viewmodel.FlightViewModel
 import com.divine.traveller.navigation.Routes.FLIGHT_DETAILS
 import com.divine.traveller.ui.composable.ItineraryNavBar
-import com.divine.traveller.ui.composable.card.FlightItemCard
+import com.divine.traveller.ui.composable.card.ItineraryFlightItemCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,7 +128,7 @@ fun FlightScreen(
                 }
             } else {
                 items(flightItems) { flight ->
-                    FlightItemCard(
+                    ItineraryFlightItemCard(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         flight = flight,
                         onClick = {
