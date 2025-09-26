@@ -10,6 +10,7 @@ data class PlaceEntity(
     val address: String? = null,
     val latitude: Double? = 0.0,
     val longitude: Double? = 0.0,
-    val iconUrl: String? = null,
+    val googleMapsUri: String? = null,
+    val primaryType: String? = null,
     val updatedAt: Long = System.currentTimeMillis()
 )

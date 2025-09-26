@@ -4,13 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.divine.traveller.data.entity.FlightStatus
-import com.divine.traveller.data.entity.ItineraryCategory
-import com.divine.traveller.data.entity.ItineraryItemStatus
 import com.divine.traveller.data.entity.TripEntity
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.FlightModel
-import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.repository.AirportRepository
 import com.divine.traveller.data.repository.FlightRepository
 import com.divine.traveller.data.repository.ItineraryItemRepository
@@ -97,7 +94,7 @@ class FlightViewModel @Inject constructor(
                     arrivalDateTime = state.arrivalDateTime!!,
                     status = FlightStatus.SCHEDULED
                 )
-                insert(newFlight) {
+                repository.insertFlightWithItinerary(newFlight) {
                     _newFlightCreation.value = NewFlightCreationState.Success
                 }
             } catch (e: Exception) {
@@ -111,39 +108,6 @@ class FlightViewModel @Inject constructor(
         _newFlightCreation.value = NewFlightCreationState.Idle
     }
 
-    fun insert(flight: FlightModel, onComplete: (Long) -> Unit = {}) = viewModelScope.launch {
-        val id = repository.insert(flight.toEntity())
-        val itemsForFlight = itineraryItemRepository.getItineraryItemsForFlight(id)
-
-        val depIata = flight.departureAirport?.iataCode.orEmpty()
-        val arrIata = flight.arrivalAirport?.iataCode.orEmpty()
-        val depDisplay = depIata.ifEmpty { flight.departureAirport?.name ?: "Unknown" }
-        val arrDisplay = arrIata.ifEmpty { flight.arrivalAirport?.name ?: "Unknown" }
-
-        val existingItineraryId = itemsForFlight.firstOrNull()?.itineraryItem?.id ?: 0L
-
-        val newItineraryItem = ItineraryItemModel(
-            id = existingItineraryId,
-            title = "Flight from $depDisplay to $arrDisplay",
-            tripId = flight.tripId,
-            category = ItineraryCategory.FLIGHT,
-            status = ItineraryItemStatus.NONE,
-            startDateTime = flight.departureDateTime,
-            endDateTime = flight.arrivalDateTime,
-            dayDate = flight.departureDateTime.toLocalDate(),
-            flight = flight.copy(id = id),
-        )
-        if (itemsForFlight.isNotEmpty()) {
-            itineraryItemRepository.update(newItineraryItem.toEntity())
-        } else {
-            itineraryItemRepository.insertWithNextOrder(
-                newItineraryItem.toEntity(),
-                flight.departureDateTime.toLocalDate()
-            )
-        }
-        onComplete(id)
-    }
-
     fun delete(flight: FlightModel, onComplete: () -> Unit = {}) = viewModelScope.launch {
         repository.delete(flight.toEntity())
     }
@@ -151,10 +115,6 @@ class FlightViewModel @Inject constructor(
     suspend fun getById(id: Long): FlightModel? {
         return repository.getById(id)?.toDomainModel()
     }
-
-//    fun getPlaceFromAirportCode(airportCode: String): String? {
-//        return placesClient.
-//    }
 }
 
 sealed class NewFlightCreationState {

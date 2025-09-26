@@ -17,13 +17,15 @@ import javax.inject.Singleton
 @Singleton
 class PlaceRepository @Inject constructor(
     private val placeDao: PlaceDao,
-    private val remoteApi: PlacesClient
+    private val placesClient: PlacesClient
 ) {
     private val placeFields = listOf(
         Place.Field.ID,
         Place.Field.DISPLAY_NAME,
         Place.Field.FORMATTED_ADDRESS,
         Place.Field.LOCATION,
+        Place.Field.GOOGLE_MAPS_URI,
+        Place.Field.PRIMARY_TYPE
     )
 
     suspend fun getPlace(id: String): Place {
@@ -35,7 +37,7 @@ class PlaceRepository @Inject constructor(
 
         val response = try {
             withContext(Dispatchers.IO) {
-                Tasks.await(remoteApi.fetchPlace(request))
+                Tasks.await(placesClient.fetchPlace(request))
             }
         } catch (e: Exception) {
             // network / places error -> return null
@@ -51,6 +53,8 @@ class PlaceRepository @Inject constructor(
             address = place.formattedAddress,
             latitude = place.location?.latitude,
             longitude = place.location?.longitude,
+            googleMapsUri = place.googleMapsUri?.toString(),
+            primaryType = place.primaryType,
             updatedAt = System.currentTimeMillis()
         )
 
@@ -66,6 +70,8 @@ class PlaceRepository @Inject constructor(
             address = place.formattedAddress,
             latitude = place.location?.latitude,
             longitude = place.location?.longitude,
+            googleMapsUri = place.googleMapsUri?.toString(),
+            primaryType = place.primaryType,
             updatedAt = System.currentTimeMillis()
         )
         placeDao.upsert(entity)
@@ -90,7 +96,7 @@ class PlaceRepository @Inject constructor(
     ): List<AutocompletePrediction>? =
         withContext(Dispatchers.IO) {
             try {
-                val response = remoteApi.awaitFindAutocompletePredictions {
+                val response = placesClient.awaitFindAutocompletePredictions {
                     query = value
                     if (includedTypes.isNotEmpty()) {
                         typesFilter = includedTypes
