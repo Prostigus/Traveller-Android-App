@@ -2,6 +2,7 @@ package com.divine.traveller.data.repository
 
 import com.divine.traveller.data.dao.ItineraryItemDao
 import com.divine.traveller.data.entity.ItineraryItemEntity
+import com.divine.traveller.data.entity.ItineraryItemWithRelations
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,7 +24,7 @@ class ItineraryItemRepository @Inject constructor(
         itineraryItemDao.delete(item)
     }
 
-    suspend fun getById(id: Long): ItineraryItemEntity? {
+    suspend fun getById(id: Long): ItineraryItemWithRelations? {
         return itineraryItemDao.getById(id)
     }
 

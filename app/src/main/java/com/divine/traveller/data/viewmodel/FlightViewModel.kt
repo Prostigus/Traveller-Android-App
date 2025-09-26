@@ -11,11 +11,11 @@ import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.FlightModel
 import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.data.repository.AirportRepository
 import com.divine.traveller.data.repository.FlightRepository
 import com.divine.traveller.data.repository.ItineraryItemRepository
 import com.divine.traveller.data.repository.TripRepository
 import com.divine.traveller.data.statemodel.NewFlightState
-import com.divine.traveller.util.AirportCodeParser
 import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,12 +36,14 @@ class FlightViewModel @Inject constructor(
     private val tripRepository: TripRepository,
     private val itineraryItemRepository: ItineraryItemRepository,
     val placesClient: PlacesClient,
-    private val airportCodeParser: AirportCodeParser,
+    private val airportRepository: AirportRepository,
 ) : ViewModel() {
     private val _trip = MutableStateFlow<TripEntity?>(null)
     val trip: StateFlow<TripEntity?> = _trip.asStateFlow()
 
-    var newFlightCreated = MutableStateFlow(false)
+    private val _newFlightCreation =
+        MutableStateFlow<NewFlightCreationState>(NewFlightCreationState.Idle)
+    val newFlightCreation: StateFlow<NewFlightCreationState> = _newFlightCreation.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val flightItems: StateFlow<List<FlightModel>> = _trip
@@ -67,59 +69,67 @@ class FlightViewModel @Inject constructor(
     fun createNewFlight(tripId: Long, state: NewFlightState) {
         viewModelScope.launch {
             try {
+                _newFlightCreation.value = NewFlightCreationState.Creating
                 Log.d("FlightViewModel", "Creating new flight with state: $state")
-                val departureIATA = state.departurePlace?.location?.let { latLng ->
-                    airportCodeParser.getIataCode(
+                val departureModel = state.departurePlace?.location?.let { latLng ->
+                    airportRepository.findNearestIata(
                         lat = latLng.latitude,
                         lng = latLng.longitude
-                    ) ?: ""
-                } ?: ""
-                val arrivalIATA = state.arrivalPlace?.location?.let { latLng ->
-                    airportCodeParser.getIataCode(
+                    )?.toDomainModel()
+                }
+                val arrivalModel = state.arrivalPlace?.location?.let { latLng ->
+                    airportRepository.findNearestIata(
                         lat = latLng.latitude,
                         lng = latLng.longitude
-                    ) ?: ""
-                } ?: ""
+                    )?.toDomainModel()
+                }
 
-                Log.d(
-                    "FlightViewModel",
-                    "Fetched IATA codes - Departure: $departureIATA, Arrival: $arrivalIATA"
-                )
                 val newFlight = FlightModel(
                     id = 0L,
                     tripId = tripId,
                     airline = state.airline,
                     flightNumber = state.flightNumber,
-                    departureAirport = state.departurePlace?.displayName!!,
-                    arrivalAirport = state.arrivalPlace?.displayName!!,
+                    departureAirport = departureModel,
+                    arrivalAirport = arrivalModel,
                     departureDateTime = state.departureDateTime!!,
                     arrivalDateTime = state.arrivalDateTime!!,
-                    departureIATA = departureIATA,
-                    arrivalIATA = arrivalIATA,
                     status = FlightStatus.SCHEDULED
                 )
                 insert(newFlight) {
-                    newFlightCreated.value = true
+                    _newFlightCreation.value = NewFlightCreationState.Success
                 }
             } catch (e: Exception) {
                 Log.e("FlightViewModel", "Error in createNewFlight", e)
+                _newFlightCreation.value = NewFlightCreationState.Error(e.message)
             }
         }
+    }
+
+    fun resetNewFlightCreation() {
+        _newFlightCreation.value = NewFlightCreationState.Idle
     }
 
     fun insert(flight: FlightModel, onComplete: (Long) -> Unit = {}) = viewModelScope.launch {
         val id = repository.insert(flight.toEntity())
         val itemsForFlight = itineraryItemRepository.getItineraryItemsForFlight(id)
+
+        val depIata = flight.departureAirport?.iataCode.orEmpty()
+        val arrIata = flight.arrivalAirport?.iataCode.orEmpty()
+        val depDisplay = depIata.ifEmpty { flight.departureAirport?.name ?: "Unknown" }
+        val arrDisplay = arrIata.ifEmpty { flight.arrivalAirport?.name ?: "Unknown" }
+
+        val existingItineraryId = itemsForFlight.firstOrNull()?.itineraryItem?.id ?: 0L
+
         val newItineraryItem = ItineraryItemModel(
-            id = if (itemsForFlight.isNotEmpty()) itemsForFlight[0].id else 0,
-            title = if (flight.departureIATA.isNotEmpty() && flight.arrivalIATA.isNotEmpty()) "Flight from ${flight.departureIATA} to ${flight.arrivalIATA}" else "Flight from ${flight.departureAirport} to ${flight.arrivalAirport}",
+            id = existingItineraryId,
+            title = "Flight from $depDisplay to $arrDisplay",
             tripId = flight.tripId,
             category = ItineraryCategory.FLIGHT,
             status = ItineraryItemStatus.NONE,
             startDateTime = flight.departureDateTime,
             endDateTime = flight.arrivalDateTime,
             dayDate = flight.departureDateTime.toLocalDate(),
-            flightId = id
+            flight = flight.copy(id = id),
         )
         if (itemsForFlight.isNotEmpty()) {
             itineraryItemRepository.update(newItineraryItem.toEntity())
@@ -139,4 +149,11 @@ class FlightViewModel @Inject constructor(
     suspend fun getById(id: Long): FlightModel? {
         return repository.getById(id)?.toDomainModel()
     }
+}
+
+sealed class NewFlightCreationState {
+    data object Idle : NewFlightCreationState()
+    data object Creating : NewFlightCreationState()
+    data object Success : NewFlightCreationState()
+    data class Error(val message: String? = null) : NewFlightCreationState()
 }

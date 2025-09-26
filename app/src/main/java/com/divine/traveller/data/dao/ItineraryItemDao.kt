@@ -9,6 +9,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.divine.traveller.data.entity.ItineraryItemEntity
+import com.divine.traveller.data.entity.ItineraryItemWithRelations
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -35,34 +36,37 @@ interface ItineraryItemDao {
         val remaining = getItemsForDayOrderedSuspend(item.tripId, day)
         var current = INITIAL_ORDER
         for (it in remaining) {
-            updateOrderIndex(it.id, current)
+            updateOrderIndex(it.itineraryItem.id, current)
             current += ORDER_GAP
         }
     }
 
     @Query("SELECT * FROM itinerary_items WHERE id = :id")
-    suspend fun getById(id: Long): ItineraryItemEntity?
+    suspend fun getById(id: Long): ItineraryItemWithRelations?
 
     @Query("SELECT * FROM itinerary_items WHERE tripId = :tripId")
-    fun getByTripId(tripId: Long): Flow<List<ItineraryItemEntity>>
+    fun getByTripId(tripId: Long): Flow<List<ItineraryItemWithRelations>>
 
     @Query("SELECT * FROM itinerary_items")
-    fun getAll(): Flow<List<ItineraryItemEntity>>
+    fun getAll(): Flow<List<ItineraryItemWithRelations>>
 
     @Query("SELECT * FROM itinerary_items WHERE flightId = :flightId")
-    suspend fun getItineraryItemsForFlight(flightId: Long): List<ItineraryItemEntity>
+    suspend fun getItineraryItemsForFlight(flightId: Long): List<ItineraryItemWithRelations>
 
     @Query("SELECT * FROM itinerary_items")
-    suspend fun getAllsuspend(): List<ItineraryItemEntity>
+    suspend fun getAllsuspend(): List<ItineraryItemWithRelations>
 
     @Query("SELECT * FROM itinerary_items WHERE tripId = :tripId AND dayDate = :dayDate ORDER BY orderIndex ASC")
-    fun getItemsForDayOrdered(tripId: Long, dayDate: LocalDate): Flow<List<ItineraryItemEntity>>
+    fun getItemsForDayOrdered(
+        tripId: Long,
+        dayDate: LocalDate
+    ): Flow<List<ItineraryItemWithRelations>>
 
     @Query("SELECT * FROM itinerary_items WHERE tripId = :tripId AND dayDate = :dayDate ORDER BY orderIndex ASC")
     suspend fun getItemsForDayOrderedSuspend(
         tripId: Long,
         dayDate: LocalDate
-    ): List<ItineraryItemEntity>
+    ): List<ItineraryItemWithRelations>
 
     @Query("UPDATE itinerary_items SET orderIndex = :orderIndex WHERE id = :id")
     suspend fun updateOrderIndex(id: Long, orderIndex: Long)
@@ -96,7 +100,7 @@ interface ItineraryItemDao {
         // fetch current items for the day
         val currentItems = getItemsForDayOrderedSuspend(tripId, dayDate)
         Log.d("ItineraryItemDao", "Current items for $dayDate: $currentItems")
-        val validIds = currentItems.map { it.id }.toSet()
+        val validIds = currentItems.map { it.itineraryItem.id }.toSet()
         Log.d("ItineraryItemDao", "Valid ids for $dayDate: $validIds")
 
         // keep only ids that exist for that day, in the requested order

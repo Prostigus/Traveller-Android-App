@@ -1,8 +1,10 @@
 package com.divine.traveller.data.entity
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
@@ -44,6 +46,14 @@ data class ItineraryItemEntity(
     val flightId: Long? = null,
     val dayDate: LocalDate? = null,
     val orderIndex: Long = 0L
+)
+
+data class ItineraryItemWithRelations(
+    @Embedded val itineraryItem: ItineraryItemEntity,
+    @Relation(parentColumn = "hotelId", entityColumn = "id")
+    val hotel: HotelEntity? = null,
+    @Relation(parentColumn = "flightId", entityColumn = "id", entity = FlightEntity::class)
+    val flight: FlightWithAirports? = null
 )
 
 enum class ItineraryItemStatus {

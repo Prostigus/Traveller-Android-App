@@ -2,6 +2,7 @@ package com.divine.traveller.data.repository
 
 import com.divine.traveller.data.dao.FlightDao
 import com.divine.traveller.data.entity.FlightEntity
+import com.divine.traveller.data.entity.FlightWithAirports
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,7 +35,7 @@ class FlightRepository @Inject constructor(
         flightDao.delete(flight)
     }
 
-    suspend fun getById(id: Long): FlightEntity? {
+    suspend fun getById(id: Long): FlightWithAirports? {
         return flightDao.getById(id)
     }
 

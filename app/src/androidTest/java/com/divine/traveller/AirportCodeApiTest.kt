@@ -22,7 +22,7 @@ class AirportCodeApiTest {
         val mockContext = Mockito.mock(Context::class.java)
         val mockResources = Mockito.mock(Resources::class.java)
         Mockito.`when`(mockContext.resources).thenReturn(mockResources)
-        Mockito.`when`(mockResources.openRawResource(com.divine.traveller.R.raw.airports))
+        Mockito.`when`(mockResources.openRawResource(com.divine.traveller.R.raw.airports_v1))
             .thenReturn(ByteArrayInputStream(csv.toByteArray()))
 
         val api = AirportCodeParser(mockContext)

@@ -1,11 +1,15 @@
 package com.divine.traveller.data.mapper
 
+import com.divine.traveller.data.entity.AirportEntity
 import com.divine.traveller.data.entity.BudgetItemEntity
 import com.divine.traveller.data.entity.DocumentEntity
 import com.divine.traveller.data.entity.FlightEntity
+import com.divine.traveller.data.entity.FlightWithAirports
 import com.divine.traveller.data.entity.HotelEntity
 import com.divine.traveller.data.entity.ItineraryItemEntity
+import com.divine.traveller.data.entity.ItineraryItemWithRelations
 import com.divine.traveller.data.entity.TripEntity
+import com.divine.traveller.data.model.AirportModel
 import com.divine.traveller.data.model.BudgetItemModel
 import com.divine.traveller.data.model.DocumentModel
 import com.divine.traveller.data.model.FlightModel
@@ -53,40 +57,11 @@ fun DocumentEntity.toDomainModel() = DocumentModel(
     id, tripId, fileName, fileUrl, flightHotelId, type, description, uploadedAt
 )
 
-fun FlightEntity.toDomainModel() = FlightModel(
-    id,
-    tripId,
-    airline,
-    flightNumber,
-    departureAirport,
-    departureIATA,
-    arrivalAirport,
-    arrivalIATA,
-    departureDateTime,
-    arrivalDateTime,
-    status
-)
 
 fun HotelEntity.toDomainModel() = HotelModel(
     id, tripId, name, address, checkInDate, checkOutDate, bookingReference, placeId, status
 )
 
-fun ItineraryItemEntity.toDomainModel() = ItineraryItemModel(
-    id,
-    tripId,
-    title,
-    description,
-    placeId,
-    viewType,
-    startDateTime,
-    endDateTime,
-    category,
-    status,
-    hotelId,
-    flightId,
-    dayDate,
-    orderIndex
-)
 
 fun ItineraryItemModel.toEntity() = ItineraryItemEntity(
     id = id,
@@ -99,8 +74,8 @@ fun ItineraryItemModel.toEntity() = ItineraryItemEntity(
     endDateTime = endDateTime,
     category = category,
     status = status,
-    hotelId = hotelId,
-    flightId = flightId,
+    hotelId = hotel?.id,
+    flightId = flight?.id,
     dayDate = dayDate,
     orderIndex = orderIndex
 )
@@ -132,12 +107,10 @@ fun FlightModel.toEntity() = FlightEntity(
     tripId = tripId,
     airline = airline,
     flightNumber = flightNumber,
-    departureAirport = departureAirport,
-    arrivalAirport = arrivalAirport,
+    departureAirportId = departureAirport?.id,
+    arrivalAirportId = arrivalAirport?.id,
     departureDateTime = departureDateTime,
     arrivalDateTime = arrivalDateTime,
-    departureIATA = departureIATA,
-    arrivalIATA = arrivalIATA,
     status = status
 )
 
@@ -152,3 +125,80 @@ fun HotelModel.toEntity() = HotelEntity(
     placeId = placeId,
     status = status
 )
+
+fun AirportEntity.toDomainModel() = AirportModel(
+    id = id,
+    ident = ident,
+    type = type,
+    name = name,
+    latitudeDeg = latitudeDeg,
+    longitudeDeg = longitudeDeg,
+    elevationFt = elevationFt,
+    continent = continent,
+    isoCountry = isoCountry,
+    isoRegion = isoRegion,
+    municipality = municipality,
+    scheduledService = scheduledService,
+    icaoCode = icaoCode,
+    iataCode = iataCode,
+    gpsCode = gpsCode,
+    localCode = localCode,
+    homeLink = homeLink,
+    wikipediaLink = wikipediaLink,
+    keywords = keywords
+)
+
+fun AirportModel.toEntity() = AirportEntity(
+    id = id,
+    ident = ident,
+    type = type,
+    name = name,
+    latitudeDeg = latitudeDeg,
+    longitudeDeg = longitudeDeg,
+    elevationFt = elevationFt,
+    continent = continent,
+    isoCountry = isoCountry,
+    isoRegion = isoRegion,
+    municipality = municipality,
+    scheduledService = scheduledService,
+    icaoCode = icaoCode,
+    iataCode = iataCode,
+    gpsCode = gpsCode,
+    localCode = localCode,
+    homeLink = homeLink,
+    wikipediaLink = wikipediaLink,
+    keywords = keywords
+)
+
+fun FlightWithAirports.toDomainModel(): FlightModel {
+    return FlightModel(
+        id = flight.id,
+        tripId = flight.tripId,
+        airline = flight.airline,
+        flightNumber = flight.flightNumber,
+        departureAirport = departureAirportEntity?.toDomainModel(),
+        arrivalAirport = arrivalAirportEntity?.toDomainModel(),
+        departureDateTime = flight.departureDateTime,
+        arrivalDateTime = flight.arrivalDateTime,
+        status = flight.status
+    )
+}
+
+fun ItineraryItemWithRelations.toDomainModel(): ItineraryItemModel {
+    return ItineraryItemModel(
+        id = itineraryItem.id,
+        tripId = itineraryItem.tripId,
+        title = itineraryItem.title,
+        description = itineraryItem.description,
+        placeId = itineraryItem.placeId,
+        viewType = itineraryItem.viewType,
+        startDateTime = itineraryItem.startDateTime,
+        endDateTime = itineraryItem.endDateTime,
+        category = itineraryItem.category,
+        status = itineraryItem.status,
+        hotel = hotel?.toDomainModel(),
+        flight = flight?.toDomainModel(),
+        dayDate = itineraryItem.dayDate,
+        orderIndex = itineraryItem.orderIndex
+    )
+}

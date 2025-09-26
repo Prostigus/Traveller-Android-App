@@ -46,4 +46,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDocumentDao(database: TravellerDatabase) = database.documentDao()
+
+    @Provides
+    @Singleton
+    fun provideAirportDao(database: TravellerDatabase) = database.airportDao()
 }

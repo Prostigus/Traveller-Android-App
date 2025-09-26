@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
-import com.divine.traveller.ui.composable.ItineraryFlightItemCard
-import com.divine.traveller.ui.composable.ItineraryItemCard
+import com.divine.traveller.ui.composable.card.ItineraryFlightItemCard
+import com.divine.traveller.ui.composable.card.ItineraryItemCard
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.time.LocalDate
@@ -59,7 +59,7 @@ fun ItineraryDayTimeline(
 
                     if (item.category == ItineraryCategory.FLIGHT) {
                         ItineraryFlightItemCard(
-                            item = item,
+                            flight = item.flight!!,
                             modifier = Modifier
                                 .longPressDraggableHandle()
                         )

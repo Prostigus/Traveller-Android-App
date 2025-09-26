@@ -1,4 +1,4 @@
-package com.divine.traveller.ui.composable
+package com.divine.traveller.ui.composable.card
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

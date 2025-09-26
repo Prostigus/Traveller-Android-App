@@ -1,4 +1,4 @@
-package com.divine.traveller.ui.composable
+package com.divine.traveller.ui.composable.card
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -50,6 +50,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.PlacesClient
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
@@ -295,7 +296,7 @@ private fun GoogleMapView(
 
 private fun formatZonedDateTime(date: ZonedDateTime): String {
     val formatter =
-        java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
+        DateTimeFormatter.ofPattern("MMM dd, yyyy 'at' HH:mm", Locale.getDefault())
     return date.format(formatter)
 }
 

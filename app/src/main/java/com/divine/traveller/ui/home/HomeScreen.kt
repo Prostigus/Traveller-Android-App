@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.data.viewmodel.HomeViewModel
-import com.divine.traveller.ui.composable.TripCard
+import com.divine.traveller.ui.composable.card.TripCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -17,7 +17,7 @@ import kotlin.math.sqrt
 class AirportCodeParser @Inject constructor(@ApplicationContext private val context: Context) {
     suspend fun getIataCode(lat: Double, lng: Double): String? = withContext(Dispatchers.IO) {
         try {
-            val inputStream = context.resources.openRawResource(R.raw.airports)
+            val inputStream = context.resources.openRawResource(R.raw.airports_v1)
             val reader = BufferedReader(inputStream.reader())
             reader.readLine() // skip header
 
