@@ -108,7 +108,7 @@ fun NewFlightForm(
                 onDepartureLocalDateChange(localDateTime)
             },
             dateTime = state.departureLocalDate,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         Spacer(modifier = Modifier.width(16.dp))
         LabeledDateTimeBox(

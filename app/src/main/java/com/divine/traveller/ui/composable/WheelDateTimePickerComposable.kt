@@ -29,6 +29,7 @@ import dev.darkokoa.datetimewheelpicker.core.format.timeFormatter
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toKotlinLocalDateTime
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
@@ -38,17 +39,17 @@ import kotlin.time.ExperimentalTime
 fun WheelDateTimePickerComposable(
     onCancel: () -> Unit = {},
     onConfirm: ((java.time.LocalDateTime) -> Unit)? = null,
+    editDateTime: java.time.LocalDateTime = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .toJavaLocalDateTime(),
 ) {
 
     var selectedDateTime by remember {
-        mutableStateOf(
-            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                .toJavaLocalDateTime()
-        )
+        mutableStateOf(editDateTime)
     }
 
     WheelDateTimePicker(
-        startDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+        startDateTime = selectedDateTime.toKotlinLocalDateTime(),
         minDateTime = LocalDateTime(
             year = 2025,
             month = 1,

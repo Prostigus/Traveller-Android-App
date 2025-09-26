@@ -106,7 +106,8 @@ fun LabeledDateTimeBox(
                         onConfirm = {
                             onDateTimeChanged(it)
                             showPicker = false
-                        }
+                        },
+                        editDateTime = dateTime ?: LocalDateTime.now()
                     )
                 }
             }
