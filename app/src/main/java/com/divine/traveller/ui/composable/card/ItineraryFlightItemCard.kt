@@ -141,9 +141,16 @@ fun FlightItemCard(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
+                    val departureLabel =
+                        flight.departureAirport?.iataCode?.takeIf { it.isNotBlank() }
+                            ?: flight.departureAirport?.municipality
+                            ?: ""
+                    val arrivalLabel = flight.arrivalAirport?.iataCode?.takeIf { it.isNotBlank() }
+                        ?: flight.arrivalAirport?.municipality
+                        ?: ""
 
                     Text(
-                        text = "Flight from ${flight.departureAirport?.iataCode} to ${flight.arrivalAirport?.iataCode}",
+                        text = "Flight from $departureLabel to $arrivalLabel",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.onSurface,

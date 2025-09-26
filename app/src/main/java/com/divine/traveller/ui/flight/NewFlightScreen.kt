@@ -1,6 +1,5 @@
 package com.divine.traveller.ui.flight
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,21 +53,18 @@ fun NewFlightScreen(
 ) {
 
     val state by newFlightStateModel.uiState.collectAsState()
-
     val creationState by viewModel.newFlightCreation.collectAsState()
 
     LaunchedEffect(flightId) {
         if (flightId != null) {
             val flight = viewModel.getById(flightId)
             if (flight != null) {
-                Log.e("NewFlightScreen", "Flight with ID $flightId not found.")
                 val departurePlace =
                     flight.departurePlaceId?.let { viewModel.placeRepository.getPlace(it) }
                 val arrivalPlace =
                     flight.arrivalPlaceId?.let { viewModel.placeRepository.getPlace(it) }
                 newFlightStateModel.replaceState(flight, departurePlace, arrivalPlace)
             }
-
         }
     }
 
@@ -89,7 +85,7 @@ fun NewFlightScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            "Add Flight",
+                            text = if (flightId != null) "Update Flight" else "Add Flight",
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
                             fontSize = 20.sp,
@@ -120,19 +116,22 @@ fun NewFlightScreen(
                 actions = {
                     Button(
                         onClick = {
-                            Log.d("NewFlightScreen", "Current State: $state")
                             if (state.departureLocalDate != null && state.arrivalLocalDate != null && state.departurePlace != null && state.arrivalPlace != null) {
-                                Log.d("NewFlightScreen", "Creating flight with state: $state")
-
                                 viewModel.createNewFlight(tripId, state)
                             }
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
+                        enabled = state.airline.isNotBlank()
+                                && state.flightNumber.isNotBlank()
+                                && state.departurePlace != null
+                                && state.arrivalPlace != null
+                                && state.departureLocalDate != null
+                                && state.arrivalLocalDate != null
                     ) {
                         Text(
-                            "Add Flight",
+                            if (flightId != null) "Update Flight" else "Add Flight",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
