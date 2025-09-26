@@ -10,7 +10,6 @@ import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.FlightModel
 import com.divine.traveller.data.repository.AirportRepository
 import com.divine.traveller.data.repository.FlightRepository
-import com.divine.traveller.data.repository.ItineraryItemRepository
 import com.divine.traveller.data.repository.PlaceRepository
 import com.divine.traveller.data.repository.TripRepository
 import com.divine.traveller.data.statemodel.NewFlightState
@@ -31,7 +30,6 @@ import javax.inject.Inject
 class FlightViewModel @Inject constructor(
     private val repository: FlightRepository,
     private val tripRepository: TripRepository,
-    private val itineraryItemRepository: ItineraryItemRepository,
     val placeRepository: PlaceRepository,
     private val airportRepository: AirportRepository,
 ) : ViewModel() {

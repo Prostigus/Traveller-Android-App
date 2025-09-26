@@ -53,6 +53,9 @@ interface ItineraryItemDao {
     @Query("SELECT * FROM itinerary_items WHERE flightId = :flightId")
     suspend fun getItineraryItemsForFlight(flightId: Long): List<ItineraryItemWithRelations>
 
+    @Query("SELECT * FROM itinerary_items WHERE hotelId = :hotelId")
+    suspend fun getItineraryItemForHotel(hotelId: Long): List<ItineraryItemWithRelations>
+
     @Query("SELECT * FROM itinerary_items")
     suspend fun getAllsuspend(): List<ItineraryItemWithRelations>
 
