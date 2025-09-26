@@ -39,9 +39,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.R
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.model.FlightModel
+import com.divine.traveller.data.viewmodel.FlightViewModel
 import com.divine.traveller.navigation.LocalNavController
 import com.divine.traveller.navigation.Routes
 import com.divine.traveller.ui.composable.DetailsActionRow
@@ -57,7 +59,8 @@ fun ItineraryFlightItemCard(
     modifier: Modifier,
     tripId: Long,
     flight: FlightModel,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    viewModel: FlightViewModel = hiltViewModel()
 ) {
 
     var showDetails by remember { mutableStateOf(false) }
@@ -87,6 +90,9 @@ fun ItineraryFlightItemCard(
             },
             onBudget = {
                 // handle budget
+            },
+            onDelete = {
+                viewModel.delete(flight)
             }
         )
     }
@@ -183,7 +189,8 @@ fun FlightDetailsModalSheet(
     onDismiss: () -> Unit,
     onEdit: () -> Unit,
     onAttach: () -> Unit,
-    onBudget: () -> Unit
+    onBudget: () -> Unit,
+    onDelete: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -230,7 +237,8 @@ fun FlightDetailsModalSheet(
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
                 onEdit = onEdit,
                 onAttach = onAttach,
-                onBudget = onBudget
+                onBudget = onBudget,
+                onDelete = onDelete
             )
         }
     }

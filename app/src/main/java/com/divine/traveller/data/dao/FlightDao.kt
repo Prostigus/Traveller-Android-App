@@ -22,6 +22,9 @@ interface FlightDao {
     @Delete
     suspend fun delete(flight: FlightEntity)
 
+    @Query("DELETE FROM flights WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Transaction
     @Query("SELECT * FROM flights WHERE id = :id")
     suspend fun getById(id: Long): FlightWithAirports?
