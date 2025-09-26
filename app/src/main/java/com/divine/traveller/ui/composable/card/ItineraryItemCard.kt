@@ -48,7 +48,6 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.PlacesClient
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -56,7 +55,6 @@ import java.util.Locale
 @Composable
 fun ItineraryItemCard(
     item: ItineraryItemModel,
-    placesClient: PlacesClient,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {

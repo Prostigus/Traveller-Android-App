@@ -1,6 +1,7 @@
 package com.divine.traveller.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -22,94 +23,115 @@ fun TravellerNavigation(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = Routes.HOME,
-        modifier = modifier
-    ) {
-        composable(Routes.HOME) {
-            HomeScreen(
-                onNavigateToNewTrip = {
-                    navController.navigate(Routes.NEW_TRIP)
-                },
-                onNavigateToTripDetails = { tripId ->
-                    navController.navigate(Routes.TRIP_DETAILS + "/$tripId")
-                }
-            )
-        }
-
-        composable(Routes.NEW_TRIP) {
-            NewTripScreen(
-                onTripCreated = {
-                    navController.popBackStack()
-                },
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable(
-            route = Routes.NEW_FLIGHT + "/{tripId}",
-            arguments = listOf(navArgument("tripId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val tripId = backStackEntry.arguments?.getLong("tripId")
-            if (tripId != null) {
-                NewFlightScreen(
-                    tripId = tripId,
-                    onFlightCreated = { navController.popBackStack() },
-                    onNavigateBack = { navController.popBackStack() }
+    CompositionLocalProvider(LocalNavController provides navController) {
+        NavHost(
+            navController = navController,
+            startDestination = Routes.HOME,
+            modifier = modifier
+        ) {
+            composable(Routes.HOME) {
+                HomeScreen(
+                    onNavigateToNewTrip = {
+                        navController.navigate(Routes.NEW_TRIP)
+                    },
+                    onNavigateToTripDetails = { tripId ->
+                        navController.navigate(Routes.TRIP_DETAILS + "/$tripId")
+                    }
                 )
             }
-        }
 
-        detailScreen(
-            navController = navController,
-            routeBase = Routes.TRIP_DETAILS
-        ) { tripId, onNavigate, onNavigateBack ->
-            ItineraryScreen(
-                tripId = tripId,
-                onNavigate = onNavigate,
-                onNavigateBack = onNavigateBack
-            )
-        }
+            composable(Routes.NEW_TRIP) {
+                NewTripScreen(
+                    onTripCreated = {
+                        navController.popBackStack()
+                    },
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
 
-        detailScreen(
-            navController = navController,
-            routeBase = Routes.FLIGHT_DETAILS
-        ) { tripId, onNavigate, onNavigateBack ->
-            FlightScreen(
-                tripId = tripId,
-                onNavigate = onNavigate,
-                onNavigateBack = onNavigateBack,
-                onNavigateToNewFlight = {
-                    navController.navigate(Routes.NEW_FLIGHT + "/$tripId")
+            composable(
+                route = Routes.NEW_FLIGHT + "/{tripId}",
+                arguments = listOf(navArgument("tripId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val tripId = backStackEntry.arguments?.getLong("tripId")
+                if (tripId != null) {
+                    NewFlightScreen(
+                        tripId = tripId,
+                        onFlightCreated = { navController.popBackStack() },
+                        onNavigateBack = { navController.popBackStack() }
+                    )
                 }
-            )
-        }
+            }
 
-        detailScreen(
-            navController = navController,
-            routeBase = Routes.HOTEL_DETAILS
-        ) { tripId, onNavigate, onNavigateBack ->
-            HotelScreen(
-                tripId = tripId,
-                onNavigate = onNavigate,
-                onNavigateBack = onNavigateBack
-            )
-        }
+            composable(
+                route = Routes.EDIT_FLIGHT + "/{tripId}/{flightId}",
+                arguments = listOf(
+                    navArgument("tripId") { type = NavType.LongType },
+                    navArgument("flightId") { type = NavType.LongType }
+                )
+            ) { backStackEntry ->
+                val tripId = backStackEntry.arguments?.getLong("tripId")
+                val flightId = backStackEntry.arguments?.getLong("flightId")
+                if (tripId != null && flightId != null) {
+                    NewFlightScreen(
+                        tripId = tripId,
+                        flightId = flightId, // make NewFlightScreen accept this param (Long?)
+                        onFlightCreated = { navController.popBackStack() },
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+            }
 
-        detailScreen(
-            navController = navController,
-            routeBase = Routes.BUDGET_DETAILS
-        ) { tripId, onNavigate, onNavigateBack ->
-            BudgetScreen(
-                tripId = tripId,
-                onNavigate = onNavigate,
-                onNavigateBack = onNavigateBack
-            )
-        }
+            detailScreen(
+                navController = navController,
+                routeBase = Routes.TRIP_DETAILS
+            ) { tripId, onNavigate, onNavigateBack ->
+                ItineraryScreen(
+                    tripId = tripId,
+                    onNavigate = onNavigate,
+                    onNavigateBack = onNavigateBack
+                )
+            }
 
+            detailScreen(
+                navController = navController,
+                routeBase = Routes.FLIGHT_DETAILS
+            ) { tripId, onNavigate, onNavigateBack ->
+                FlightScreen(
+                    tripId = tripId,
+                    onNavigate = onNavigate,
+                    onNavigateBack = onNavigateBack,
+                    onNavigateToNewFlight = {
+                        navController.navigate(Routes.NEW_FLIGHT + "/$tripId")
+                    }
+                )
+            }
+
+            detailScreen(
+                navController = navController,
+                routeBase = Routes.HOTEL_DETAILS
+            ) { tripId, onNavigate, onNavigateBack ->
+                HotelScreen(
+                    tripId = tripId,
+                    onNavigate = onNavigate,
+                    onNavigateBack = onNavigateBack
+                )
+            }
+
+            detailScreen(
+                navController = navController,
+                routeBase = Routes.BUDGET_DETAILS
+            ) { tripId, onNavigate, onNavigateBack ->
+                BudgetScreen(
+                    tripId = tripId,
+                    onNavigate = onNavigate,
+                    onNavigateBack = onNavigateBack
+                )
+            }
+
+        }
     }
 }
 

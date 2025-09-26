@@ -14,9 +14,9 @@ import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.repository.AirportRepository
 import com.divine.traveller.data.repository.FlightRepository
 import com.divine.traveller.data.repository.ItineraryItemRepository
+import com.divine.traveller.data.repository.PlaceRepository
 import com.divine.traveller.data.repository.TripRepository
 import com.divine.traveller.data.statemodel.NewFlightState
-import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +35,7 @@ class FlightViewModel @Inject constructor(
     private val repository: FlightRepository,
     private val tripRepository: TripRepository,
     private val itineraryItemRepository: ItineraryItemRepository,
-    val placesClient: PlacesClient,
+    val placeRepository: PlaceRepository,
     private val airportRepository: AirportRepository,
 ) : ViewModel() {
     private val _trip = MutableStateFlow<TripEntity?>(null)
@@ -85,12 +85,14 @@ class FlightViewModel @Inject constructor(
                 }
 
                 val newFlight = FlightModel(
-                    id = 0L,
+                    id = state.id,
                     tripId = tripId,
                     airline = state.airline,
                     flightNumber = state.flightNumber,
                     departureAirport = departureModel,
                     arrivalAirport = arrivalModel,
+                    departurePlaceId = state.departurePlace?.id,
+                    arrivalPlaceId = state.arrivalPlace?.id,
                     departureDateTime = state.departureDateTime!!,
                     arrivalDateTime = state.arrivalDateTime!!,
                     status = FlightStatus.SCHEDULED
@@ -149,6 +151,10 @@ class FlightViewModel @Inject constructor(
     suspend fun getById(id: Long): FlightModel? {
         return repository.getById(id)?.toDomainModel()
     }
+
+//    fun getPlaceFromAirportCode(airportCode: String): String? {
+//        return placesClient.
+//    }
 }
 
 sealed class NewFlightCreationState {

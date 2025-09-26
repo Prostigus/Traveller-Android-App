@@ -39,11 +39,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.R
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.model.FlightModel
-import com.divine.traveller.data.viewmodel.FlightViewModel
+import com.divine.traveller.navigation.LocalNavController
+import com.divine.traveller.navigation.Routes
 import com.divine.traveller.ui.composable.DetailsActionRow
 import com.divine.traveller.ui.composable.InfoRow
 import com.divine.traveller.util.formatZonedDateTime
@@ -55,12 +55,14 @@ import java.time.ZonedDateTime
 @Composable
 fun ItineraryFlightItemCard(
     modifier: Modifier,
+    tripId: Long,
     flight: FlightModel,
-    onClick: () -> Unit = {},
-    viewModel: FlightViewModel = hiltViewModel()
+    onClick: () -> Unit = {}
 ) {
 
     var showDetails by remember { mutableStateOf(false) }
+    val navController = LocalNavController.current
+
     FlightItemCard(
         modifier = modifier,
         flight = flight,
@@ -75,7 +77,10 @@ fun ItineraryFlightItemCard(
             flight = flight,
             onDismiss = { showDetails = false },
             onEdit = {
-                showDetails = false
+                flight.id.let { fid ->
+                    navController?.navigate(Routes.EDIT_FLIGHT + "/$tripId/$fid")
+                    showDetails = false
+                }
             },
             onAttach = {
                 // handle attachment

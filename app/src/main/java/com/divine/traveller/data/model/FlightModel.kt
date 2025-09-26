@@ -10,6 +10,8 @@ data class FlightModel(
     val flightNumber: String,
     val departureAirport: AirportModel?,
     val arrivalAirport: AirportModel?,
+    val departurePlaceId: String? = null,
+    val arrivalPlaceId: String? = null,
     val departureDateTime: ZonedDateTime,
     val arrivalDateTime: ZonedDateTime,
     val status: FlightStatus

@@ -59,6 +59,7 @@ fun ItineraryDayTimeline(
 
                     if (item.category == ItineraryCategory.FLIGHT) {
                         ItineraryFlightItemCard(
+                            tripId = tripId,
                             flight = item.flight!!,
                             modifier = Modifier
                                 .longPressDraggableHandle()
@@ -70,7 +71,6 @@ fun ItineraryDayTimeline(
                     if (item.category != ItineraryCategory.FLIGHT && item.category != ItineraryCategory.HOTEL) {
                         ItineraryItemCard(
                             item = item,
-                            placesClient = viewModel.placesClient,
                             modifier = Modifier
                                 .longPressDraggableHandle()
                         )

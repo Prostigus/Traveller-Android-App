@@ -231,7 +231,7 @@ fun NewTripScreen(
                             id
                         } ?: "UTC")
                     },
-                    placesClient = viewModel.placesClient,
+                    placeRepository = viewModel.placeRepository,
                     modifier = Modifier.fillMaxWidth(),
                     label = "City, Country",
                     placeholder = "Enter a destination...",

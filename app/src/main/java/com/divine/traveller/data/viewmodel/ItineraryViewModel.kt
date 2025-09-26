@@ -13,8 +13,8 @@ import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.model.TripModel
 import com.divine.traveller.data.repository.ItineraryItemRepository
+import com.divine.traveller.data.repository.PlaceRepository
 import com.divine.traveller.data.repository.TripRepository
-import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +34,7 @@ import javax.inject.Inject
 class ItineraryViewModel @Inject constructor(
     private val repository: ItineraryItemRepository,
     private val tripRepository: TripRepository,
-    val placesClient: PlacesClient,
+    val placeRepository: PlaceRepository,
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
 

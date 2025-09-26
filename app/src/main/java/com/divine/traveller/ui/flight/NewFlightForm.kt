@@ -15,13 +15,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.divine.traveller.R
+import com.divine.traveller.data.repository.PlaceRepository
 import com.divine.traveller.data.statemodel.NewFlightState
 import com.divine.traveller.ui.composable.FormFieldWithIcon
 import com.divine.traveller.ui.composable.LabeledDateTimeBox
 import com.divine.traveller.ui.composable.PlacesAutocompleteTextField
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.PlaceTypes
-import com.google.android.libraries.places.api.net.PlacesClient
 import java.time.LocalDateTime
 import kotlin.time.ExperimentalTime
 
@@ -36,7 +36,7 @@ fun NewFlightForm(
     onArrivalPlaceChange: (Place) -> Unit,
     onDepartureLocalDateChange: (LocalDateTime) -> Unit,
     onArrivalLocalDateChange: (LocalDateTime) -> Unit,
-    placesClient: PlacesClient,
+    placeRepository: PlaceRepository,
 ) {
     Spacer(modifier = Modifier.height(8.dp))
 
@@ -70,11 +70,12 @@ fun NewFlightForm(
                 onDeparturePlaceChange(selectedPlace)
                 Log.d("NewFlightForm", "Selected departure place: $selectedPlace")
             },
-            placesClient = placesClient,
+            placeRepository = placeRepository,
             modifier = Modifier.fillMaxWidth(),
             label = "Departure Airport",
             placeholder = "YVR",
             includedTypes = listOf(PlaceTypes.AIRPORT),
+            text = state.departurePlace?.displayName ?: "",
         )
     }
 
@@ -91,11 +92,12 @@ fun NewFlightForm(
             onPlaceSelected = { selectedPlace ->
                 onArrivalPlaceChange(selectedPlace)
             },
-            placesClient = placesClient,
+            placeRepository = placeRepository,
             modifier = Modifier.fillMaxWidth(),
             label = "Arrival Airport",
             placeholder = "HND",
             includedTypes = listOf(PlaceTypes.AIRPORT),
+            text = state.arrivalPlace?.displayName ?: "",
         )
     }
 

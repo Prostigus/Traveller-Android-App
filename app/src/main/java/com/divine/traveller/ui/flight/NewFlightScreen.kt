@@ -46,6 +46,7 @@ import com.divine.traveller.data.viewmodel.NewFlightCreationState
 fun NewFlightScreen(
     modifier: Modifier = Modifier,
     tripId: Long,
+    flightId: Long? = null,
     onFlightCreated: () -> Unit = {},
     onNavigateBack: () -> Unit = {},
     newFlightStateModel: NewFlightStateModel = hiltViewModel(),
@@ -55,6 +56,21 @@ fun NewFlightScreen(
     val state by newFlightStateModel.uiState.collectAsState()
 
     val creationState by viewModel.newFlightCreation.collectAsState()
+
+    LaunchedEffect(flightId) {
+        if (flightId != null) {
+            val flight = viewModel.getById(flightId)
+            if (flight != null) {
+                Log.e("NewFlightScreen", "Flight with ID $flightId not found.")
+                val departurePlace =
+                    flight.departurePlaceId?.let { viewModel.placeRepository.getPlace(it) }
+                val arrivalPlace =
+                    flight.arrivalPlaceId?.let { viewModel.placeRepository.getPlace(it) }
+                newFlightStateModel.replaceState(flight, departurePlace, arrivalPlace)
+            }
+
+        }
+    }
 
     LaunchedEffect(creationState) {
         if (creationState is NewFlightCreationState.Success) {
@@ -141,7 +157,7 @@ fun NewFlightScreen(
                 onArrivalPlaceChange = newFlightStateModel::setArrivalPlace,
                 onDepartureLocalDateChange = newFlightStateModel::setDepartureLocalDate,
                 onArrivalLocalDateChange = newFlightStateModel::setArrivalLocalDate,
-                placesClient = viewModel.placesClient,
+                placeRepository = viewModel.placeRepository,
             )
         }
         if (creationState is NewFlightCreationState.Creating) {

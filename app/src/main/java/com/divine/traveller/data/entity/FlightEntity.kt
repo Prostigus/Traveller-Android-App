@@ -33,6 +33,8 @@ data class FlightEntity(
     val flightNumber: String,
     val departureAirportId: Long? = null,
     val arrivalAirportId: Long? = null,
+    val departurePlaceId: String? = null,
+    val arrivalPlaceId: String? = null,
     val departureDateTime: ZonedDateTime,
     val arrivalDateTime: ZonedDateTime,
     val status: FlightStatus

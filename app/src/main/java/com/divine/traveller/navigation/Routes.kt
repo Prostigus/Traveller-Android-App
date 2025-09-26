@@ -5,7 +5,9 @@ object Routes {
     const val NEW_TRIP = "new_trip"
 
     const val NEW_FLIGHT = "new_flight"
+    const val EDIT_FLIGHT = "edit_flight"
     const val NEW_HOTEL = "new_hotel"
+    const val EDIT_HOTEL = "edit_hotel"
 
 
     const val TRIP_DETAILS = "trip_details"

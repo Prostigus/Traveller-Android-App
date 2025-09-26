@@ -33,11 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.divine.traveller.data.repository.PlaceRepository
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.android.libraries.places.api.net.kotlin.awaitFetchPlace
-import com.google.android.libraries.places.api.net.kotlin.awaitFindAutocompletePredictions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -45,41 +43,42 @@ import kotlinx.coroutines.launch
 @Composable
 fun PlacesAutocompleteTextField(
     onPlaceSelected: (Place) -> Unit,
-    placesClient: PlacesClient,
+    placeRepository: PlaceRepository,
     modifier: Modifier = Modifier,
     label: String = "Search location",
     placeholder: String = "Enter a location...",
     includedTypes: List<String> = emptyList(),
-    placeFields: List<Place.Field> = listOf(
-        Place.Field.ID,
-        Place.Field.DISPLAY_NAME,
-        Place.Field.FORMATTED_ADDRESS,
-        Place.Field.LOCATION,
-    ),
+    text: String = "",
 ) {
-    var value by remember { mutableStateOf("") }
+    var value by remember { mutableStateOf(text) }
+
     var predictions by remember { mutableStateOf<List<AutocompletePrediction>>(emptyList()) }
     var expanded by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var isSelecting by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(text) {
+        if (text != value) {
+            isSelecting = true
+            value = text
+        }
+        if (isSelecting) {
+            isSelecting = false
+        }
+        Log.d("PlacesAutocomplete", "External text change detected: $text")
+    }
+
     // Efficient autocomplete search with debouncing
     LaunchedEffect(value) {
-        if (value.length >= 2 && !isSelecting) {
+        if (value.length >= 2 && !isSelecting && value != text) {
             delay(300) // Debounce
             isLoading = true
             Log.d("PlacesAutocomplete", "Searching for predictions with query: $value")
 
             try {
-                val foundPredictions = placesClient.awaitFindAutocompletePredictions {
-                    query = value
-                    if (includedTypes.isNotEmpty()) {
-                        typesFilter = includedTypes
-                    }
-                }
-
-                predictions = foundPredictions.autocompletePredictions
+                predictions = placeRepository.awaitFindAutocompletePredictions(value, includedTypes)
+                    ?: emptyList()
                 Log.d(
                     "PlacesAutocomplete",
                     "Found ${predictions.size} predictions for query: $value"
@@ -219,13 +218,14 @@ fun PlacesAutocompleteTextField(
                                 coroutineScope.launch {
                                     try {
                                         isSelecting = true // Set flag before updating value
-                                        val place = placesClient.awaitFetchPlace(
-                                            prediction.placeId,
-                                            placeFields = placeFields
-                                        ).place
+                                        val place = placeRepository.getPlace(prediction.placeId)
 
-                                        value = place.displayName ?: prediction.getPrimaryText(null)
-                                            .toString()
+                                        // set visible text to the display/name and notify parent
+                                        val display =
+                                            place.displayName ?: prediction.getPrimaryText(null)
+                                                .toString()
+                                        value = display
+
                                         onPlaceSelected(place)
                                         expanded = false
                                         predictions = emptyList()

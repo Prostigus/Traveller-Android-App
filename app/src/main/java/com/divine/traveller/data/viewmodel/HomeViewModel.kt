@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.TripModel
+import com.divine.traveller.data.repository.PlaceRepository
 import com.divine.traveller.data.repository.TripRepository
 import com.divine.traveller.data.statemodel.NewTripState
-import com.google.android.libraries.places.api.net.PlacesClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: TripRepository,
-    val placesClient: PlacesClient,
+    val placeRepository: PlaceRepository,
     private val timeZoneEngineDeferred: Deferred<TimeZoneEngine>
 ) : ViewModel() {
     suspend fun getTimeZoneEngine(): TimeZoneEngine = timeZoneEngineDeferred.await()

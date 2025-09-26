@@ -130,6 +130,7 @@ fun FlightScreen(
                 items(flightItems) { flight ->
                     ItineraryFlightItemCard(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        tripId = tripId,
                         flight = flight,
                         onClick = {
                             // TODO: Navigate to flight details screen

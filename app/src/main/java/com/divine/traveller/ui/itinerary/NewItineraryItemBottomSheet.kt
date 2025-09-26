@@ -111,7 +111,7 @@ fun NewItineraryItemBottomSheet(
                         title = selectedPlace.displayName ?: ""
                         placeId = selectedPlace.id ?: ""
                     },
-                    placesClient = viewModel.placesClient,
+                    placeRepository = viewModel.placeRepository,
                     modifier = Modifier.fillMaxWidth(),
                     label = "Destination",
                     placeholder = "Search for a place...",

@@ -109,6 +109,8 @@ fun FlightModel.toEntity() = FlightEntity(
     flightNumber = flightNumber,
     departureAirportId = departureAirport?.id,
     arrivalAirportId = arrivalAirport?.id,
+    departurePlaceId = departurePlaceId,
+    arrivalPlaceId = arrivalPlaceId,
     departureDateTime = departureDateTime,
     arrivalDateTime = arrivalDateTime,
     status = status
@@ -178,6 +180,8 @@ fun FlightWithAirports.toDomainModel(): FlightModel {
         flightNumber = flight.flightNumber,
         departureAirport = departureAirportEntity?.toDomainModel(),
         arrivalAirport = arrivalAirportEntity?.toDomainModel(),
+        departurePlaceId = flight.departurePlaceId,
+        arrivalPlaceId = flight.arrivalPlaceId,
         departureDateTime = flight.departureDateTime,
         arrivalDateTime = flight.arrivalDateTime,
         status = flight.status
