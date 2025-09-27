@@ -4,14 +4,12 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.divine.traveller.data.entity.FlightStatus
-import com.divine.traveller.data.entity.TripEntity
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
 import com.divine.traveller.data.model.FlightModel
 import com.divine.traveller.data.repository.AirportRepository
 import com.divine.traveller.data.repository.FlightRepository
 import com.divine.traveller.data.repository.PlaceRepository
-import com.divine.traveller.data.repository.TripRepository
 import com.divine.traveller.data.statemodel.NewFlightState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,37 +27,21 @@ import javax.inject.Inject
 @HiltViewModel
 class FlightViewModel @Inject constructor(
     private val repository: FlightRepository,
-    private val tripRepository: TripRepository,
     val placeRepository: PlaceRepository,
     private val airportRepository: AirportRepository,
 ) : ViewModel() {
-    private val _trip = MutableStateFlow<TripEntity?>(null)
-    val trip: StateFlow<TripEntity?> = _trip.asStateFlow()
 
+    var tripId = MutableStateFlow<Long?>(null)
     private val _newFlightCreation =
         MutableStateFlow<NewFlightCreationState>(NewFlightCreationState.Idle)
     val newFlightCreation: StateFlow<NewFlightCreationState> = _newFlightCreation.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val flightItems: StateFlow<List<FlightModel>> = _trip
+    val flightItems: StateFlow<List<FlightModel>> = tripId
         .filterNotNull()
-        .flatMapLatest { trip ->
-            repository.getByTripId(trip.id)
-                .map { entities ->
-                    entities.map { it.toDomainModel() }
-                }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList()
-        )
-
-    fun loadItems(tripId: Long) {
-        viewModelScope.launch {
-            _trip.value = tripRepository.getTripByIdCached(tripId)
-        }
-    }
+        .flatMapLatest { id -> repository.getByTripId(id) }
+        .map { list -> list.map { it.toDomainModel() } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun createNewFlight(tripId: Long, state: NewFlightState) {
         viewModelScope.launch {

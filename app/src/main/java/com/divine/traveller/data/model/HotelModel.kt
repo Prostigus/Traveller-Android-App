@@ -7,7 +7,7 @@ data class HotelModel(
     val id: Long,
     val tripId: Long,
     val name: String,
-    val address: String,
+    val address: String?,
     val checkInDate: ZonedDateTime,
     val checkOutDate: ZonedDateTime,
     val bookingReference: String?,

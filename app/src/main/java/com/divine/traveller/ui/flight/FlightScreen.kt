@@ -51,7 +51,7 @@ fun FlightScreen(
     val flightItems by viewModel.flightItems.collectAsState()
 
     LaunchedEffect(tripId) {
-        viewModel.loadItems(tripId)
+        viewModel.tripId.value = tripId
     }
 
     Scaffold(
@@ -131,10 +131,7 @@ fun FlightScreen(
                     ItineraryFlightItemCard(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         tripId = tripId,
-                        flight = flight,
-                        onClick = {
-                            // TODO: Navigate to flight details screen
-                        }
+                        flight = flight
                     )
                 }
             }

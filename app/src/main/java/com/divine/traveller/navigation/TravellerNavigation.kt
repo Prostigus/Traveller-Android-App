@@ -15,6 +15,7 @@ import com.divine.traveller.ui.flight.FlightScreen
 import com.divine.traveller.ui.flight.NewFlightScreen
 import com.divine.traveller.ui.home.HomeScreen
 import com.divine.traveller.ui.hotel.HotelScreen
+import com.divine.traveller.ui.hotel.NewHotelScreen
 import com.divine.traveller.ui.itinerary.ItineraryScreen
 import com.divine.traveller.ui.trip.NewTripScreen
 
@@ -77,8 +78,41 @@ fun TravellerNavigation(
                 if (tripId != null && flightId != null) {
                     NewFlightScreen(
                         tripId = tripId,
-                        flightId = flightId, // make NewFlightScreen accept this param (Long?)
+                        flightId = flightId,
                         onFlightCreated = { navController.popBackStack() },
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+            }
+
+            composable(
+                route = Routes.NEW_HOTEL + "/{tripId}",
+                arguments = listOf(navArgument("tripId") { type = NavType.LongType })
+            ) { backStackEntry ->
+                val tripId = backStackEntry.arguments?.getLong("tripId")
+                if (tripId != null) {
+                    NewHotelScreen(
+                        tripId = tripId,
+                        onHotelCreated = { navController.popBackStack() },
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+            }
+
+            composable(
+                route = Routes.EDIT_HOTEL + "/{tripId}/{hotelId}",
+                arguments = listOf(
+                    navArgument("tripId") { type = NavType.LongType },
+                    navArgument("hotelId") { type = NavType.LongType }
+                )
+            ) { backStackEntry ->
+                val tripId = backStackEntry.arguments?.getLong("tripId")
+                val hotelId = backStackEntry.arguments?.getLong("hotelId")
+                if (tripId != null && hotelId != null) {
+                    NewHotelScreen(
+                        tripId = tripId,
+                        hotelId = hotelId,
+                        onHotelCreated = { navController.popBackStack() },
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }
@@ -116,7 +150,10 @@ fun TravellerNavigation(
                 HotelScreen(
                     tripId = tripId,
                     onNavigate = onNavigate,
-                    onNavigateBack = onNavigateBack
+                    onNavigateBack = onNavigateBack,
+                    onNavigateToNewHotel = {
+                        navController.navigate(Routes.NEW_HOTEL + "/$tripId")
+                    }
                 )
             }
 

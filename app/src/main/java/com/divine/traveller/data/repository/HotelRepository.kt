@@ -66,4 +66,9 @@ class HotelRepository @Inject constructor(
     suspend fun delete(hotel: HotelEntity) {
         hotelDao.delete(hotel)
     }
+
+    fun getByTripId(tripId: Long) = hotelDao.getByTripId(tripId)
+
+    suspend fun getById(id: Long) = hotelDao.getById(id)
+
 }

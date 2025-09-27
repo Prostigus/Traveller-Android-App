@@ -9,7 +9,7 @@ data class HotelEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val tripId: Long,
     val name: String,
-    val address: String,
+    val address: String? = null,
     val checkInDate: ZonedDateTime,
     val checkOutDate: ZonedDateTime,
     val bookingReference: String? = null,
