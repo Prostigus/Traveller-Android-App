@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -170,10 +171,15 @@ fun ItineraryCalendar(
                     items(monthDays) { date ->
                         if (date != null) {
                             val hi = dayHighlight(date)
+                            val backgroundSpec = dayRangeBackground(hi)
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(brush = dayRangeBackground(hi))
+                                    .background(
+                                        brush = backgroundSpec.brush,
+                                        shape = backgroundSpec.shape
+                                    )
+                                    .padding(PaddingValues(horizontal = 4.dp))
                             ) {
                                 CalendarDayItem(
                                     date = date,
@@ -200,19 +206,31 @@ fun ItineraryCalendar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
                     items(tripDaysInMonth) { date ->
-                        CalendarDayItem(
-                            date = date,
-                            items = itemsPerDay,
-                            isSelected = date == selectedDay,
-                            isCurrentMonth = date.month == currentMonth.month,
-                            isTripDay = tripDates.contains(date),
-                            isToday = date == LocalDate.now(),
-                            onClick = { onClickDay(date) },
-                            compact = true,
-                        )
+                        val hi = dayHighlight(date)
+                        val backgroundSpec = dayRangeBackground(hi)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    brush = backgroundSpec.brush,
+                                    shape = backgroundSpec.shape
+                                )
+                                .padding(PaddingValues(horizontal = 4.dp))
+                        ) {
+                            CalendarDayItem(
+                                date = date,
+                                items = itemsPerDay,
+                                isSelected = date == selectedDay,
+                                isCurrentMonth = date.month == currentMonth.month,
+                                isTripDay = tripDates.contains(date),
+                                isToday = date == LocalDate.now(),
+                                onClick = { onClickDay(date) },
+                                compact = true,
+                            )
+                        }
                     }
                 }
             }
@@ -220,24 +238,26 @@ fun ItineraryCalendar(
     }
 }
 
-private fun dayRangeBackground(info: DayHighlightInfo): Brush {
-    if (info.colors.isEmpty()) return Brush.horizontalGradient(
-        listOf(
-            Color.Transparent,
-            Color.Transparent
-        )
+private fun dayRangeBackground(info: DayHighlightInfo): BackgroundSpec {
+    if (info.colors.isEmpty()) return BackgroundSpec(
+        brush = Brush.horizontalGradient(listOf(Color.Transparent, Color.Transparent)),
+        shape = RoundedCornerShape(50.dp)
     )
+
     val shape: Shape = RoundedCornerShape(
         topStart = if (info.leftContinues) 0.dp else 50.dp,
         bottomStart = if (info.leftContinues) 0.dp else 50.dp,
         topEnd = if (info.rightContinues) 0.dp else 50.dp,
         bottomEnd = if (info.rightContinues) 0.dp else 50.dp
     )
+
     val brush = if (info.isGradient && info.colors.size >= 2) {
         Brush.horizontalGradient(info.colors)
     } else {
         Brush.horizontalGradient(listOf(info.colors.first(), info.colors.first()))
     }
 
-    return brush
+    return BackgroundSpec(brush = brush, shape = shape)
 }
+
+data class BackgroundSpec(val brush: Brush, val shape: Shape)

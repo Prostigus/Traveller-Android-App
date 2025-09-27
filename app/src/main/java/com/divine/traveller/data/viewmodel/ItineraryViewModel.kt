@@ -59,24 +59,6 @@ class ItineraryViewModel @Inject constructor(
         .map { entities -> entities.map { it.toDomainModel() } }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-//    @OptIn(ExperimentalCoroutinesApi::class)
-//    val hotelBookingsForTripByDay: StateFlow<Map<HotelModel, List<LocalDate>>> = _trip
-//        .filterNotNull()
-//        .flatMapLatest { trip ->
-//            hotelRepository.getByTripId(trip.id)
-//        }
-//        .map { entities ->
-//            entities.map { it.toDomainModel() }
-//                .associateWith { hotel ->
-//                    getAccommodationDays(
-//                        hotel.checkInDate.toLocalDate(),
-//                        hotel.checkOutDate.toLocalDate().minusDays(1)
-//                    )
-//                }
-//        }
-//        .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
-
-    // In `ItineraryViewModel.kt`
     @OptIn(ExperimentalCoroutinesApi::class)
     val hotelBookingsByDay: StateFlow<Map<LocalDate, List<HotelModel>>> = _trip
         .filterNotNull()
@@ -91,33 +73,17 @@ class ItineraryViewModel @Inject constructor(
                 map.getOrPut(date) { mutableListOf() }.add(hotel)
             }
 
-            // Nights for each hotel (checkOut night excluded)
+            // Nights for each hotel
             hotels.forEach { hotel ->
                 val start = hotel.checkInDate.toLocalDate()
-                val endExclusive = hotel.checkOutDate.toLocalDate() // exclusive
+                val endInclusive = hotel.checkOutDate.toLocalDate().plusDays(1) // exclusive
                 var d = start
-                while (d.isBefore(endExclusive)) {
+                while (d.isBefore(endInclusive)) {
                     add(d, hotel)
                     d = d.plusDays(1)
                 }
             }
 
-            // Changeover (gradient) days: when A.checkOut == B.checkIn
-            for (i in 0 until hotels.lastIndex) {
-                val a = hotels[i]
-                val b = hotels[i + 1]
-                val aOut = a.checkOutDate.toLocalDate()
-                val bIn = b.checkInDate.toLocalDate()
-                if (aOut == bIn) {
-                    // Put both on the shared boundary day (choose either aOut/bIn)
-                    map.getOrPut(aOut) { mutableListOf() }.apply {
-                        if (a !in this) add(a)
-                        if (b !in this) add(b)
-                    }
-                }
-            }
-
-            // Return immutable copy
             map.mapValues { it.value.toList() }
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())

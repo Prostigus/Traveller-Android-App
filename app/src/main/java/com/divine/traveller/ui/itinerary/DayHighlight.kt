@@ -27,7 +27,7 @@ fun computeDayHighlightInfo(
             val prevHasA = bookingsByDay[date.minusDays(1)].orEmpty().any { it.id == a.id }
             val nextHasB = bookingsByDay[date.plusDays(1)].orEmpty().any { it.id == b.id }
             return DayHighlightInfo(
-                colors = listOfNotNull(colorMap[b.id], colorMap[a.id]),
+                colors = listOfNotNull(colorMap[a.id], colorMap[b.id]),
                 isGradient = true,
                 leftContinues = prevHasA,
                 rightContinues = nextHasB
