@@ -154,6 +154,7 @@ fun ItineraryScreen(
             // Calendar - shown at top, will be compressed when scrolling timeline
 
             ItineraryCalendar(
+                viewModel = viewModel,
                 itemsPerDay = itemsForDay,
                 selectedDay = selectedDay.value,
                 tripDates = trip?.tripDatesAsLocalDates ?: emptySet(),

@@ -71,4 +71,6 @@ class HotelRepository @Inject constructor(
 
     suspend fun getById(id: Long) = hotelDao.getById(id)
 
+    fun getAll() = hotelDao.getAll()
+
 }

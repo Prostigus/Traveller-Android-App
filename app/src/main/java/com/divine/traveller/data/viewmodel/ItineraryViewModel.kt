@@ -10,8 +10,10 @@ import com.divine.traveller.data.di.DataStoreModule.SELECTED_DAY_KEY
 import com.divine.traveller.data.di.DataStoreModule.SELECTED_DAY_TIMESTAMP_KEY
 import com.divine.traveller.data.mapper.toDomainModel
 import com.divine.traveller.data.mapper.toEntity
+import com.divine.traveller.data.model.HotelModel
 import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.model.TripModel
+import com.divine.traveller.data.repository.HotelRepository
 import com.divine.traveller.data.repository.ItineraryItemRepository
 import com.divine.traveller.data.repository.PlaceRepository
 import com.divine.traveller.data.repository.TripRepository
@@ -28,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,7 +38,8 @@ class ItineraryViewModel @Inject constructor(
     private val repository: ItineraryItemRepository,
     private val tripRepository: TripRepository,
     val placeRepository: PlaceRepository,
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
+    private val hotelRepository: HotelRepository
 ) : ViewModel() {
 
     private val _trip = MutableStateFlow<TripModel?>(null)
@@ -54,6 +58,23 @@ class ItineraryViewModel @Inject constructor(
         }
         .map { entities -> entities.map { it.toDomainModel() } }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val hotelBookingsForTripByDay: StateFlow<Map<HotelModel, List<LocalDate>>> = _trip
+        .filterNotNull()
+        .flatMapLatest { trip ->
+            hotelRepository.getByTripId(trip.id)
+        }
+        .map { entities ->
+            entities.map { it.toDomainModel() }
+                .associateWith { hotel ->
+                    getAccommodationDays(
+                        hotel.checkInDate.toLocalDate(),
+                        hotel.checkOutDate.toLocalDate().minusDays(1)
+                    )
+                }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
     fun selectDay(day: LocalDate) {
         _selectedDay.value = day
@@ -83,6 +104,43 @@ class ItineraryViewModel @Inject constructor(
                     if (savedDay != null && savedDay >= tripStartDate && isValid) savedDay else defaultDay
             }
         }
+    }
+
+    private fun getAccommodationDays(startDate: LocalDate, endDate: LocalDate): List<LocalDate> {
+        val days = mutableListOf<LocalDate>()
+        var currentDay = startDate
+        while (!currentDay.isAfter(endDate)) {
+            days.add(currentDay)
+            currentDay = currentDay.plusDays(1)
+        }
+        return days
+    }
+
+    fun getMonthDays(yearMonth: YearMonth): List<LocalDate?> {
+        val firstDayOfMonth = yearMonth.atDay(1)
+        val lastDayOfMonth = yearMonth.atEndOfMonth()
+        val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value % 7 // Sunday = 0
+
+        val days = mutableListOf<LocalDate?>()
+
+        // Add empty cells for days before the first day of the month
+        repeat(firstDayOfWeek) {
+            days.add(null)
+        }
+
+        // Add all days of the month
+        var currentDay = firstDayOfMonth
+        while (!currentDay.isAfter(lastDayOfMonth)) {
+            days.add(currentDay)
+            currentDay = currentDay.plusDays(1)
+        }
+
+        // Fill remaining cells to complete the grid (6 rows * 7 days = 42 cells)
+        while (days.size < 42) {
+            days.add(null)
+        }
+
+        return days
     }
 
     fun update(item: ItineraryItemModel) {

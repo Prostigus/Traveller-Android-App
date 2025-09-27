@@ -23,7 +23,7 @@ interface HotelDao {
     @Query("SELECT * FROM hotels WHERE id = :id")
     suspend fun getById(id: Long): HotelEntity?
 
-    @Query("SELECT * FROM hotels WHERE tripId = :tripId")
+    @Query("SELECT * FROM hotels WHERE tripId = :tripId ORDER BY checkInDate ASC")
     fun getByTripId(tripId: Long): Flow<List<HotelEntity>>
 
     @Query("SELECT * FROM hotels")
