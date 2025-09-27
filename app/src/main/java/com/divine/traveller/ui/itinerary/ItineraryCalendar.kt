@@ -1,9 +1,12 @@
 package com.divine.traveller.ui.itinerary
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
@@ -30,6 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,15 +60,38 @@ fun ItineraryCalendar(
 ) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
 
-    val hotelBookingsForTripByDay by viewModel.hotelBookingsForTripByDay.collectAsState(emptyMap())
+    val hotelBookingsByDay by viewModel.hotelBookingsByDay.collectAsState(emptyMap())
 
+    // Color palette (cycled)
+    val palette = listOf(
+        Color(0xFFEF9A9A).copy(alpha = 0.6f),
+        Color(0xFFA5D6A7).copy(alpha = 0.6f),
+        Color(0xFF90CAF9).copy(alpha = 0.6f),
+        Color(0xFFFFF59D).copy(alpha = 0.6f),
+        Color(0xFFCE93D8).copy(alpha = 0.6f)
+    )
 
-    // Auto-select today if it's in the trip dates and no day is selected
-//    LaunchedEffect(itemsPerDay, selectedDay) {
-//        if (selectedDay == null && tripDates.contains(LocalDate.now())) {
-//            onClickDay(LocalDate.now())
-//        }
-//    }
+    // Assign a color per distinct hotel (by hotelId or bookingId)
+    val bookingColorMap = remember(hotelBookingsByDay) {
+        val map = LinkedHashMap<Long, Color>()
+        var idx = 0
+        hotelBookingsByDay
+            .values
+            .flatten()
+            .distinctBy { it.id }  // adapt property if different
+            .forEach { booking ->
+                map[booking.id] = palette[idx % palette.size]
+                idx++
+            }
+        map
+    }
+
+    fun dayHighlight(date: LocalDate) =
+        computeDayHighlightInfo(
+            date = date,
+            bookingsByDay = hotelBookingsByDay,
+            colorMap = bookingColorMap
+        )
 
     Card(
         modifier = modifier
@@ -82,7 +111,6 @@ fun ItineraryCalendar(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Month header with navigation
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -121,14 +149,12 @@ fun ItineraryCalendar(
             }
 
             if (isExpanded) {
-                // Full calendar grid
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(7),
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(0.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // Day headers
                     items(listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")) { dayName ->
                         Text(
                             text = dayName,
@@ -142,21 +168,24 @@ fun ItineraryCalendar(
 
                     val monthDays = viewModel.getMonthDays(currentMonth)
                     items(monthDays) { date ->
-                        val items = itemsPerDay
-                        val isCurrentMonth = date?.month == currentMonth.month
-                        val isTripDay = date?.let { tripDates.contains(it) } ?: false
-
                         if (date != null) {
-                            CalendarDayItem(
-                                date = date,
-                                items = items,
-                                isSelected = date == selectedDay,
-                                isCurrentMonth = isCurrentMonth,
-                                isTripDay = isTripDay,
-                                isToday = date == LocalDate.now(),
-                                onClick = { onClickDay(date) },
-                                compact = false
-                            )
+                            val hi = dayHighlight(date)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(brush = dayRangeBackground(hi))
+                            ) {
+                                CalendarDayItem(
+                                    date = date,
+                                    items = itemsPerDay,
+                                    isSelected = date == selectedDay,
+                                    isCurrentMonth = date.month == currentMonth.month,
+                                    isTripDay = tripDates.contains(date),
+                                    isToday = date == LocalDate.now(),
+                                    onClick = { onClickDay(date) },
+                                    compact = false,
+                                )
+                            }
                         }
                     }
                 }
@@ -182,11 +211,33 @@ fun ItineraryCalendar(
                             isTripDay = tripDates.contains(date),
                             isToday = date == LocalDate.now(),
                             onClick = { onClickDay(date) },
-                            compact = true
+                            compact = true,
                         )
                     }
                 }
             }
         }
     }
+}
+
+private fun dayRangeBackground(info: DayHighlightInfo): Brush {
+    if (info.colors.isEmpty()) return Brush.horizontalGradient(
+        listOf(
+            Color.Transparent,
+            Color.Transparent
+        )
+    )
+    val shape: Shape = RoundedCornerShape(
+        topStart = if (info.leftContinues) 0.dp else 50.dp,
+        bottomStart = if (info.leftContinues) 0.dp else 50.dp,
+        topEnd = if (info.rightContinues) 0.dp else 50.dp,
+        bottomEnd = if (info.rightContinues) 0.dp else 50.dp
+    )
+    val brush = if (info.isGradient && info.colors.size >= 2) {
+        Brush.horizontalGradient(info.colors)
+    } else {
+        Brush.horizontalGradient(listOf(info.colors.first(), info.colors.first()))
+    }
+
+    return brush
 }
