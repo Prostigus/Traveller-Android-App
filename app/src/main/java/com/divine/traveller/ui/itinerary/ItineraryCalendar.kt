@@ -63,6 +63,17 @@ fun ItineraryCalendar(
 
     val hotelBookingsByDay by viewModel.hotelBookingsByDay.collectAsState(emptyMap())
 
+    //TODO: Show days without hotel bookings only once when the calendar is first displayed
+//    val context = LocalContext.current
+
+//    LaunchedEffect(hotelBookingsByDay) {
+//        val days = viewModel.daysWithoutBookings()
+//        if (days.isNotEmpty()) {
+//            val message = days.joinToString(", ") { it.toString() }
+//            Toast.makeText(context, "Days without hotel: $message", Toast.LENGTH_LONG).show()
+//        }
+//    }
+
     // Color palette (cycled)
     val palette = listOf(
         Color(0xFFEF9A9A).copy(alpha = 0.6f),

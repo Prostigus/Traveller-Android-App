@@ -88,6 +88,35 @@ class ItineraryViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
+    fun daysWithoutBookings(): List<LocalDate> {
+
+        //TODO: fix ths logic here, it's broken
+        val trip = _trip.value ?: return emptyList()
+        val allDays = getAccommodationDays(
+            trip.startDateTime.toLocalDate(),
+            trip.endDateTime.toLocalDate()
+        )
+
+        val bookingsByDay = hotelBookingsByDay.value
+
+        return allDays.filter { day ->
+            val todays = bookingsByDay[day].orEmpty()
+            // No hotels at all for the day -> count as without booking
+            if (todays.isEmpty()) return@filter true
+
+            // If there's exactly one hotel, compare its id with previous day's hotels
+            if (todays.size == 1) {
+                val todayId = todays.firstOrNull()?.id
+                val prevList = bookingsByDay[day.minusDays(1)].orEmpty()
+                // Only treat as without booking if both ids are non-null and previous day's bookings do NOT contain today's id
+                return@filter (todayId != null && prevList.isNotEmpty() && prevList.none { it.id == todayId })
+            }
+
+            // Otherwise (multiple hotels) do not treat as without booking
+            false
+        }
+    }
+
     fun selectDay(day: LocalDate) {
         _selectedDay.value = day
         viewModelScope.launch {
