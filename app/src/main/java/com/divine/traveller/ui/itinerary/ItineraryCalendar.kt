@@ -28,7 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.data.viewmodel.HotelsByDay
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import java.time.LocalDate
 import java.time.YearMonth
@@ -56,6 +56,7 @@ fun ItineraryCalendar(
     modifier: Modifier = Modifier,
     viewModel: ItineraryViewModel,
     itemsPerDay: List<ItineraryItemModel>,
+    hotelBookingsByDay: Map<LocalDate, HotelsByDay> = emptyMap(),
     selectedDay: LocalDate? = null,
     tripDates: Set<LocalDate> = emptySet(),
     isExpanded: Boolean = true,
@@ -64,14 +65,12 @@ fun ItineraryCalendar(
 ) {
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
 
-    val hotelBookingsByDay by viewModel.hotelBookingsByDay.collectAsState(emptyMap())
-
     //TODO: Show a better message in the UI
     val context = LocalContext.current
 
     LaunchedEffect(hotelBookingsByDay) {
         val days = hotelBookingsByDay
-            .filter { entry -> entry.value.hotels.isEmpty() }
+            .filter { entry -> !entry.value.isNightBooked }
             .map { entry -> entry.key }
         if (days.isNotEmpty()) {
             val message = days.joinToString(", ") { it.toString() }

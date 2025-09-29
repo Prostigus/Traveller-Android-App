@@ -39,9 +39,8 @@ import com.divine.traveller.data.model.tripDatesAsLocalDates
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.navigation.Routes.TRIP_DETAILS
 import com.divine.traveller.ui.composable.ItineraryNavBar
-import com.divine.traveller.util.toZoneId
+import com.divine.traveller.ui.home.AccommodationsBar
 import java.time.LocalDate
-import java.time.ZoneId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,8 +108,8 @@ fun ItineraryScreen(
     }
 
     val itemsForDay by viewModel.itemsForDay.collectAsState()
+    val hotelBookingsByDay by viewModel.hotelBookingsByDay.collectAsState(emptyMap())
     val trip by viewModel.trip.collectAsState()
-    val timeZone = trip?.let { toZoneId(it.destinationZoneIdString) } ?: ZoneId.systemDefault()
 
     Scaffold(
         modifier = modifier,
@@ -156,6 +155,7 @@ fun ItineraryScreen(
             ItineraryCalendar(
                 viewModel = viewModel,
                 itemsPerDay = itemsForDay,
+                hotelBookingsByDay = hotelBookingsByDay,
                 selectedDay = selectedDay.value,
                 tripDates = trip?.tripDatesAsLocalDates ?: emptySet(),
                 isExpanded = isCalendarExpandedComputed,
@@ -173,6 +173,17 @@ fun ItineraryScreen(
                     .fillMaxWidth()
                     .height(calendarHeight)
             )
+
+            selectedDay.let { day ->
+                AccommodationsBar(
+                    selectedDay = day.value ?: LocalDate.now(),
+                    tripId = tripId,
+                    hotelBookingsByDay = hotelBookingsByDay,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                )
+            }
 
             selectedDay.let { day ->
                 if (itemsForDay.isNotEmpty()) {
