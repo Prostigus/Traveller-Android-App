@@ -1,5 +1,6 @@
 package com.divine.traveller.ui.itinerary
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +39,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,16 +66,18 @@ fun ItineraryCalendar(
 
     val hotelBookingsByDay by viewModel.hotelBookingsByDay.collectAsState(emptyMap())
 
-    //TODO: Show days without hotel bookings only once when the calendar is first displayed
-//    val context = LocalContext.current
+    //TODO: Show a better message in the UI
+    val context = LocalContext.current
 
-//    LaunchedEffect(hotelBookingsByDay) {
-//        val days = viewModel.daysWithoutBookings()
-//        if (days.isNotEmpty()) {
-//            val message = days.joinToString(", ") { it.toString() }
-//            Toast.makeText(context, "Days without hotel: $message", Toast.LENGTH_LONG).show()
-//        }
-//    }
+    LaunchedEffect(hotelBookingsByDay) {
+        val days = hotelBookingsByDay
+            .filter { entry -> entry.value.hotels.isEmpty() }
+            .map { entry -> entry.key.dayOfMonth }
+        if (days.isNotEmpty()) {
+            val message = days.joinToString(", ") { it.toString() }
+            Toast.makeText(context, "Nights without hotel: $message", Toast.LENGTH_LONG).show()
+        }
+    }
 
     // Color palette (cycled)
     val palette = listOf(
@@ -89,8 +94,8 @@ fun ItineraryCalendar(
         var idx = 0
         hotelBookingsByDay
             .values
-            .flatten()
-            .distinctBy { it.id }  // adapt property if different
+            .flatMap { hotelsByDay -> hotelsByDay.hotels }               // List<HotelModel>
+            .distinctBy { hotel -> hotel.id }           // explicit param type inference
             .forEach { booking ->
                 map[booking.id] = palette[idx % palette.size]
                 idx++

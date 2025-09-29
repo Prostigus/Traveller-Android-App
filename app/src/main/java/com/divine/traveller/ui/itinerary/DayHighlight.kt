@@ -1,7 +1,7 @@
 package com.divine.traveller.ui.itinerary
 
 import androidx.compose.ui.graphics.Color
-import com.divine.traveller.data.model.HotelModel
+import com.divine.traveller.data.viewmodel.HotelsByDay
 import java.time.LocalDate
 
 data class DayHighlightInfo(
@@ -13,10 +13,10 @@ data class DayHighlightInfo(
 
 fun computeDayHighlightInfo(
     date: LocalDate,
-    bookingsByDay: Map<LocalDate, List<HotelModel>>,
+    bookingsByDay: Map<LocalDate, HotelsByDay>,
     colorMap: Map<Long, Color>
 ): DayHighlightInfo {
-    val todayBookings = bookingsByDay[date].orEmpty()
+    val todayBookings = bookingsByDay[date]?.hotels.orEmpty()
     if (todayBookings.isEmpty()) return DayHighlightInfo()
 
     if (todayBookings.size >= 2) {
@@ -24,8 +24,8 @@ fun computeDayHighlightInfo(
         if (distinct.size == 2) {
             val a = distinct[0]
             val b = distinct[1]
-            val prevHasA = bookingsByDay[date.minusDays(1)].orEmpty().any { it.id == a.id }
-            val nextHasB = bookingsByDay[date.plusDays(1)].orEmpty().any { it.id == b.id }
+            val prevHasA = bookingsByDay[date.minusDays(1)]?.hotels.orEmpty().any { it.id == a.id }
+            val nextHasB = bookingsByDay[date.plusDays(1)]?.hotels.orEmpty().any { it.id == b.id }
             return DayHighlightInfo(
                 colors = listOfNotNull(colorMap[a.id], colorMap[b.id]),
                 isGradient = true,
@@ -37,8 +37,8 @@ fun computeDayHighlightInfo(
 
     val booking = todayBookings.first()
     val color = colorMap[booking.id] ?: return DayHighlightInfo()
-    val prevHasSame = bookingsByDay[date.minusDays(1)].orEmpty().any { it.id == booking.id }
-    val nextHasSame = bookingsByDay[date.plusDays(1)].orEmpty().any { it.id == booking.id }
+    val prevHasSame = bookingsByDay[date.minusDays(1)]?.hotels.orEmpty().any { it.id == booking.id }
+    val nextHasSame = bookingsByDay[date.plusDays(1)]?.hotels.orEmpty().any { it.id == booking.id }
 
     return DayHighlightInfo(
         colors = listOf(color),

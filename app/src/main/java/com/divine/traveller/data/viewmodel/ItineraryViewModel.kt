@@ -60,61 +60,53 @@ class ItineraryViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val hotelBookingsByDay: StateFlow<Map<LocalDate, List<HotelModel>>> = _trip
+    val hotelBookingsByDay: StateFlow<Map<LocalDate, HotelsByDay>> = _trip
         .filterNotNull()
         .flatMapLatest { trip ->
-            hotelRepository.getByTripId(trip.id)
-        }
-        .map { entities ->
-            val hotels = entities.map { it.toDomainModel() }.sortedBy { it.checkInDate }
-            val map = mutableMapOf<LocalDate, MutableList<HotelModel>>()
+            hotelRepository.getByTripId(trip.id).map { entities ->
+                val hotels = entities.map { it.toDomainModel() }.sortedBy { it.checkInDate }
 
-            fun add(date: LocalDate, hotel: HotelModel) {
-                map.getOrPut(date) { mutableListOf() }.add(hotel)
-            }
+                val tripStartDay = trip.startDateTime.toLocalDate()
+                val tripLastDay = trip.endDateTime.toLocalDate()
 
-            // Nights for each hotel
-            hotels.forEach { hotel ->
-                val start = hotel.checkInDate.toLocalDate()
-                val endInclusive = hotel.checkOutDate.toLocalDate().plusDays(1) // exclusive
-                var d = start
-                while (d.isBefore(endInclusive)) {
-                    add(d, hotel)
-                    d = d.plusDays(1)
+                // Initialize map with every trip day as an empty list
+                val map = getAccommodationDays(tripStartDay, tripLastDay)
+                    .associateWith { mutableListOf<HotelModel>() }
+                    .toMutableMap()
+
+                // Add each hotel to the days it spans (clipped to the trip range)
+                hotels.forEach { hotel ->
+                    val hotelStart = hotel.checkInDate.toLocalDate().coerceAtLeast(tripStartDay)
+                    val hotelEndExclusive = hotel.checkOutDate.toLocalDate().plusDays(1)
+                        .coerceAtMost(tripLastDay.plusDays(1))
+
+                    var d = hotelStart
+                    while (d.isBefore(hotelEndExclusive)) {
+                        map[d]?.add(hotel) // safe because map has all trip days
+                        d = d.plusDays(1)
+                    }
+                }
+
+                // Convert to immutable HotelsByDay
+                map.mapValues { (day, list) ->
+                    HotelsByDay(
+                        isNightBooked = checkDateHasHotelNightBooking(day, list, tripLastDay),
+                        hotels = list.toList()
+                    )
                 }
             }
-
-            map.mapValues { it.value.toList() }
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
-    fun daysWithoutBookings(): List<LocalDate> {
-
-        //TODO: fix ths logic here, it's broken
-        val trip = _trip.value ?: return emptyList()
-        val allDays = getAccommodationDays(
-            trip.startDateTime.toLocalDate(),
-            trip.endDateTime.toLocalDate()
-        )
-
-        val bookingsByDay = hotelBookingsByDay.value
-
-        return allDays.filter { day ->
-            val todays = bookingsByDay[day].orEmpty()
-            // No hotels at all for the day -> count as without booking
-            if (todays.isEmpty()) return@filter true
-
-            // If there's exactly one hotel, compare its id with previous day's hotels
-            if (todays.size == 1) {
-                val todayId = todays.firstOrNull()?.id
-                val prevList = bookingsByDay[day.minusDays(1)].orEmpty()
-                // Only treat as without booking if both ids are non-null and previous day's bookings do NOT contain today's id
-                return@filter (todayId != null && prevList.isNotEmpty() && prevList.none { it.id == todayId })
-            }
-
-            // Otherwise (multiple hotels) do not treat as without booking
-            false
-        }
+    fun checkDateHasHotelNightBooking(
+        date: LocalDate,
+        hotelList: List<HotelModel>,
+        tripLastDay: LocalDate
+    ): Boolean {
+        if (hotelList.isEmpty()) return false
+        if (hotelList.size == 1 && hotelList[0].checkOutDate.toLocalDate() == date && date != tripLastDay) return false
+        if (hotelList.size > 1 && hotelList.any { it.checkOutDate.toLocalDate() == date } && !hotelList.any { it.checkInDate.toLocalDate() == date } && date != tripLastDay) return false
+        return true
     }
 
     fun selectDay(day: LocalDate) {
@@ -219,3 +211,8 @@ class ItineraryViewModel @Inject constructor(
     }
 
 }
+
+data class HotelsByDay(
+    val isNightBooked: Boolean,
+    val hotels: List<HotelModel>
+)
