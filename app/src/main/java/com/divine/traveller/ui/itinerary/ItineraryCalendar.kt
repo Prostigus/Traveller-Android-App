@@ -72,7 +72,7 @@ fun ItineraryCalendar(
     LaunchedEffect(hotelBookingsByDay) {
         val days = hotelBookingsByDay
             .filter { entry -> entry.value.hotels.isEmpty() }
-            .map { entry -> entry.key.dayOfMonth }
+            .map { entry -> entry.key }
         if (days.isNotEmpty()) {
             val message = days.joinToString(", ") { it.toString() }
             Toast.makeText(context, "Nights without hotel: $message", Toast.LENGTH_LONG).show()
