@@ -91,11 +91,11 @@ fun ItineraryCalendar(
     val paletteAlpha = if (isSystemInDarkTheme()) 0.85f else 0.6f
 
     val palette = listOf(
-        Color(0xFF00E5B7).copy(alpha = paletteAlpha), // vivid teal - works well on dark
-        Color(0xFFFF7A7A).copy(alpha = paletteAlpha), // coral/red - high contrast
-        Color(0xFF4FC3F7).copy(alpha = paletteAlpha), // sky blue - bright accent
-        Color(0xFFFFD27F).copy(alpha = paletteAlpha), // warm amber - soft highlight
-        Color(0xFFB388FF).copy(alpha = paletteAlpha)  // soft purple - complementary accent
+        Color(0xFF00E5B7).copy(alpha = paletteAlpha),
+        Color(0xFFFF7A7A).copy(alpha = paletteAlpha),
+        Color(0xFF4FC3F7).copy(alpha = paletteAlpha),
+        Color(0xFFFFD27F).copy(alpha = paletteAlpha),
+        Color(0xFFB388FF).copy(alpha = paletteAlpha)
     )
 
     // Assign a color per distinct hotel (by hotelId or bookingId)

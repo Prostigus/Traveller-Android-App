@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -99,7 +99,7 @@ fun AccommodationsBar(
                 LazyRow {
                     items(hotels, key = { it.id }) { hotel ->
                         ItineraryHotelItemCard(
-                            modifier = Modifier.width(350.dp),
+                            modifier = Modifier.widthIn(min = 200.dp, max = 350.dp),
                             tripId = tripId,
                             hotel = hotel,
                             onClick = { /* navigation handled by card itself */ }
