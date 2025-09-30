@@ -47,8 +47,8 @@ import com.divine.traveller.data.model.HotelModel
 import com.divine.traveller.data.viewmodel.HotelViewModel
 import com.divine.traveller.navigation.LocalNavController
 import com.divine.traveller.navigation.Routes
+import com.divine.traveller.ui.composable.ClickableAddressRow
 import com.divine.traveller.ui.composable.DetailsActionRow
-import com.divine.traveller.ui.composable.InfoRow
 import com.divine.traveller.util.getCategoryColor
 import com.divine.traveller.util.getCategoryIcon
 import kotlinx.coroutines.launch
@@ -73,7 +73,7 @@ fun ItineraryHotelItemCard(
         onClick = {
             showDetails = true
             onClick()
-        }
+        },
     )
 
     if (showDetails) {
@@ -103,7 +103,7 @@ fun ItineraryHotelItemCard(
 fun HotelItemCard(
     modifier: Modifier,
     hotel: HotelModel,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Card(
         modifier = modifier
@@ -165,7 +165,10 @@ fun HotelItemCard(
             )
             hotel.address.let {
                 if (it?.isNotBlank() ?: false) {
-                    InfoRow("Address", it)
+                    ClickableAddressRow(
+                        it,
+                        placeId = hotel.placeId ?: "",
+                    )
                 }
             }
         }

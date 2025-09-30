@@ -1,5 +1,6 @@
 package com.divine.traveller.data.repository
 
+import androidx.core.net.toUri
 import com.divine.traveller.data.dao.PlaceDao
 import com.divine.traveller.data.entity.PlaceEntity
 import com.google.android.gms.maps.model.LatLng
@@ -82,6 +83,8 @@ class PlaceRepository @Inject constructor(
             .setId(entity.id)
             .setFormattedAddress(entity.address)
             .setDisplayName(entity.displayName)
+            .setGoogleMapsUri(entity.googleMapsUri?.toUri())
+            .setPrimaryType(entity.primaryType)
 
         if (entity.latitude != null && entity.longitude != null) {
             builder.setLocation(LatLng(entity.latitude, entity.longitude))

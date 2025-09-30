@@ -229,6 +229,7 @@ fun ItineraryScreen(
                 tripId = tripId,
                 hotelBookingsByDay = hotelBookingsByDay,
                 modifier = Modifier
+                    .padding(horizontal = 10.dp)
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
             )
