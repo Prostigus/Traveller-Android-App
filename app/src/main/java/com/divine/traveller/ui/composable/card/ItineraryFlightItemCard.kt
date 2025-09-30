@@ -36,7 +36,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,8 +46,6 @@ import com.divine.traveller.data.viewmodel.FlightViewModel
 import com.divine.traveller.navigation.LocalNavController
 import com.divine.traveller.navigation.Routes
 import com.divine.traveller.ui.composable.DetailsActionRow
-import com.divine.traveller.ui.composable.InfoRow
-import com.divine.traveller.util.formatZonedDateTime
 import com.divine.traveller.util.getCategoryColor
 import com.divine.traveller.util.getCategoryIcon
 import kotlinx.coroutines.launch
@@ -147,37 +144,38 @@ fun FlightItemCard(
                 Column(
                     modifier = Modifier.weight(1f)
                 ) {
-                    val departureLabel =
-                        flight.departureAirport?.iataCode?.takeIf { it.isNotBlank() }
-                            ?: flight.departureAirport?.municipality
-                            ?: ""
-                    val arrivalLabel = flight.arrivalAirport?.iataCode?.takeIf { it.isNotBlank() }
-                        ?: flight.arrivalAirport?.municipality
-                        ?: ""
-
-                    Text(
-                        text = "Flight from $departureLabel to $arrivalLabel",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Flight to ${flight.arrivalAirport?.municipality}",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Column {
+                            Text(
+                                text = flight.airline,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            )
+                            Text(
+                                text = flight.flightNumber,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            )
+                        }
+                    }
 
                 }
             }
-
-            Column(
-                modifier = Modifier
-                    .padding(top = 12.dp, start = 4.dp, end = 4.dp, bottom = 4.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                InfoRow("Airline", flight.airline)
-                InfoRow("Flight Number", flight.flightNumber)
-                InfoRow("Departure", formatZonedDateTime(flight.departureDateTime))
-                InfoRow("Arrival", formatZonedDateTime(flight.arrivalDateTime))
-            }
+            FlightRouteRow(
+                departureIata = flight.departureAirport?.iataCode,
+                departureMunicipality = flight.departureAirport?.municipality,
+                arrivalIata = flight.arrivalAirport?.iataCode,
+                arrivalMunicipality = flight.arrivalAirport?.municipality
+            )
+            DateRow(flight.departureDateTime, flight.arrivalDateTime)
         }
     }
 }
@@ -305,7 +303,6 @@ private fun FlightRouteRow(
                 )
             }
         }
-
 
         AirportColumn(
             modifier = Modifier
