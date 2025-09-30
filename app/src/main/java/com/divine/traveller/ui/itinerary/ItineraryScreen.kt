@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -69,24 +70,73 @@ fun ItineraryScreen(
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // available.y is negative when scrolling up (content moves up)
+                // collapse as the user scrolls up — handle before the child scrolls
                 if (available.y < 0f && calendarOffset < maxOffset) {
                     val delta = -available.y
                     val newOffset = (calendarOffset + delta).coerceAtMost(maxOffset)
                     val consumed = newOffset - calendarOffset
                     calendarOffset = newOffset
-                    // consumed is positive -> we consumed upward scroll, so return negative y
                     return Offset(0f, -consumed)
-                } else if (available.y > 0f && calendarOffset > 0f) {
-                    // scrolling down: expand calendar if there's collapsed offset
+                }
+                return Offset.Zero
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                // expand only after the child had a chance to scroll.
+                // this ensures expansion only starts when the timeline is at the very top.
+                if (available.y > 0f &&
+                    calendarOffset > 0f &&
+                    timelineScrollState.firstVisibleItemIndex == 0 &&
+                    timelineScrollState.firstVisibleItemScrollOffset == 0
+                ) {
                     val delta = available.y
                     val newOffset = (calendarOffset - delta).coerceAtLeast(0f)
                     val consumed = calendarOffset - newOffset
                     calendarOffset = newOffset
-                    // consumed is positive -> we consumed downward scroll, so return positive y
                     return Offset(0f, consumed)
                 }
                 return Offset.Zero
+            }
+
+            override suspend fun onPreFling(available: androidx.compose.ui.unit.Velocity): androidx.compose.ui.unit.Velocity {
+                // snap fully expand/collapse on fling to avoid being left mid-way
+                if (available.y > 0f &&
+                    calendarOffset > 0f &&
+                    timelineScrollState.firstVisibleItemIndex == 0 &&
+                    timelineScrollState.firstVisibleItemScrollOffset == 0
+                ) {
+                    calendarOffset = 0f
+                    return available
+                } else if (available.y < 0f && calendarOffset < maxOffset) {
+                    calendarOffset = maxOffset
+                    return available
+                }
+                return androidx.compose.ui.unit.Velocity.Zero
+            }
+        }
+    }
+
+    // Snap when user stops dragging (no fling). This watches the timeline's scrolling state
+    // and, once scrolling finishes, snaps the calendar to fully expanded or collapsed.
+    LaunchedEffect(timelineScrollState) {
+        snapshotFlow { timelineScrollState.isScrollInProgress }.collect { inProgress ->
+            if (!inProgress) {
+                // only snap if calendar is mid-way
+                if (calendarOffset > 0f && calendarOffset < maxOffset) {
+                    if (timelineScrollState.firstVisibleItemIndex == 0 &&
+                        timelineScrollState.firstVisibleItemScrollOffset == 0
+                    ) {
+                        // at very top -> snap to nearest end
+                        calendarOffset = if (calendarOffset < maxOffset / 2f) 0f else maxOffset
+                    } else {
+                        // not at top -> collapse fully
+                        calendarOffset = maxOffset
+                    }
+                }
             }
         }
     }
