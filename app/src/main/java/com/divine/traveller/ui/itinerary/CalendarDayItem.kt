@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,7 +44,7 @@ fun CalendarDayItem(
                     isSelected -> MaterialTheme.colorScheme.primary
                     isTripDay && isCurrentMonth -> MaterialTheme.colorScheme.primaryContainer
                     isToday && isCurrentMonth -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
-                    else -> Color.Transparent
+                    else -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
                 }
             )
             .border(

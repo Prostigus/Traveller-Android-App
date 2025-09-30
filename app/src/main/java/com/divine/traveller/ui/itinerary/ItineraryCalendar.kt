@@ -3,6 +3,7 @@ package com.divine.traveller.ui.itinerary
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,13 +79,14 @@ fun ItineraryCalendar(
         }
     }
 
-    // Color palette (cycled)
+    val paletteAlpha = if (isSystemInDarkTheme()) 0.85f else 0.6f
+
     val palette = listOf(
-        Color(0xFFEF9A9A).copy(alpha = 0.6f),
-        Color(0xFFA5D6A7).copy(alpha = 0.6f),
-        Color(0xFF90CAF9).copy(alpha = 0.6f),
-        Color(0xFFFFF59D).copy(alpha = 0.6f),
-        Color(0xFFCE93D8).copy(alpha = 0.6f)
+        Color(0xFF00E5B7).copy(alpha = paletteAlpha), // vivid teal - works well on dark
+        Color(0xFFFF7A7A).copy(alpha = paletteAlpha), // coral/red - high contrast
+        Color(0xFF4FC3F7).copy(alpha = paletteAlpha), // sky blue - bright accent
+        Color(0xFFFFD27F).copy(alpha = paletteAlpha), // warm amber - soft highlight
+        Color(0xFFB388FF).copy(alpha = paletteAlpha)  // soft purple - complementary accent
     )
 
     // Assign a color per distinct hotel (by hotelId or bookingId)
