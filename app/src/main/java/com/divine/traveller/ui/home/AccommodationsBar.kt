@@ -10,8 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -59,7 +60,7 @@ fun AccommodationsBar(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -95,10 +96,10 @@ fun AccommodationsBar(
             }
 
             if (expanded && hotels.isNotEmpty()) {
-                LazyColumn {
+                LazyRow {
                     items(hotels, key = { it.id }) { hotel ->
                         ItineraryHotelItemCard(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.width(350.dp),
                             tripId = tripId,
                             hotel = hotel,
                             onClick = { /* navigation handled by card itself */ }

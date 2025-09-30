@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,7 +49,6 @@ import com.divine.traveller.navigation.LocalNavController
 import com.divine.traveller.navigation.Routes
 import com.divine.traveller.ui.composable.DetailsActionRow
 import com.divine.traveller.ui.composable.InfoRow
-import com.divine.traveller.util.formatZonedDateTime
 import com.divine.traveller.util.getCategoryColor
 import com.divine.traveller.util.getCategoryIcon
 import kotlinx.coroutines.launch
@@ -121,15 +121,16 @@ fun HotelItemCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
             // Header row with category icon and title
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Category icon with background
                 Box(
                     modifier = Modifier
                         .size(40.dp)
@@ -145,35 +146,27 @@ fun HotelItemCard(
                     )
                 }
 
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-
-                    Text(
-                        text = hotel.name,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .padding(top = 12.dp, start = 4.dp, end = 4.dp, bottom = 4.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                InfoRow("Address", hotel.address ?: "N/A")
-                InfoRow("Check-in", formatZonedDateTime(hotel.checkInDate))
-                InfoRow("Check-out", formatZonedDateTime(hotel.checkOutDate))
-                if (hotel.bookingReference != null) InfoRow(
-                    "Booking Reference",
-                    hotel.bookingReference
+                Text(
+                    modifier = Modifier
+                        .weight(1f)
+                        .wrapContentWidth(Alignment.End),
+                    text = hotel.name,
+                    textAlign = TextAlign.End,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+            }
+            HotelCheckInCheckOutRow(
+                checkIn = hotel.checkInDate,
+                checkOut = hotel.checkOutDate
+            )
+            hotel.address.let {
+                if (it?.isNotBlank() ?: false) {
+                    InfoRow("Address", it)
+                }
             }
         }
     }

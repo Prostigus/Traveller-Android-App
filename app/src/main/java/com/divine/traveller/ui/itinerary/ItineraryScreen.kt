@@ -174,16 +174,14 @@ fun ItineraryScreen(
                     .height(calendarHeight)
             )
 
-            selectedDay.let { day ->
-                AccommodationsBar(
-                    selectedDay = day.value ?: LocalDate.now(),
-                    tripId = tripId,
-                    hotelBookingsByDay = hotelBookingsByDay,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background)
-                )
-            }
+            AccommodationsBar(
+                selectedDay = selectedDay.value ?: LocalDate.now(),
+                tripId = tripId,
+                hotelBookingsByDay = hotelBookingsByDay,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+            )
 
             selectedDay.let { day ->
                 if (itemsForDay.isNotEmpty()) {
