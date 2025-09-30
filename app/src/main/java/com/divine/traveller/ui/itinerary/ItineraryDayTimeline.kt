@@ -1,6 +1,7 @@
 package com.divine.traveller.ui.itinerary
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -13,9 +14,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.data.viewmodel.HotelsByDay
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.ui.composable.card.ItineraryFlightItemCard
 import com.divine.traveller.ui.composable.card.ItineraryItemCard
+import com.divine.traveller.ui.home.AccommodationsBar
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import java.time.LocalDate
@@ -25,6 +28,7 @@ fun ItineraryDayTimeline(
     modifier: Modifier = Modifier,
     day: LocalDate,
     itemsForDay: List<ItineraryItemModel>,
+    hotelBookingsByDay: Map<LocalDate, HotelsByDay>,
     tripId: Long,
     viewModel: ItineraryViewModel,
     lazyListState: LazyListState
@@ -47,6 +51,17 @@ fun ItineraryDayTimeline(
         LazyColumn(
             state = lazyListState
         ) {
+
+            item {
+                AccommodationsBar(
+                    selectedDay = day,
+                    hotelBookingsByDay = hotelBookingsByDay,
+                    tripId = tripId,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
+
             items(list, key = { it.id }) { item ->
                 ReorderableItem(reorderableLazyListState, key = item.id) { isDragging ->
 

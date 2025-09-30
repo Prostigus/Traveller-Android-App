@@ -22,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,32 +58,6 @@ fun ItineraryItemCard(
 ) {
     var expanded by remember { mutableStateOf(false) }
     var placeDetails by remember { mutableStateOf<Place?>(null) }
-    val context = LocalContext.current
-
-    // Fetch place details if googlePlaceLink is available
-    LaunchedEffect(item.placeId) {
-        if (!item.placeId.isNullOrEmpty()) {
-            val placeId = item.placeId
-
-            val placeFields = listOf(
-                Place.Field.ID,
-                Place.Field.NAME,
-                Place.Field.LAT_LNG,
-                Place.Field.ADDRESS,
-                Place.Field.RATING,
-                Place.Field.PHOTO_METADATAS
-            )
-
-//            val request = FetchPlaceRequest.newInstance(placeId, placeFields)
-//            placesClient.fetchPlace(request)
-//                .addOnSuccessListener { response ->
-//                    placeDetails = response.place
-//                }
-//                .addOnFailureListener { exception ->
-//                    // Handle error
-//                }
-        }
-    }
 
     Card(
         modifier = modifier

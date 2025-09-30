@@ -40,7 +40,6 @@ import com.divine.traveller.data.model.tripDatesAsLocalDates
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
 import com.divine.traveller.navigation.Routes.TRIP_DETAILS
 import com.divine.traveller.ui.composable.ItineraryNavBar
-import com.divine.traveller.ui.home.AccommodationsBar
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -224,21 +223,22 @@ fun ItineraryScreen(
                     .height(calendarHeight)
             )
 
-            AccommodationsBar(
-                selectedDay = selectedDay.value ?: LocalDate.now(),
-                tripId = tripId,
-                hotelBookingsByDay = hotelBookingsByDay,
-                modifier = Modifier
-                    .padding(horizontal = 15.dp)
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background)
-            )
+//            AccommodationsBar(
+//                selectedDay = selectedDay.value ?: LocalDate.now(),
+//                tripId = tripId,
+//                hotelBookingsByDay = hotelBookingsByDay,
+//                modifier = Modifier
+//                    .padding(horizontal = 15.dp)
+//                    .fillMaxWidth()
+//                    .background(MaterialTheme.colorScheme.background)
+//            )
 
             selectedDay.let { day ->
                 if (itemsForDay.isNotEmpty()) {
                     ItineraryDayTimeline(
                         day = day.value ?: LocalDate.now(),
                         itemsForDay = itemsForDay,
+                        hotelBookingsByDay = hotelBookingsByDay,
                         viewModel = viewModel,
                         tripId = tripId,
                         lazyListState = timelineScrollState,

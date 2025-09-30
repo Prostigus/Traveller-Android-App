@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.divine.traveller.R
@@ -47,7 +47,6 @@ fun AccommodationsBar(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    // Flatten distinct hotels across days
     val hotels = remember(selectedDay, hotelBookingsByDay) {
         hotelBookingsByDay[selectedDay]?.hotels ?: emptyList()
     }
@@ -55,12 +54,18 @@ fun AccommodationsBar(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .animateContentSize(),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+//            .wrapContentHeight()
+            .animateContentSize()
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(12.dp)
+            ),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
