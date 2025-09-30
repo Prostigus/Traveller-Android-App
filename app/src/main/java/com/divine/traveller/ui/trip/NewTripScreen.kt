@@ -112,11 +112,12 @@ fun NewTripScreen(
     }
 
     val startDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = startDateTime?.toEpochSecond() ?: today,
+        initialSelectedDateMillis = startDateTime?.toInstant()?.toEpochMilli() ?: today,
     )
 
     val endDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = endDateTime?.toEpochSecond() ?: today
+        initialSelectedDateMillis = endDateTime?.toInstant()?.toEpochMilli()
+            ?: startDateTime?.toInstant()?.toEpochMilli() ?: today,
     )
 
     Scaffold(
@@ -383,18 +384,36 @@ fun NewTripScreen(
 
     // Start Date Picker Dialog
     if (showStartDatePicker) {
+        val startState = rememberDatePickerState(
+            initialSelectedDateMillis = startDateTime?.toInstant()?.toEpochMilli() ?: today,
+            initialDisplayedMonthMillis = startDateTime?.toInstant()?.toEpochMilli() ?: today
+        )
+
         DatePickerDialog(
             onDismissRequest = { showStartDatePicker = false },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        startDatePickerState.selectedDateMillis?.let { millis ->
-                            newTripStateModel.setStartDate(
-                                correctUtcTimeStampForZonedDate(
-                                    millis,
-                                    ZoneId.systemDefault()
-                                )
+                        startState.selectedDateMillis?.let { millis ->
+                            val startZoned = correctUtcTimeStampForZonedDate(
+                                millis,
+                                ZoneId.systemDefault()
                             )
+                            newTripStateModel.setStartDate(startZoned)
+
+                            // if end date hasn't been picked, set it to start + 1 day
+                            if (endDateTime == null) {
+                                val oneDayMillis = 24 * 60 * 60 * 1000L
+                                val nextMillis = millis + oneDayMillis
+                                val zoneId = try {
+                                    ZoneId.of(destinationZoneIdString)
+                                } catch (e: Exception) {
+                                    ZoneId.systemDefault()
+                                }
+                                val nextZoned = correctUtcTimeStampForZonedDate(nextMillis, zoneId)
+                                newTripStateModel.setEndDate(nextZoned)
+                                // no need to update a global end state here; dialog state will be recreated when opened
+                            }
                         }
 
                         showStartDatePicker = false
@@ -409,18 +428,27 @@ fun NewTripScreen(
                 }
             }
         ) {
-            DatePicker(state = startDatePickerState)
+            DatePicker(state = startState)
         }
     }
 
     // End Date Picker Dialog
     if (showEndDatePicker) {
+        val fallbackStart = startDateTime?.plusDays(1)
+        val initialEndMillis = endDateTime?.toInstant()?.toEpochMilli()
+            ?: fallbackStart?.toInstant()?.toEpochMilli() ?: today
+
+        val endState = rememberDatePickerState(
+            initialSelectedDateMillis = initialEndMillis,
+            initialDisplayedMonthMillis = initialEndMillis
+        )
+
         DatePickerDialog(
             onDismissRequest = { showEndDatePicker = false },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        endDatePickerState.selectedDateMillis?.let { millis ->
+                        endState.selectedDateMillis?.let { millis ->
                             newTripStateModel.setEndDate(
                                 correctUtcTimeStampForZonedDate(
                                     millis,
@@ -440,7 +468,7 @@ fun NewTripScreen(
                 }
             }
         ) {
-            DatePicker(state = endDatePickerState)
+            DatePicker(state = endState)
         }
     }
 }

@@ -49,6 +49,11 @@ class NewHotelStateModel @Inject constructor(
 
     fun setCheckInLocalDate(v: LocalDateTime?) {
         update { it.copy(checkInLocalDate = v) }
+        if (uiState.value.checkOutLocalDate == null) {
+            update {
+                it.copy(checkOutLocalDate = v)
+            }
+        }
     }
 
     fun setCheckOutLocalDate(v: LocalDateTime?) {

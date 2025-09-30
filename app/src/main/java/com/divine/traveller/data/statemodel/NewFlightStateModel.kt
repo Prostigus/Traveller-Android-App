@@ -51,6 +51,11 @@ class NewFlightStateModel @Inject constructor(
 
     fun setDepartureLocalDate(v: LocalDateTime?) {
         update { it.copy(departureLocalDate = v) }
+        if (uiState.value.arrivalLocalDate == null) {
+            update {
+                it.copy(arrivalLocalDate = v)
+            }
+        }
         maybeUpdateDepartureDateTime()
     }
 

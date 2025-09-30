@@ -47,7 +47,19 @@ class FlightViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _newFlightCreation.value = NewFlightCreationState.Creating
-                Log.d("FlightViewModel", "Creating new flight with state: $state")
+
+                if (state.departureDateTime == null || state.arrivalDateTime == null) {
+                    _newFlightCreation.value =
+                        NewFlightCreationState.Error("Departure and Arrival date/time must be set")
+                    return@launch
+                }
+
+                if (state.arrivalDateTime.isBefore(state.arrivalDateTime)) {
+                    _newFlightCreation.value =
+                        NewFlightCreationState.Error("Arrival date/time cannot be before Departure date/time")
+                    return@launch
+                }
+
                 val departureModel = state.departurePlace?.location?.let { latLng ->
                     airportRepository.findNearestIata(
                         lat = latLng.latitude,
@@ -70,8 +82,8 @@ class FlightViewModel @Inject constructor(
                     arrivalAirport = arrivalModel,
                     departurePlaceId = state.departurePlace?.id,
                     arrivalPlaceId = state.arrivalPlace?.id,
-                    departureDateTime = state.departureDateTime!!,
-                    arrivalDateTime = state.arrivalDateTime!!,
+                    departureDateTime = state.departureDateTime,
+                    arrivalDateTime = state.arrivalDateTime,
                     status = FlightStatus.SCHEDULED
                 )
                 repository.insertFlightWithItinerary(newFlight) {
