@@ -64,9 +64,6 @@ fun ItineraryCalendar(
     onClickDay: (LocalDate) -> Unit = {},
     onToggleExpanded: () -> Unit = {}
 ) {
-    var currentMonth by remember { mutableStateOf(YearMonth.now()) }
-
-    //TODO: Show a better message in the UI
     val context = LocalContext.current
 
     LaunchedEffect(hotelBookingsByDay) {
@@ -76,6 +73,18 @@ fun ItineraryCalendar(
         if (days.isNotEmpty()) {
             val message = days.joinToString(", ") { it.toString() }
             Toast.makeText(context, "Nights without hotel: $message", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    var currentMonth by remember {
+        mutableStateOf(
+            selectedDay?.let { YearMonth.of(it.year, it.monthValue) } ?: YearMonth.now()
+        )
+    }
+
+    LaunchedEffect(selectedDay) {
+        selectedDay?.let {
+            currentMonth = YearMonth.of(it.year, it.monthValue)
         }
     }
 
