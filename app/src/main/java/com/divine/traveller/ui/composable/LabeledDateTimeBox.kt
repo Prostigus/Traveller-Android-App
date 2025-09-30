@@ -1,10 +1,13 @@
 package com.divine.traveller.ui.composable
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -21,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -84,31 +88,41 @@ fun LabeledDateTimeBox(
             onDismissRequest = { showPicker = false },
             properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 12.dp,
-                shadowElevation = 12.dp,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f))
-            ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text(
-                        text = "Select Date & Time",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 16.dp)
+            BoxWithConstraints {
+                val dialogWidth = maxWidth
+
+                Surface(
+                    modifier = Modifier
+                        .width(dialogWidth)
+                        .padding(horizontal = 8.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    color = MaterialTheme.colorScheme.background,
+                    tonalElevation = 12.dp,
+                    shadowElevation = 12.dp,
+                    border = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
                     )
-                    WheelDateTimePickerComposable(
-                        onCancel = { showPicker = false },
-                        onConfirm = {
-                            onDateTimeChanged(it)
-                            showPicker = false
-                        },
-                        editDateTime = dateTime ?: LocalDateTime.now()
-                    )
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text(
+                            text = "Select Date & Time",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        Log.d("LabeledDateTimeBox", "Container width: $dialogWidth")
+                        WheelDateTimePickerComposable(
+                            onCancel = { showPicker = false },
+                            onConfirm = {
+                                onDateTimeChanged(it)
+                                showPicker = false
+                            },
+                            editDateTime = dateTime ?: LocalDateTime.now(),
+                            size = DpSize((dialogWidth - 48.dp), 140.dp)
+                        )
+                    }
                 }
             }
         }

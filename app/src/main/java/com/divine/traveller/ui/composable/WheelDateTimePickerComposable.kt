@@ -42,6 +42,7 @@ fun WheelDateTimePickerComposable(
     editDateTime: java.time.LocalDateTime = Clock.System.now()
         .toLocalDateTime(TimeZone.currentSystemDefault())
         .toJavaLocalDateTime(),
+    size: DpSize = DpSize(256.dp, 128.dp),
 ) {
 
     var selectedDateTime by remember {
@@ -72,7 +73,7 @@ fun WheelDateTimePickerComposable(
         timeFormatter = timeFormatter(
             timeFormat = TimeFormat.HOUR_24
         ),
-        size = DpSize(400.dp, 100.dp),
+        size = size,
         rowCount = 5,
         textStyle = MaterialTheme.typography.titleSmall,
         textColor = MaterialTheme.colorScheme.primary,

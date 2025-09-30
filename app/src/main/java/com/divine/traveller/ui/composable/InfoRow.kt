@@ -1,6 +1,5 @@
 package com.divine.traveller.ui.composable
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun InfoRow(label: String, value: String, onClick: () -> Unit = {}) {
+fun InfoRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -33,7 +32,6 @@ fun InfoRow(label: String, value: String, onClick: () -> Unit = {}) {
                     strokeWidth = strokeWidth
                 )
             }
-            .clickable(onClick = onClick)
             .padding(top = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

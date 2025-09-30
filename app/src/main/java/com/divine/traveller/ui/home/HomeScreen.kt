@@ -157,7 +157,8 @@ fun HomeScreen(
                             items(upcomingTrips) { trip ->
                                 TripCard(
                                     tripModel = trip,
-                                    modifier = Modifier.width(256.dp)
+                                    modifier = Modifier.width(256.dp),
+                                    onClick = { onNavigateToTripDetails(trip.id) }
                                 )
                             }
                         }
