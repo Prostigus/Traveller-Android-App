@@ -8,6 +8,10 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
     namespace = "com.divine.traveller"
     compileSdk = 36
@@ -41,9 +45,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
+
     buildFeatures {
         compose = true
     }

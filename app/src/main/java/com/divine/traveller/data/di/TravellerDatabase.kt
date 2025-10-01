@@ -28,7 +28,7 @@ import com.divine.traveller.util.ZonedDateTimeConverter
 @Database(
     entities = [TripEntity::class, ItineraryItemEntity::class, FlightEntity::class, HotelEntity::class, BudgetItemEntity::class, DocumentEntity::class, AirportEntity::class, PlaceEntity::class],
     version = 1,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(DateConverter::class, ZonedDateTimeConverter::class, LocalDateConverter::class)
 abstract class TravellerDatabase : RoomDatabase() {

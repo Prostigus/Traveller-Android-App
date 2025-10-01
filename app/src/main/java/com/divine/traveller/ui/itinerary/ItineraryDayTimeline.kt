@@ -16,6 +16,7 @@ import com.divine.traveller.data.entity.ItineraryCategory
 import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.viewmodel.HotelsByDay
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
+import com.divine.traveller.data.viewmodel.PlaceViewModel
 import com.divine.traveller.ui.composable.card.ItineraryFlightItemCard
 import com.divine.traveller.ui.composable.card.ItineraryItemCard
 import com.divine.traveller.ui.home.AccommodationsBar
@@ -31,6 +32,7 @@ fun ItineraryDayTimeline(
     hotelBookingsByDay: Map<LocalDate, HotelsByDay>,
     tripId: Long,
     viewModel: ItineraryViewModel,
+    placesViewModel: PlaceViewModel,
     lazyListState: LazyListState
 ) {
 
@@ -87,7 +89,8 @@ fun ItineraryDayTimeline(
                         ItineraryItemCard(
                             item = item,
                             modifier = Modifier
-                                .longPressDraggableHandle()
+                                .longPressDraggableHandle(),
+                            placesViewModel = placesViewModel,
                         )
                     }
                 }

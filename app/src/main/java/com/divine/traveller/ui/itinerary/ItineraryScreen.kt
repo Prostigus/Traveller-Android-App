@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.divine.traveller.data.model.ItineraryItemModel
 import com.divine.traveller.data.model.tripDatesAsLocalDates
 import com.divine.traveller.data.viewmodel.ItineraryViewModel
+import com.divine.traveller.data.viewmodel.PlaceViewModel
 import com.divine.traveller.navigation.Routes.TRIP_DETAILS
 import com.divine.traveller.ui.composable.ItineraryNavBar
 import java.time.LocalDate
@@ -48,6 +49,7 @@ fun ItineraryScreen(
     modifier: Modifier = Modifier,
     tripId: Long,
     viewModel: ItineraryViewModel = hiltViewModel(),
+    placesViewModel: PlaceViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
     onNavigate: (String) -> Unit = {}
 ) {
@@ -223,16 +225,6 @@ fun ItineraryScreen(
                     .height(calendarHeight)
             )
 
-//            AccommodationsBar(
-//                selectedDay = selectedDay.value ?: LocalDate.now(),
-//                tripId = tripId,
-//                hotelBookingsByDay = hotelBookingsByDay,
-//                modifier = Modifier
-//                    .padding(horizontal = 15.dp)
-//                    .fillMaxWidth()
-//                    .background(MaterialTheme.colorScheme.background)
-//            )
-
             selectedDay.let { day ->
                 if (itemsForDay.isNotEmpty()) {
                     ItineraryDayTimeline(
@@ -240,6 +232,7 @@ fun ItineraryScreen(
                         itemsForDay = itemsForDay,
                         hotelBookingsByDay = hotelBookingsByDay,
                         viewModel = viewModel,
+                        placesViewModel = placesViewModel,
                         tripId = tripId,
                         lazyListState = timelineScrollState,
                         modifier = Modifier

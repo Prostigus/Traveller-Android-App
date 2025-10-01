@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.divine.traveller.data.model.ItineraryItemModel
+import com.divine.traveller.data.viewmodel.PlaceViewModel
 import com.divine.traveller.util.getCategoryColor
 import com.divine.traveller.util.getCategoryIcon
 import com.divine.traveller.util.getStatusColor
@@ -54,10 +56,15 @@ import java.util.Locale
 fun ItineraryItemCard(
     item: ItineraryItemModel,
     modifier: Modifier = Modifier,
+    placesViewModel: PlaceViewModel,
     onClick: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
     var placeDetails by remember { mutableStateOf<Place?>(null) }
+
+    LaunchedEffect(item) {
+        placeDetails = item.placeId?.let { placesViewModel.getPlace(it) }
+    }
 
     Card(
         modifier = modifier
@@ -166,15 +173,15 @@ fun ItineraryItemCard(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = place.name ?: "Unknown location",
+                            text = place.displayName ?: "Unknown location",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
-                        place.address?.let { address ->
+                        place.displayName?.let { displayName ->
                             Text(
-                                text = address,
+                                text = displayName,
                                 fontSize = 12.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
@@ -217,11 +224,11 @@ fun ItineraryItemCard(
                 }
 
                 // Map (if expanded)
-                if (expanded && place.latLng != null) {
+                if (expanded && place.location != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     GoogleMapView(
-                        latLng = place.latLng!!,
-                        placeName = place.name ?: "Location",
+                        latLng = place.location!!,
+                        placeName = place.displayName ?: "Location",
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
